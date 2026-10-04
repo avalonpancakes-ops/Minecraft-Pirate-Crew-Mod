@@ -65,3 +65,4 @@ hunter_2 wide D
 hunter_3 slim C
 hunter_4 wide B
 hunter_5 wide A
+hunter_6 wide S

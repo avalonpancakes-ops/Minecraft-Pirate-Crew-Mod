@@ -33,6 +33,18 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import com.piratecrew.PirateCrew;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import org.joml.Vector3f;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -226,34 +238,147 @@ public class BountyHunterEntity extends PirateEntity {
             getPack().setItem(0, blade);
             setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
             addPotions(true);
-            applyPermanentStrength();
+            applyPermanentEffects();
             summonCooldown = 0;
             return;
         }
 
-        // Marksmen open with a crossbow, balanced hunters carry one in reserve, brawlers bring a shield.
-        ItemStack ranged = gear(this.random.nextInt(3) == 0 ? Items.BOW : Items.CROSSBOW);
-        switch (getCombatStyle()) {
-            case MARKSMAN -> {
-                setItemSlot(EquipmentSlot.MAINHAND, ranged);
-                getPack().setItem(0, gear(sword));
-            }
-            case BALANCED -> {
-                setItemSlot(EquipmentSlot.MAINHAND, gear(sword));
-                getPack().setItem(0, ranged);
-                if (t >= PirateTier.A.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
-            }
-            default -> {
-                setItemSlot(EquipmentSlot.MAINHAND, gear(sword));
-                if (t >= PirateTier.C.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
-            }
+        // S tier: charges in with a fully enchanted netherite sword, fires eye lasers at range,
+        // and is permanently buffed to the max.
+        setCombatStyle(CombatStyle.BRAWLER);
+        ItemStack blade = gear(sword);
+        blade.enchant(Enchantments.SHARPNESS, 5);
+        blade.enchant(Enchantments.FIRE_ASPECT, 2);
+        blade.enchant(Enchantments.KNOCKBACK, 2);
+        blade.enchant(Enchantments.SWEEPING_EDGE, 3);
+        blade.enchant(Enchantments.UNBREAKING, 3);
+        setItemSlot(EquipmentSlot.MAINHAND, blade);
+        setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
+        addPotions(false);
+        applyPermanentEffects();
+    }
+
+    private void permanent(net.minecraft.world.effect.MobEffect effect, int amplifier) {
+        MobEffectInstance cur = this.getEffect(effect);
+        if (cur == null || cur.getAmplifier() < amplifier || !cur.isInfiniteDuration()) {
+            this.addEffect(new MobEffectInstance(effect, MobEffectInstance.INFINITE_DURATION, amplifier, false, true));
         }
     }
 
-    private void applyPermanentStrength() {
-        if (!this.hasEffect(MobEffects.DAMAGE_BOOST)) {
-            this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, MobEffectInstance.INFINITE_DURATION, 0, false, true));
+    /** A tier: permanent Strength. S tier: Strength II, Speed II, Resistance II, Regeneration II, Fire Resistance, Water Breathing. */
+    private void applyPermanentEffects() {
+        if (minion) return;
+        if (getTier() == PirateTier.A) {
+            permanent(MobEffects.DAMAGE_BOOST, 0);
+        } else if (getTier() == PirateTier.S) {
+            permanent(MobEffects.DAMAGE_BOOST, 1);
+            permanent(MobEffects.MOVEMENT_SPEED, 1);
+            permanent(MobEffects.DAMAGE_RESISTANCE, 1);
+            permanent(MobEffects.REGENERATION, 1);
+            permanent(MobEffects.FIRE_RESISTANCE, 0);
+            permanent(MobEffects.WATER_BREATHING, 0);
         }
+    }
+
+    // ------------------------------------------------------------------ S tier: eye lasers
+
+    private static final int LASER_CHARGE = 30, LASER_BEAM = 8, LASER_COOLDOWN = 160;
+    private static final float LASER_DAMAGE = 16.0F;
+    private static final ResourceKey<DamageType> LASER = ResourceKey.create(Registries.DAMAGE_TYPE, PirateCrew.id("laser"));
+    private int laserCooldown = 60;
+    private int laserCharge = -1;
+    @Nullable private Vec3 laserAim;
+    @Nullable private Vec3 beamEnd;
+
+    private boolean isLaserUser() {
+        return !minion && getTier() == PirateTier.S;
+    }
+
+    private Vec3[] eyes() {
+        Vec3 look = Vec3.directionFromRotation(this.getXRot(), this.getYHeadRot());
+        Vec3 side = look.cross(new Vec3(0, 1, 0));
+        side = side.lengthSqr() < 1e-6 ? new Vec3(1, 0, 0) : side.normalize();
+        Vec3 c = this.getEyePosition().add(look.scale(0.3));
+        return new Vec3[]{c.add(side.scale(0.13)), c.add(side.scale(-0.13))};
+    }
+
+    private static final DustParticleOptions RED = new DustParticleOptions(new Vector3f(1.0F, 0.05F, 0.05F), 1.4F);
+
+    /**
+     * Eyes glow red for a moment (tracking the target), lock on just before firing, then a beam hits
+     * the first thing in its path for heavy damage that ignores armor and sets it alight. Walls and
+     * shields stop it; dodging at the last moment works.
+     */
+    private void tickLaser(ServerLevel sl) {
+        if (!isLaserUser()) return;
+        if (laserCooldown > 0) laserCooldown--;
+        LivingEntity t = getTarget();
+        if (laserCharge < 0) {
+            if (laserCooldown == 0 && t != null && t.isAlive() && !isUsingItem()) {
+                double d = this.distanceTo(t);
+                if (d >= 4 && d <= 32 && this.getSensing().hasLineOfSight(t)) {
+                    laserCharge = 0;
+                    this.playSound(SoundEvents.GUARDIAN_ATTACK, 2.0F, 0.6F);
+                }
+            }
+            return;
+        }
+        laserCharge++;
+        if (laserCharge <= LASER_CHARGE) {
+            if (t == null || !t.isAlive()) {
+                laserCharge = -1;
+                laserCooldown = 40;
+                return;
+            }
+            this.getLookControl().setLookAt(t, 90.0F, 90.0F);
+            if (laserCharge <= LASER_CHARGE - 8) laserAim = t.getBoundingBox().getCenter();
+            if (laserCharge % 2 == 0) for (Vec3 e : eyes()) sl.sendParticles(RED, e.x, e.y, e.z, 2, 0.02, 0.02, 0.02, 0);
+            if (laserCharge == LASER_CHARGE && laserAim != null) fireLaser(sl);
+            return;
+        }
+        if (beamEnd != null && laserCharge <= LASER_CHARGE + LASER_BEAM) {
+            for (Vec3 e : eyes()) drawBeam(sl, e, beamEnd);
+            return;
+        }
+        laserCharge = -1;
+        beamEnd = null;
+        laserCooldown = LASER_COOLDOWN;
+    }
+
+    private void fireLaser(ServerLevel sl) {
+        Vec3 eye = this.getEyePosition();
+        Vec3 dir = laserAim.subtract(eye).normalize();
+        Vec3 end = eye.add(dir.scale(40));
+        BlockHitResult block = sl.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+        if (block.getType() != HitResult.Type.MISS) end = block.getLocation();
+        EntityHitResult hit = ProjectileUtil.getEntityHitResult(sl, this, eye, end, new AABB(eye, end).inflate(1.0),
+                e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator() && e != this && !(e instanceof BountyHunterEntity));
+        if (hit != null && hit.getEntity() instanceof LivingEntity victim) {
+            end = victim.getBoundingBox().getCenter();
+            victim.hurt(laserDamage(sl), LASER_DAMAGE);
+            victim.setSecondsOnFire(4);
+        }
+        beamEnd = end;
+        this.playSound(SoundEvents.FIRECHARGE_USE, 2.0F, 0.5F);
+        sl.sendParticles(ParticleTypes.LAVA, end.x, end.y, end.z, 6, 0.2, 0.2, 0.2, 0);
+        sl.sendParticles(ParticleTypes.SMOKE, end.x, end.y, end.z, 10, 0.2, 0.2, 0.2, 0.02);
+        for (Vec3 e : eyes()) drawBeam(sl, e, end);
+    }
+
+    private void drawBeam(ServerLevel sl, Vec3 from, Vec3 to) {
+        Vec3 d = to.subtract(from);
+        double len = d.length();
+        int steps = (int) Math.min(160, len * 3);
+        for (int i = 0; i <= steps; i++) {
+            Vec3 p = from.add(d.scale(i / (double) Math.max(1, steps)));
+            sl.sendParticles(RED, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+        }
+    }
+
+    private DamageSource laserDamage(ServerLevel sl) {
+        var reg = sl.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
+        var holder = reg.getHolder(LASER);
+        return holder.isPresent() ? new DamageSource(holder.get(), this) : this.damageSources().indirectMagic(this, this);
     }
 
     private boolean isSummoner() {
@@ -326,6 +451,7 @@ public class BountyHunterEntity extends PirateEntity {
     public void aiStep() {
         super.aiStep();
         if (this.level().isClientSide || !(this.level() instanceof ServerLevel sl)) return;
+        tickLaser(sl);
         if (this.tickCount % 20 != 0) return;
 
         if (debtorId == null || (!test && !LoanManager.huntActive(sl.getServer(), debtorId, waveSerial))) {
@@ -339,8 +465,8 @@ public class BountyHunterEntity extends PirateEntity {
             return;
         }
         debtorMissing = 0;
+        applyPermanentEffects();
         if (isSummoner()) {
-            applyPermanentStrength();
             if (summonCooldown > 0) summonCooldown -= 20;
             if (summonCooldown <= 0 && getTarget() == debtor && this.distanceToSqr(debtor) < 24 * 24
                     && this.getSensing().hasLineOfSight(debtor) && !debtor.isCreative()) {

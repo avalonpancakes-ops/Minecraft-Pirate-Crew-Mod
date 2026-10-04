@@ -21,5 +21,8 @@
   "block.piratecrew.bounty_board": "Bounty Board",
   "block.piratecrew.bank_counter": "Bank Counter",
   "entity.piratecrew.banker": "Banker",
-  "entity.piratecrew.bounty_hunter": "Bounty Hunter"
+  "entity.piratecrew.bounty_hunter": "Bounty Hunter",
+  "death.attack.piratecrew.laser": "%1$s was vaporised by %2$s's laser eyes",
+  "death.attack.piratecrew.laser.player": "%1$s was vaporised by %2$s's laser eyes",
+  "death.attack.piratecrew.laser.item": "%1$s was vaporised by %2$s's laser eyes"
 }
