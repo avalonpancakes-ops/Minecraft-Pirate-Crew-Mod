@@ -20,6 +20,7 @@ public class Config {
 
     // Bars
     public static final ForgeConfigSpec.BooleanValue GENERATE_BARS;
+    public static final ForgeConfigSpec.BooleanValue GENERATE_BANKS;
     public static final ForgeConfigSpec.IntValue BAR_MIN_PIRATES;
     public static final ForgeConfigSpec.IntValue BAR_MAX_PIRATES;
     public static final ForgeConfigSpec.IntValue BAR_RESTOCK_TICKS;
@@ -29,6 +30,7 @@ public class Config {
     public static final ForgeConfigSpec.IntValue BOUNTY_PER_PIRATE_KILL;
     public static final ForgeConfigSpec.IntValue BOUNTY_PER_PIRATE_TIER;
     public static final ForgeConfigSpec.DoubleValue BOUNTY_SHARE;
+    public static final ForgeConfigSpec.DoubleValue BOUNTY_CAPTAIN_CUT;
     public static final ForgeConfigSpec.IntValue BOUNTY_REPEAT_COOLDOWN;
 
     static {
@@ -51,6 +53,7 @@ public class Config {
 
         b.push("bars");
         GENERATE_BARS = b.comment("Generate one pirate bar next to every village").define("generateBars", true);
+        GENERATE_BANKS = b.comment("Generate one ruby bank next to every village (never overlapping the bar)").define("generateBanks", true);
         BAR_MIN_PIRATES = b.comment("A bar restocks pirates when it has fewer than this many unrecruited pirates").defineInRange("minPirates", 3, 0, 20);
         BAR_MAX_PIRATES = b.comment("Pirates placed in a freshly built bar").defineInRange("startPirates", 6, 0, 20);
         BAR_RESTOCK_TICKS = b.comment("Ticks between restock checks (24000 = one Minecraft day)").defineInRange("restockTicks", 12000, 200, 1000000);
@@ -61,6 +64,7 @@ public class Config {
         BOUNTY_PER_PIRATE_KILL = b.comment("Rubies added for killing an F-tier pirate (doubled if the pirate belonged to a crew)").defineInRange("perPirateKill", 2, 0, 10000);
         BOUNTY_PER_PIRATE_TIER = b.comment("Extra rubies per tier above F for pirate kills (D +1x, C +2x ... S +5x)").defineInRange("perPirateTier", 1, 0, 10000);
         BOUNTY_SHARE = b.comment("Share of a claimed bounty that's added to the killer's own bounty (0.25 = 25%)").defineInRange("claimShare", 0.25, 0.0, 10.0);
+        BOUNTY_CAPTAIN_CUT = b.comment("When a crew pirate kills a wanted target, its captain gets this share of the bounty in their bank (0.25 = 25%)").defineInRange("captainCut", 0.25, 0.0, 1.0);
         BOUNTY_REPEAT_COOLDOWN = b.comment("Seconds before killing the same target again counts toward bounties (stops kill farming)").defineInRange("repeatKillCooldown", 600, 0, 86400);
         b.pop();
 

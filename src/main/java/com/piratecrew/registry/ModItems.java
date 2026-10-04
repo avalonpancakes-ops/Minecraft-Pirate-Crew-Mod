@@ -19,6 +19,7 @@ public class ModItems {
     public static final RegistryObject<Item> DEEPSLATE_RUBY_ORE = blockItem("deepslate_ruby_ore", ModBlocks.DEEPSLATE_RUBY_ORE);
     public static final RegistryObject<Item> RUBY_BLOCK = blockItem("ruby_block", ModBlocks.RUBY_BLOCK);
     public static final RegistryObject<Item> BOUNTY_BOARD = blockItem("bounty_board", ModBlocks.BOUNTY_BOARD);
+    public static final RegistryObject<Item> BANK_COUNTER = blockItem("bank_counter", ModBlocks.BANK_COUNTER);
 
     // Tools & weapons (damage/speed values chosen to sit between iron and diamond)
     public static final RegistryObject<Item> RUBY_SWORD = ITEMS.register("ruby_sword",

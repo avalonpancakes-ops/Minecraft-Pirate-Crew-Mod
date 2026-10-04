@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "piratecrew:bounty_board"
+    "piratecrew:bounty_board",
+    "piratecrew:bank_counter"
   ]
 }

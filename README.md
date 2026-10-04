@@ -63,17 +63,25 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ### Bounties
 - Crew members (players **and** recruited pirates) earn a ruby bounty by killing players and pirates outside their crew: **10 rubies per player**, **2 rubies per F-tier pirate +1 per tier above F** (doubled if the pirate belonged to a crew).
-- Kill a wanted crew member and you **claim their whole bounty in rubies**. Players get the rubies straight into their inventory; if a pirate gets the kill, the rubies drop where the target fell. The whole server is told who claimed what. The killer also adds 25% of the claimed bounty to their own.
-- Killing the same target again within 10 minutes doesn't count, so friends can't farm each other.
-- A dead pirate's poster comes down for good; a player's bounty resets to 0 when claimed.
+- **A player** who kills a wanted target from another crew claims the **whole bounty, paid into their bank account**, and adds 25% of it to their own bounty.
+- **Pirates have no bank account.** When a crew pirate kills a wanted player or pirate, that crew's **captain gets 25% of the bounty** in their bank.
+- The whole server is told who claimed what. Killing the same target again within 10 minutes doesn't count, so friends can't farm each other.
+- A dead pirate's poster comes down for good; a player's bounty resets to 0 once claimed.
 - Every pirate bar has a **Bounty Board** on its front wall (bars built before this update get one the next time they're loaded). Right-click it to see WANTED posters for everyone with a bounty, biggest first, with their face, name and bounty. Hover a poster for crew, tier and kills.
 - Craft your own board: planks top and bottom, paper-ruby-paper in the middle.
 - The crew screen shows your crew's total bounty, and hovering a member shows theirs.
 
+### Banks
+- Every village also gets **one bank**, a stone hall with a teller counter, built on its own spot at least 20 blocks from the bar so they never overlap. Villages you've already visited get theirs the next time you go there.
+- Right-click a **Bank Counter** to open your account. Your balance is just a number (1,200, 1,700...), so rubies stop taking up inventory space.
+- Deposit +1 / +10 / +64 / All, withdraw -1 / -10 / -64 / Max (Max = as much as fits in your inventory), or type an exact amount. Ruby blocks count as 9 rubies when depositing.
+- Bounty rewards go straight into the bank. `/bank` shows your balance anywhere; deposits and withdrawals need a counter.
+
 ### Commands
 - `/crew` — open the crew screen
 - `/crew create <name>`, `/crew invite <player>`, `/crew leave`, `/crew disband`, `/crew icon`
-- `/piratecrew spawnbar` (op) — build a bar in front of you
+- `/bank` — show your bank balance
+- `/piratecrew spawnbar` / `/piratecrew spawnbank` (op) — build a bar or bank in front of you
 - `/piratecrew spawnpirate <F|D|C|B|A|S>` (op) — spawn a pirate of a given tier
 
 ## Config

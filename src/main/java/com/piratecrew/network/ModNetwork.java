@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ModNetwork {
-    private static final String VERSION = "2";
+    private static final String VERSION = "3";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             PirateCrew.id("main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -27,6 +27,16 @@ public class ModNetwork {
                 .encoder(PirateCommandPacket::encode)
                 .decoder(PirateCommandPacket::decode)
                 .consumerMainThread(PirateCommandPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(BankActionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(BankActionPacket::encode)
+                .decoder(BankActionPacket::decode)
+                .consumerMainThread(BankActionPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(BankSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(BankSyncPacket::encode)
+                .decoder(BankSyncPacket::decode)
+                .consumerMainThread(BankSyncPacket::handle)
                 .add();
         CHANNEL.messageBuilder(BountyBoardPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(BountyBoardPacket::encode)

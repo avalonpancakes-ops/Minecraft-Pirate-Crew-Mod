@@ -6,6 +6,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.piratecrew.entity.PirateEntity;
 import com.piratecrew.entity.PirateTier;
 import com.piratecrew.registry.ModEntities;
+import com.piratecrew.bank.BankManager;
+import com.piratecrew.world.BankBuilder;
 import com.piratecrew.world.BarBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -38,6 +40,14 @@ public class CrewCommands {
                         .executes(c -> { CrewManager.setIconFromHand(c.getSource().getPlayerOrException()); return 1; }))
         );
 
+        d.register(Commands.literal("bank").executes(c -> {
+            ServerPlayer p = c.getSource().getPlayerOrException();
+            long bal = BankManager.balance(p.server, p.getUUID());
+            c.getSource().sendSuccess(() -> Component.literal("Bank balance: " + String.format("%,d", bal) + " rubies. Visit a Bank Counter to deposit or withdraw.")
+                    .withStyle(net.minecraft.ChatFormatting.GOLD), false);
+            return 1;
+        }));
+
         d.register(Commands.literal("piratecrew")
                 .requires(s -> s.hasPermission(2))
                 .then(Commands.literal("spawnbar").executes(c -> {
@@ -45,6 +55,13 @@ public class CrewCommands {
                     Direction facing = p.getDirection().getOpposite(); // door faces the player
                     BarBuilder.buildAt(p.serverLevel(), p.blockPosition().relative(p.getDirection(), 8), facing, true);
                     c.getSource().sendSuccess(() -> Component.literal("Built a pirate bar."), true);
+                    return 1;
+                }))
+                .then(Commands.literal("spawnbank").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    Direction facing = p.getDirection().getOpposite();
+                    BankBuilder.buildAt(p.serverLevel(), p.blockPosition().relative(p.getDirection(), 7), facing, true);
+                    c.getSource().sendSuccess(() -> Component.literal("Built a bank."), true);
                     return 1;
                 }))
                 .then(Commands.literal("spawnpirate").then(Commands.argument("tier", StringArgumentType.word())

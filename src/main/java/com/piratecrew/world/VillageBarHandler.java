@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class VillageBarHandler {
     private enum Result { PLACED, WAIT, FAILED }
 
-    private record Pending(ResourceKey<Level> dim, long key, BoundingBox box, int attempts) {}
+    private record Pending(ResourceKey<Level> dim, long key, BoundingBox box, int attempts, boolean bank) {}
 
     private static final Queue<Pending> QUEUE = new ConcurrentLinkedQueue<>();
     private static final Set<String> QUEUED = ConcurrentHashMap.newKeySet();
@@ -42,7 +42,7 @@ public class VillageBarHandler {
     private static final int MARGIN = 12;   // area that must be loaded around the bar
 
     public static void onChunkLoad(ServerLevel level, LevelChunk chunk) {
-        if (!Config.GENERATE_BARS.get()) return;
+        if (!Config.GENERATE_BARS.get() && !Config.GENERATE_BANKS.get()) return;
         Map<Structure, StructureStart> starts = chunk.getAllStarts();
         if (starts.isEmpty()) return;
         Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
@@ -51,14 +51,17 @@ public class VillageBarHandler {
             if (start == null || !start.isValid()) continue;
             if (!registry.wrapAsHolder(e.getKey()).is(StructureTags.VILLAGE)) continue;
             long key = chunk.getPos().toLong();
-            if (QUEUED.add(id(level.dimension(), key))) {
-                QUEUE.add(new Pending(level.dimension(), key, start.getBoundingBox(), 0));
+            if (Config.GENERATE_BARS.get() && QUEUED.add(id(level.dimension(), key, false))) {
+                QUEUE.add(new Pending(level.dimension(), key, start.getBoundingBox(), 0, false));
+            }
+            if (Config.GENERATE_BANKS.get() && QUEUED.add(id(level.dimension(), key, true))) {
+                QUEUE.add(new Pending(level.dimension(), key, start.getBoundingBox(), 0, true));
             }
         }
     }
 
-    private static String id(ResourceKey<Level> dim, long key) {
-        return dim.location() + "@" + key;
+    private static String id(ResourceKey<Level> dim, long key, boolean bank) {
+        return dim.location() + "@" + key + (bank ? "#bank" : "#bar");
     }
 
     public static void tick(MinecraftServer server) {
@@ -75,30 +78,40 @@ public class VillageBarHandler {
         for (int i = 0; i < n; i++) {
             Pending p = QUEUE.poll();
             if (p == null) break;
+            String qid = id(p.dim(), p.key(), p.bank());
             ServerLevel level = server.getLevel(p.dim());
-            if (level == null || !Config.GENERATE_BARS.get()) {
-                QUEUED.remove(id(p.dim(), p.key()));
+            boolean enabled = p.bank() ? Config.GENERATE_BANKS.get() : Config.GENERATE_BARS.get();
+            if (level == null || !enabled) {
+                QUEUED.remove(qid);
                 continue;
             }
             BarData data = BarData.get(level);
-            if (data.isProcessed(p.key())) {
-                QUEUED.remove(id(p.dim(), p.key()));
+            boolean done = p.bank() ? data.isBankProcessed(p.key()) : data.isProcessed(p.key());
+            if (done) {
+                QUEUED.remove(qid);
                 continue;
             }
-            Result r = builtOne ? Result.WAIT : tryPlace(level, p.box(), p.attempts());
+            // The bank goes in after the village's bar, so it can keep clear of it.
+            boolean waitForBar = p.bank() && Config.GENERATE_BARS.get() && !data.isProcessed(p.key());
+            Result r = (builtOne || waitForBar) ? Result.WAIT : tryPlace(level, p.box(), p.attempts(), p.bank());
             if (r == Result.WAIT) {
-                QUEUE.add(new Pending(p.dim(), p.key(), p.box(), p.attempts() + 1));
+                QUEUE.add(new Pending(p.dim(), p.key(), p.box(), p.attempts() + 1, p.bank()));
             } else {
                 builtOne |= r == Result.PLACED;
-                data.markProcessed(p.key());
-                QUEUED.remove(id(p.dim(), p.key()));
+                if (p.bank()) data.markBankProcessed(p.key());
+                else data.markProcessed(p.key());
+                QUEUED.remove(qid);
             }
         }
     }
 
     private record Candidate(BlockPos origin, Direction facing, int score, boolean water) {}
 
-    private static Result tryPlace(ServerLevel level, BoundingBox box, int attempts) {
+    /** Minimum distance between the centres of any two mod buildings, so a bank never overlaps a bar. */
+    private static final double SPACING = 20.0;
+
+    private static Result tryPlace(ServerLevel level, BoundingBox box, int attempts, boolean bank) {
+        BarData data = BarData.get(level);
         BlockPos c = box.getCenter();
         List<Candidate> loaded = new ArrayList<>();
         boolean anyUnloaded = false;
@@ -116,7 +129,9 @@ public class VillageBarHandler {
                     anyUnloaded = true;
                     continue;
                 }
-                Candidate cand = evaluate(level, new BlockPos(x, 0, z), side.getOpposite());
+                BlockPos centre = new BlockPos(x, 0, z);
+                if (data.tooCloseToBuildings(centre, SPACING)) continue;
+                Candidate cand = evaluate(level, centre, side.getOpposite(), bank);
                 if (cand != null) loaded.add(cand);
             }
         }
@@ -131,18 +146,20 @@ public class VillageBarHandler {
         if (!good && anyUnloaded && attempts < 600) return Result.WAIT;
         if (best == null || best.score() > 20) return Result.FAILED;
 
-        BarBuilder.buildAt(level, best.origin(), best.facing(), false);
+        if (bank) BankBuilder.buildAt(level, best.origin(), best.facing(), false);
+        else BarBuilder.buildAt(level, best.origin(), best.facing(), false);
         return Result.PLACED;
     }
 
     /** Lower score = flatter, drier ground. */
-    private static Candidate evaluate(ServerLevel level, BlockPos centre, Direction facing) {
+    private static Candidate evaluate(ServerLevel level, BlockPos centre, Direction facing, boolean bank) {
         var rot = BarBuilder.rotationFor(facing);
+        int w = bank ? BankBuilder.W : BarBuilder.W, d = bank ? BankBuilder.D : BarBuilder.D;
         List<Integer> heights = new ArrayList<>();
         int water = 0, min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
-        for (int lx = -1; lx <= BarBuilder.W; lx++) {
-            for (int lz = -1; lz <= BarBuilder.D; lz++) {
-                BlockPos p = BarBuilder.toWorld(centre, rot, lx, 0, lz);
+        for (int lx = -1; lx <= w; lx++) {
+            for (int lz = -1; lz <= d; lz++) {
+                BlockPos p = bank ? BankBuilder.toWorld(centre, rot, lx, 0, lz) : BarBuilder.toWorld(centre, rot, lx, 0, lz);
                 int h = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.getX(), p.getZ());
                 if (!level.getBlockState(new BlockPos(p.getX(), h - 1, p.getZ())).getFluidState().isEmpty()) water++;
                 heights.add(h);

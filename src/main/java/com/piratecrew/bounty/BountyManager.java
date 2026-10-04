@@ -2,22 +2,19 @@ package com.piratecrew.bounty;
 
 import com.mojang.authlib.properties.Property;
 import com.piratecrew.Config;
+import com.piratecrew.bank.BankManager;
 import com.piratecrew.crew.Crew;
 import com.piratecrew.crew.CrewData;
 import com.piratecrew.crew.CrewManager;
 import com.piratecrew.entity.PirateEntity;
 import com.piratecrew.network.BountyBoardPacket;
 import com.piratecrew.network.ModNetwork;
-import com.piratecrew.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -30,9 +27,9 @@ import java.util.UUID;
  * Bounties, paid in rubies.
  *
  * Crew members (players and recruited pirates) earn a bounty by killing players and pirates from
- * outside their crew. Whoever kills a wanted crew member (anyone outside that crew) claims the full
- * bounty: a player gets the rubies in their inventory, a pirate drops them where the target fell.
- * The killer also takes a share of the target's bounty onto their own head.
+ * outside their crew. A player who kills a wanted target (from another crew) claims the whole bounty
+ * into their bank account and takes a share of it onto their own head. Pirates have no bank account:
+ * when a crew pirate kills a wanted target, its crew's captain gets 25% of the bounty in their bank.
  */
 public class BountyManager {
     /** killer+victim -> game time of the last counted kill, to stop two friends farming each other. */
@@ -62,12 +59,29 @@ public class BountyManager {
             if (counts) RECENT.put(pair, now);
             if (RECENT.size() > 5000) RECENT.entrySet().removeIf(e -> now - e.getValue() > 72000);
 
-            // 1. Claim the victim's bounty
+            // 1. Claim the victim's bounty into a bank account.
+            //    Player killer: the whole bounty. Crew pirate killer: its captain gets 25%.
             if (victimEntry != null && victimEntry.amount > 0 && counts) {
-                claimed = victimEntry.amount;
-                payOut(killer, victim, claimed);
-                announceClaim(server, killer, victim, claimed);
-                victimEntry.amount = 0;
+                if (killer instanceof ServerPlayer kp) {
+                    claimed = victimEntry.amount;
+                    BankManager.credit(server, kp.getUUID(), claimed);
+                    kp.sendSystemMessage(Component.literal(String.format("%,d", claimed) + " rubies were deposited in your bank.").withStyle(ChatFormatting.GREEN));
+                    announceClaim(server, killer, victim, claimed, null);
+                    victimEntry.amount = 0;
+                } else if (killer instanceof PirateEntity && killerCrew != null) {
+                    Crew crew = CrewData.get(server).byId(killerCrew);
+                    if (crew != null && crew.captain != null) {
+                        int cut = (int) Math.round(victimEntry.amount * Config.BOUNTY_CAPTAIN_CUT.get());
+                        if (cut > 0) {
+                            BankManager.credit(server, crew.captain, cut);
+                            ServerPlayer cap = server.getPlayerList().getPlayer(crew.captain);
+                            if (cap != null) cap.sendSystemMessage(Component.literal("Your pirate " + displayName(killer) + " sank "
+                                    + displayName(victim) + ": " + String.format("%,d", cut) + " rubies were deposited in your bank.").withStyle(ChatFormatting.GREEN));
+                            announceClaim(server, killer, victim, cut, crew.name);
+                        }
+                        victimEntry.amount = 0;
+                    }
+                }
             }
 
             // 2. Killer's bounty grows (crew members only)
@@ -104,33 +118,14 @@ public class BountyManager {
         if (victimCrew != null && !victimCrew.equals(killerCrew) && crews.byId(victimCrew) != null) CrewManager.syncCrew(server, crews.byId(victimCrew));
     }
 
-    private static void payOut(LivingEntity killer, LivingEntity victim, int amount) {
-        List<ItemStack> stacks = new ArrayList<>();
-        int left = amount;
-        while (left > 0) {
-            int n = Math.min(64, left);
-            stacks.add(new ItemStack(ModItems.RUBY.get(), n));
-            left -= n;
-        }
-        for (ItemStack s : stacks) {
-            if (killer instanceof ServerPlayer sp) {
-                ItemHandlerHelper.giveItemToPlayer(sp, s);
-            } else {
-                ItemEntity item = new ItemEntity(victim.level(), victim.getX(), victim.getY() + 0.5, victim.getZ(), s);
-                item.setDefaultPickUpDelay();
-                victim.level().addFreshEntity(item);
-            }
-        }
-    }
-
-    private static void announceClaim(MinecraftServer server, LivingEntity killer, LivingEntity victim, int amount) {
-        Component msg = Component.literal("☠ ").withStyle(ChatFormatting.DARK_RED)
+    private static void announceClaim(MinecraftServer server, LivingEntity killer, LivingEntity victim, int amount, @Nullable String forCrew) {
+        Component msg = Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
                 .append(Component.literal(displayName(killer)).withStyle(ChatFormatting.GOLD))
-                .append(Component.literal(" claimed the ").withStyle(ChatFormatting.YELLOW))
-                .append(Component.literal(amount + "-ruby").withStyle(ChatFormatting.RED))
-                .append(Component.literal(" bounty on ").withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal(" claimed ").withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal(String.format("%,d", amount) + " rubies").withStyle(ChatFormatting.RED))
+                .append(Component.literal(" of the bounty on ").withStyle(ChatFormatting.YELLOW))
                 .append(Component.literal(displayName(victim)).withStyle(ChatFormatting.GOLD))
-                .append(Component.literal("!").withStyle(ChatFormatting.YELLOW));
+                .append(Component.literal(forCrew != null ? " for " + forCrew + "!" : "!").withStyle(ChatFormatting.YELLOW));
         server.getPlayerList().broadcastSystemMessage(msg, false);
     }
 

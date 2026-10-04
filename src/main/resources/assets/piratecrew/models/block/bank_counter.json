@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "piratecrew:block/bank_counter_top",
+    "bottom": "minecraft:block/dark_oak_planks",
+    "side": "piratecrew:block/bank_counter_side"
+  }
+}

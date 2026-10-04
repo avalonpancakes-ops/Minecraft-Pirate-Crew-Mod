@@ -1,6 +1,7 @@
 package com.piratecrew.registry;
 
 import com.piratecrew.PirateCrew;
+import com.piratecrew.block.BankCounterBlock;
 import com.piratecrew.block.BountyBoardBlock;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Block;
@@ -50,4 +51,13 @@ public class ModBlocks {
                     .sound(SoundType.WOOD)
                     .noOcclusion()
                     .ignitedByLava()));
+
+    /** Tough like obsidian so village banks don't get carried off easily. */
+    public static final RegistryObject<Block> BANK_COUNTER = BLOCKS.register("bank_counter",
+            () -> new BankCounterBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BROWN)
+                    .instrument(NoteBlockInstrument.BASS)
+                    .requiresCorrectToolForDrops()
+                    .strength(50.0F, 1200.0F)
+                    .sound(SoundType.WOOD)));
 }
