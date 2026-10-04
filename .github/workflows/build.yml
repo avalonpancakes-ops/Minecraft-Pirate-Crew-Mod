@@ -26,7 +26,21 @@ jobs:
       - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew build --no-daemon --stacktrace
+          set -o pipefail
+          ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log
+
+      # If the build fails, publish the errors as a "build-log" release so they can be read
+      # without downloading the full Actions log.
+      - name: Publish build errors
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { echo "Build failed for commit ${GITHUB_SHA::7}"; echo; echo '```';
+            grep -E "error:|warning: \[|\.java:[0-9]+|FAILURE|What went wrong|> " build.log | head -150;
+            echo '```'; echo; echo "Last lines:"; echo '```'; tail -60 build.log; echo '```'; } > errors.md
+          gh release delete build-log --yes --cleanup-tag || true
+          gh release create build-log --title "Last failed build" --notes-file errors.md --prerelease --target "$GITHUB_SHA"
 
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
