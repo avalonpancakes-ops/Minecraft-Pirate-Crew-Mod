@@ -5,14 +5,17 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
@@ -31,3 +34,15 @@ jobs:
           name: PirateCrew-jar
           path: build/libs/*.jar
           if-no-files-found: error
+
+      # Every successful build on main replaces the "latest" release with the new jar.
+      - name: Publish latest release
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest build/libs/*.jar \
+            --title "Pirate Crew (latest build)" \
+            --notes "Built from commit ${GITHUB_SHA::7}. Download the .jar below and put it in your .minecraft/mods folder (Forge 1.20.1)." \
+            --target "$GITHUB_SHA"
