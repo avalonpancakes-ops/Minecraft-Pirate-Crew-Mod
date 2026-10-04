@@ -64,7 +64,17 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import java.util.UUID;
 
 public class PirateEntity extends PathfinderMob {
@@ -284,6 +294,7 @@ public class PirateEntity extends PathfinderMob {
 
     @Override
     public boolean doHurtTarget(Entity target) {
+        if (consuming != null) return false; // busy drinking
         lastCombatTick = this.tickCount;
         lastSwing = this.tickCount;
         // Like a player: the shield comes down to swing.
@@ -709,6 +720,7 @@ public class PirateEntity extends PathfinderMob {
     }
 
     private void openEquipment(ServerPlayer player) {
+        if (consuming != null) stopUsingItem();
         NetworkHooks.openScreen(player,
                 new SimpleMenuProvider((id, inv, p) -> new PirateMenu(id, inv, this), this.getDisplayName()),
                 buf -> buf.writeVarInt(this.getId()));
@@ -733,6 +745,237 @@ public class PirateEntity extends PathfinderMob {
             }
         }
         inv.setChanged();
+    }
+
+    // ------------------------------------------------------------------ potions & food
+
+    private static final int OFFHAND_SOURCE = -1, NONE = -2;
+    /** The single potion / apple / milk being drunk or eaten from the off hand right now. */
+    @Nullable private ItemStack consuming;
+    /** Whatever was in the off hand (usually a shield) while drinking. */
+    private ItemStack stashedOffhand = ItemStack.EMPTY;
+    private int lastConsume = -1000;
+    private int lastThrow = -1000;
+    private int lastMilk = -1000;
+
+    /** Bounty hunters never run out of potions. */
+    protected boolean infiniteConsumables() {
+        return false;
+    }
+
+    /** Ticks between offensive splash potions. */
+    protected int throwCooldown() {
+        return 80;
+    }
+
+    private static boolean hasEffect(ItemStack s, Predicate<MobEffectInstance> want) {
+        for (MobEffectInstance e : PotionUtils.getMobEffects(s)) if (want.test(e)) return true;
+        return false;
+    }
+
+    private static boolean isSplash(ItemStack s) {
+        return s.is(Items.SPLASH_POTION) || s.is(Items.LINGERING_POTION);
+    }
+
+    private static boolean isHealing(MobEffectInstance e) {
+        return e.getEffect() == MobEffects.HEAL || e.getEffect() == MobEffects.REGENERATION;
+    }
+
+    private static boolean isHarmfulPotion(ItemStack s) {
+        List<MobEffectInstance> effects = PotionUtils.getMobEffects(s);
+        if (effects.isEmpty()) return false;
+        for (MobEffectInstance e : effects) if (e.getEffect().getCategory() != MobEffectCategory.HARMFUL) return false;
+        return true;
+    }
+
+    private boolean isBuffWanted(MobEffectInstance e) {
+        MobEffect m = e.getEffect();
+        return (m == MobEffects.DAMAGE_BOOST || m == MobEffects.MOVEMENT_SPEED || m == MobEffects.DAMAGE_RESISTANCE
+                || m == MobEffects.ABSORPTION) && !this.hasEffect(m);
+    }
+
+    private boolean hasHarmfulEffect() {
+        for (MobEffectInstance e : this.getActiveEffects()) if (e.getEffect().getCategory() == MobEffectCategory.HARMFUL) return true;
+        return false;
+    }
+
+    /** Off hand first, then the pack. */
+    private int findConsumable(Predicate<ItemStack> want) {
+        if (consuming == null && want.test(getOffhandItem())) return OFFHAND_SOURCE;
+        for (int i = 0; i < pack.getContainerSize(); i++) if (want.test(pack.getItem(i))) return i;
+        return NONE;
+    }
+
+    private ItemStack takeOne(int source) {
+        ItemStack s = source == OFFHAND_SOURCE ? getOffhandItem() : pack.getItem(source);
+        ItemStack one = s.copy();
+        one.setCount(1);
+        if (!infiniteConsumables()) {
+            s.shrink(1);
+            if (source == OFFHAND_SOURCE && s.isEmpty()) setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+            pack.setChanged();
+        }
+        return one;
+    }
+
+    /** Drink or eat one item from the off hand (whatever was there is put back afterwards). */
+    private void startConsuming(ItemStack one) {
+        stashedOffhand = getOffhandItem().copy();
+        consuming = one.copy();
+        setItemSlot(EquipmentSlot.OFFHAND, one);
+        startUsingItem(InteractionHand.OFF_HAND);
+        lastConsume = this.tickCount;
+    }
+
+    private void throwPotion(ItemStack potion, @Nullable LivingEntity target) {
+        ThrownPotion thrown = new ThrownPotion(this.level(), this);
+        thrown.setItem(potion);
+        if (target == null) {
+            thrown.shoot(0, -1, 0, 0.3F, 0); // at its own feet
+        } else {
+            Vec3 move = target.getDeltaMovement();
+            double dx = target.getX() + move.x - getX();
+            double dy = target.getEyeY() - 1.1 - getY();
+            double dz = target.getZ() + move.z - getZ();
+            double flat = Math.sqrt(dx * dx + dz * dz);
+            thrown.setXRot(thrown.getXRot() + 20.0F);
+            thrown.shoot(dx, dy + flat * 0.2, dz, 0.75F, 8.0F);
+        }
+        this.swing(InteractionHand.MAIN_HAND);
+        this.playSound(SoundEvents.WITCH_THROW, 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+        this.level().addFreshEntity(thrown);
+        lastConsume = this.tickCount;
+    }
+
+    /**
+     * Use potions, golden apples and milk from the off hand or pack: milk to purge debuffs, healing
+     * potions and golden apples when hurt, fire resistance when burning, strength/speed/resistance
+     * in a fight, and harmful splash potions thrown at the enemy. Pirates have no hunger, so food
+     * is only eaten for its effects.
+     */
+    private void tickConsumables() {
+        if (consuming != null || isUsingItem() || this.tickCount - lastConsume < 30) return;
+        LivingEntity target = getTarget();
+        boolean fighting = target != null && target.isAlive();
+        float hp = this.getHealth() / this.getMaxHealth();
+        int src;
+
+        // 1. Milk purges debuffs (only the bad effects).
+        if (hasHarmfulEffect() && this.tickCount - lastMilk > (infiniteConsumables() ? 200 : 40)
+                && (src = findConsumable(st -> st.is(Items.MILK_BUCKET))) != NONE) {
+            lastMilk = this.tickCount;
+            startConsuming(takeOne(src));
+            return;
+        }
+
+        // 2. Heal up when badly hurt.
+        if (hp < 0.45F && (fighting || hp < 0.3F)) {
+            if ((src = findConsumable(st -> st.is(Items.POTION) && hasEffect(st, PirateEntity::isHealing))) != NONE) {
+                startConsuming(takeOne(src));
+                return;
+            }
+            if ((src = findConsumable(st -> isSplash(st) && hasEffect(st, PirateEntity::isHealing))) != NONE) {
+                throwPotion(takeOne(src), null);
+                return;
+            }
+            boolean desperate = hp < 0.3F && fighting;
+            src = findConsumable(st -> st.is(desperate ? Items.ENCHANTED_GOLDEN_APPLE : Items.GOLDEN_APPLE));
+            if (src == NONE) src = findConsumable(st -> st.is(Items.GOLDEN_APPLE) || st.is(Items.ENCHANTED_GOLDEN_APPLE));
+            if (src != NONE) {
+                startConsuming(takeOne(src));
+                return;
+            }
+        }
+
+        // 3. Burning: fire resistance.
+        if (this.isOnFire() && !this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
+            Predicate<MobEffectInstance> fireRes = e -> e.getEffect() == MobEffects.FIRE_RESISTANCE;
+            if ((src = findConsumable(st -> st.is(Items.POTION) && hasEffect(st, fireRes))) != NONE) {
+                startConsuming(takeOne(src));
+                return;
+            }
+            if ((src = findConsumable(st -> isSplash(st) && hasEffect(st, fireRes))) != NONE) {
+                throwPotion(takeOne(src), null);
+                return;
+            }
+        }
+
+        if (!fighting) return;
+        double dist = this.distanceTo(target);
+
+        // 4. Buff up for the fight.
+        if (dist < 16 && (src = findConsumable(st -> st.is(Items.POTION) && hasEffect(st, this::isBuffWanted))) != NONE) {
+            startConsuming(takeOne(src));
+            return;
+        }
+
+        // 5. Throw harmful splash potions at the enemy (never into a crewmate).
+        if (dist >= 5.0 && dist <= 10.0 && this.tickCount - lastThrow > throwCooldown() && this.getSensing().hasLineOfSight(target)) {
+            final LivingEntity t = target;
+            src = findConsumable(st -> isSplash(st) && isHarmfulPotion(st)
+                    && hasEffect(st, e -> !t.hasEffect(e.getEffect()) || e.getEffect().isInstantenous()));
+            if (src != NONE) {
+                boolean friendNear = !this.level().getEntitiesOfClass(LivingEntity.class, t.getBoundingBox().inflate(4.0),
+                        e -> e != t && (e == this || CrewManager.areCrewmates(this, e))).isEmpty();
+                if (!friendNear) {
+                    lastThrow = this.tickCount;
+                    throwPotion(takeOne(src), t);
+                }
+            }
+        }
+    }
+
+    private void applyConsumable(ItemStack item) {
+        if (item.is(Items.MILK_BUCKET)) {
+            for (MobEffectInstance e : new ArrayList<>(this.getActiveEffects())) {
+                if (e.getEffect().getCategory() == MobEffectCategory.HARMFUL) this.removeEffect(e.getEffect());
+            }
+        } else if (item.is(Items.POTION)) {
+            for (MobEffectInstance e : PotionUtils.getMobEffects(item)) {
+                if (e.getEffect().isInstantenous()) e.getEffect().applyInstantenousEffect(this, this, this, e.getAmplifier(), 1.0);
+                else this.addEffect(new MobEffectInstance(e));
+            }
+        } else {
+            FoodProperties food = item.getFoodProperties(this);
+            if (food != null) {
+                for (Pair<MobEffectInstance, Float> p : food.getEffects()) {
+                    if (p.getFirst() != null && this.random.nextFloat() < p.getSecond()) this.addEffect(new MobEffectInstance(p.getFirst()));
+                }
+                this.playSound(SoundEvents.PLAYER_BURP, 0.5F, this.random.nextFloat() * 0.1F + 0.9F);
+            }
+        }
+    }
+
+    @Override
+    protected void completeUsingItem() {
+        if (!this.level().isClientSide && consuming != null && isUsingItem()) {
+            ItemStack item = consuming;
+            this.triggerItemUseEffects(getUseItem(), 16);
+            applyConsumable(item);
+            consuming = null; // finished, so stopping doesn't hand it back
+            stopUsingItem();
+            setItemSlot(EquipmentSlot.OFFHAND, stashedOffhand);
+            stashedOffhand = ItemStack.EMPTY;
+            if (!infiniteConsumables()) {
+                if (item.is(Items.POTION)) addToPack(new ItemStack(Items.GLASS_BOTTLE));
+                else if (item.is(Items.MILK_BUCKET)) addToPack(new ItemStack(Items.BUCKET));
+            }
+            return;
+        }
+        super.completeUsingItem();
+    }
+
+    /** Interrupted while drinking or eating: put things back as they were. */
+    @Override
+    public void stopUsingItem() {
+        ItemStack c = consuming;
+        consuming = null;
+        super.stopUsingItem();
+        if (c != null && !this.level().isClientSide) {
+            setItemSlot(EquipmentSlot.OFFHAND, stashedOffhand);
+            stashedOffhand = ItemStack.EMPTY;
+            if (!infiniteConsumables()) addToPack(c);
+        }
     }
 
     // ------------------------------------------------------------------ shields
@@ -845,6 +1088,7 @@ public class PirateEntity extends PathfinderMob {
 
         if (this.tickCount % 10 == 0 && this.getTarget() != null) chooseWeapon();
         tickShield();
+        if (this.tickCount % 10 == 0) tickConsumables();
 
         // Players regenerate, so do pirates (slowly, out of combat).
         if (this.tickCount % 60 == 0 && this.getHealth() < this.getMaxHealth()
@@ -871,6 +1115,7 @@ public class PirateEntity extends PathfinderMob {
 
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean hitByPlayer) {
+        if (consuming != null) stopUsingItem();
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = this.getItemBySlot(slot);
             if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack)) {
@@ -913,6 +1158,10 @@ public class PirateEntity extends PathfinderMob {
             packTag.add(t);
         }
         tag.put("Pack", packTag);
+        if (consuming != null) {
+            tag.put("Consuming", consuming.save(new CompoundTag()));
+            tag.put("StashedOffhand", stashedOffhand.save(new CompoundTag()));
+        }
     }
 
     @Override
@@ -941,6 +1190,11 @@ public class PirateEntity extends PathfinderMob {
             if (slot < pack.getContainerSize()) pack.setItem(slot, ItemStack.of(c));
         }
         if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")));
+        if (tag.contains("Consuming")) {
+            // Saved mid-drink: put the off hand back and the potion in the pack.
+            setItemSlot(EquipmentSlot.OFFHAND, ItemStack.of(tag.getCompound("StashedOffhand")));
+            if (!infiniteConsumables()) addToPack(ItemStack.of(tag.getCompound("Consuming")));
+        }
         if (initialized) {
             applyTierStats();
             updateDisplayName();

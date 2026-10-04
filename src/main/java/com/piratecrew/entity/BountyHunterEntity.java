@@ -28,6 +28,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -73,6 +75,16 @@ public class BountyHunterEntity extends PirateEntity {
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 12.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+    }
+
+    @Override
+    protected boolean infiniteConsumables() {
+        return true;
+    }
+
+    @Override
+    protected int throwCooldown() {
+        return 140;
     }
 
     @Override
@@ -143,17 +155,23 @@ public class BountyHunterEntity extends PirateEntity {
         Item sword = switch (tier) {
             case F -> Items.WOODEN_SWORD;
             case D -> Items.STONE_SWORD;
-            case C, B -> ModItems.RUBY_SWORD.get();
+            case C -> Items.DIAMOND_SWORD;
+            case B -> ModItems.RUBY_SWORD.get();
             case A -> Items.DIAMOND_SWORD;
             default -> Items.NETHERITE_SWORD;
         };
 
-        if (tier == PirateTier.F || tier == PirateTier.D) {
-            // Sword (wooden at F, stone at D), bow and shield: bow in hand for marksmen, sword for everyone else.
+        if (tier.ordinal() <= PirateTier.C.ordinal()) {
+            // Sword (wooden at F, stone at D, diamond at C), bow and shield: bow in hand for marksmen, sword for everyone else.
             boolean marksman = getCombatStyle() == CombatStyle.MARKSMAN;
             setItemSlot(EquipmentSlot.MAINHAND, gear(marksman ? Items.BOW : sword));
             getPack().setItem(0, gear(marksman ? sword : Items.BOW));
             setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
+            if (tier == PirateTier.C) {
+                // Poison splash potions to throw, and milk to purge debuffs. Hunters never run out.
+                getPack().setItem(1, PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), Potions.POISON));
+                getPack().setItem(2, new ItemStack(Items.MILK_BUCKET));
+            }
             return;
         }
 

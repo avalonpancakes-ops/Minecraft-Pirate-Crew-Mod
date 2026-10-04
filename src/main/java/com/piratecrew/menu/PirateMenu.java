@@ -104,7 +104,9 @@ public class PirateMenu extends AbstractContainerMenu {
                 if (!target.hasItem() && target.mayPlace(stack)) moved = moveItemStackTo(stack, i, i + 1, false);
             }
             if (!moved && !this.slots.get(5).hasItem() && stack.canPerformAction(net.minecraftforge.common.ToolActions.SHIELD_BLOCK)) moved = moveItemStackTo(stack, 5, 6, false);
-            if (!moved && !this.slots.get(4).hasItem() && stack.getMaxStackSize() == 1) moved = moveItemStackTo(stack, 4, 5, false);
+            boolean consumable = stack.is(net.minecraft.world.item.Items.POTION) || stack.is(net.minecraft.world.item.Items.SPLASH_POTION)
+                    || stack.is(net.minecraft.world.item.Items.LINGERING_POTION) || stack.is(net.minecraft.world.item.Items.MILK_BUCKET);
+            if (!moved && !consumable && !this.slots.get(4).hasItem() && stack.getMaxStackSize() == 1) moved = moveItemStackTo(stack, 4, 5, false);
             if (!moved) moved = moveItemStackTo(stack, packStart, packEnd, false);
             if (!moved) return ItemStack.EMPTY;
         }
