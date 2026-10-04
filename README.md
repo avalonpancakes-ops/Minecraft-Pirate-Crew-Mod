@@ -109,13 +109,14 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **If a hunter kills you**, the bank collects, in this order:
   1. **Your bounty:** the bank claims the whole bounty on your head (announced to the server) and takes it off your debt.
   2. **Your bank account:** as much as is still owed.
-  3. **Your items:** if you still owe more, the hunter walks over to your corpse, crouches over it and goes through your things for a few seconds. He takes items worth what you still owe, and they're **destroyed for good**. Rubies go first, then your most valuable things (diamonds, netherite, enchanted gear, elytra, totems...) until the debt is covered. Items are valued at the banker's shop prices; everyday blocks are worthless to him. While he searches, the corpse is locked (you can't grab your stuff), but if you or your crew **kill him before he finishes, your items are safe**. When he's done he vanishes, and whatever he didn't take is still on your corpse.
+  3. **Your items:** if you still owe more, the hunter walks over to your corpse, crouches over it and goes through your things for a few seconds. He takes items worth what you still owe, and they're **destroyed for good**. Rubies go first, then your most valuable things (diamonds, netherite, enchanted gear, elytra, totems...) until the debt is covered. Items are valued at the banker's shop prices; everyday blocks are worthless to him. While he searches, the corpse is locked (you can't grab your stuff), but if you or your crew **kill him before he finishes, your items are safe**. When he's done he vanishes, and whatever he didn't take is still on your corpse (and the 2-minute timer keeps running, so get back fast).
   - If that still doesn't cover it, more hunters come the next day, at the same strength.
 - **Paying off the debt calls the hunters off** at once. Hunters also leave if you log out or change dimension.
 
 ### Corpses
 - When a player dies, their items don't scatter on the ground: they stay on the player's **corpse**, which lies where they died wearing their skin, with a name tag. Chat tells you its coordinates.
-- Only the owner can take the items back: **right-click the corpse** and everything returns (armor straight back on if the slot is free), and the corpse disappears.
+- For the first **2 minutes** only the dead player can loot it: **right-click the corpse** and everything comes back (armor straight back on if the slot is free) and the corpse disappears. Sneak + right-click opens it like a chest to pick items out instead.
+- After 2 minutes the corpse's name tag says **(free loot)** and **anyone** can right-click it to open it like a chest and take what they want. Other players who try earlier are told how long is left. The owner can still take everything back at any time.
 - Corpses can't be hurt, don't burn in lava, and never despawn while they hold items. If you die in the void, your corpse floats just above it.
 - With the `keepInventory` gamerule on there's no corpse (you keep your items, and a hunter takes his share straight from your inventory).
 

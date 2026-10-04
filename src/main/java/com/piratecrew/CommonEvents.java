@@ -73,7 +73,7 @@ public class CommonEvents {
         CorpseEntity corpse = CorpseEntity.create(sp, stacks);
         sp.serverLevel().addFreshEntity(corpse);
         sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.format(
-                "\u2620 Your belongings are on your corpse at %d, %d, %d. Right-click it to get them back.",
+                "\u2620 Your belongings are on your corpse at %d, %d, %d. Right-click it to get them back: after 2 minutes anyone can loot it.",
                 corpse.getBlockX(), corpse.getBlockY(), corpse.getBlockZ())).withStyle(net.minecraft.ChatFormatting.GRAY));
         LoanManager.onCorpse(sp, corpse);
     }

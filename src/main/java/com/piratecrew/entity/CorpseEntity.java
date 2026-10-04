@@ -46,8 +46,12 @@ public class CorpseEntity extends Entity {
 
     /** After this long a stuck search is finished by the bank anyway. */
     private static final int LOCK_TIMEOUT = 1200;
+    /** Only the dead player can loot their corpse for this long (2 minutes); then anyone can. */
+    public static final int OWNER_ONLY_TICKS = 2400;
 
-    private SimpleContainer items = new SimpleContainer(54);
+    private SimpleContainer items = new Contents(54);
+    private long createdAt = -1;
+    private boolean publicLoot;
     @Nullable private UUID looter;
     private int lockedTicks;
 
@@ -67,7 +71,8 @@ public class CorpseEntity extends Entity {
         c.moveTo(player.getX(), y, player.getZ(), player.getYRot(), 0);
         c.entityData.set(DATA_OWNER, Optional.of(player.getUUID()));
         c.entityData.set(DATA_NAME, player.getGameProfile().getName());
-        c.items = new SimpleContainer(Math.max(54, drops.size()));
+        c.items = c.new Contents(Math.max(54, drops.size()));
+        c.createdAt = player.level().getGameTime();
         for (ItemStack s : drops) c.items.addItem(s);
         c.updateName();
         return c;
@@ -117,10 +122,29 @@ public class CorpseEntity extends Entity {
 
     private void updateName() {
         String n = "☠ " + getOwnerName() + "'s corpse";
-        this.setCustomName(isLocked()
-                ? Component.literal(n).withStyle(ChatFormatting.GRAY).append(Component.literal(" (being searched)").withStyle(ChatFormatting.RED))
-                : Component.literal(n).withStyle(ChatFormatting.GRAY));
+        var name = Component.literal(n).withStyle(ChatFormatting.GRAY);
+        if (isLocked()) name.append(Component.literal(" (being searched)").withStyle(ChatFormatting.RED));
+        else if (publicLoot) name.append(Component.literal(" (free loot)").withStyle(ChatFormatting.GOLD));
+        this.setCustomName(name);
         this.setCustomNameVisible(true);
+    }
+
+    /** Ticks left before anyone can loot this corpse (0 = anyone can now). */
+    private long ownerOnlyLeft() {
+        if (createdAt < 0) return 0;
+        return Math.max(0, OWNER_ONLY_TICKS - (this.level().getGameTime() - createdAt));
+    }
+
+    /** The corpse's items, viewable like a chest; the view closes when the corpse is gone or out of reach. */
+    private class Contents extends SimpleContainer {
+        Contents(int size) {
+            super(size);
+        }
+
+        @Override
+        public boolean stillValid(Player player) {
+            return CorpseEntity.this.isAlive() && !CorpseEntity.this.isLocked() && player.distanceToSqr(CorpseEntity.this) < 8 * 8;
+        }
     }
 
     @Override
@@ -132,6 +156,11 @@ public class CorpseEntity extends Entity {
             this.move(MoverType.SELF, this.getDeltaMovement());
         }
         if (this.level().isClientSide || !(this.level() instanceof ServerLevel sl)) return;
+        if (createdAt < 0) createdAt = sl.getGameTime();
+        if (!publicLoot && this.tickCount % 20 == 0 && ownerOnlyLeft() == 0) {
+            publicLoot = true;
+            updateName();
+        }
         if (isLocked()) {
             lockedTicks++;
             if (lockedTicks % 20 == 0) {
@@ -164,12 +193,26 @@ public class CorpseEntity extends Entity {
     public InteractionResult interact(Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (this.level().isClientSide) return InteractionResult.SUCCESS;
-        if (!player.getUUID().equals(getOwner())) {
-            player.displayClientMessage(Component.literal("This is " + getOwnerName() + "'s corpse. Only they can take its items.").withStyle(ChatFormatting.GRAY), true);
+        boolean owner = player.getUUID().equals(getOwner());
+        if (isLocked()) {
+            player.displayClientMessage(Component.literal(owner ? "A bounty hunter is searching your corpse. Stop him or wait."
+                    : "A bounty hunter is searching this corpse.").withStyle(ChatFormatting.RED), true);
             return InteractionResult.CONSUME;
         }
-        if (isLocked()) {
-            player.displayClientMessage(Component.literal("A bounty hunter is searching your corpse. Stop him or wait.").withStyle(ChatFormatting.RED), true);
+        if (!owner) {
+            long left = ownerOnlyLeft();
+            if (left > 0) {
+                long secs = (left + 19) / 20;
+                player.displayClientMessage(Component.literal(String.format("This is %s's corpse. Anyone can loot it in %d:%02d.",
+                        getOwnerName(), secs / 60, secs % 60)).withStyle(ChatFormatting.GRAY), true);
+                return InteractionResult.CONSUME;
+            }
+            openLoot(player);
+            return InteractionResult.CONSUME;
+        }
+        // The owner can sneak-click to pick items out instead of taking everything.
+        if (player.isShiftKeyDown()) {
+            openLoot(player);
             return InteractionResult.CONSUME;
         }
         // Armor and off-hand items go back where they were worn if the slot is free; the rest into the inventory.
@@ -188,6 +231,15 @@ public class CorpseEntity extends Entity {
         player.displayClientMessage(Component.literal("You recovered your belongings.").withStyle(ChatFormatting.GREEN), true);
         this.discard();
         return InteractionResult.CONSUME;
+    }
+
+    /** A chest-style view of the first 54 slots, to pick items out one by one. */
+    private void openLoot(Player player) {
+        if (!(player instanceof ServerPlayer sp)) return;
+        net.minecraft.world.Container view = items;
+        sp.openMenu(new net.minecraft.world.SimpleMenuProvider((id, inv, p) -> new net.minecraft.world.inventory.ChestMenu(
+                net.minecraft.world.inventory.MenuType.GENERIC_9x6, id, inv, view, 6), Component.literal(getOwnerName() + "'s corpse")));
+        this.level().playSound(null, blockPosition(), SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.PLAYERS, 0.8F, 0.8F);
     }
 
     @Override
@@ -228,6 +280,8 @@ public class CorpseEntity extends Entity {
         tag.putBoolean("Locked", isLocked());
         if (looter != null) tag.putUUID("Looter", looter);
         tag.putInt("LockedTicks", lockedTicks);
+        tag.putLong("CreatedAt", createdAt);
+        tag.putBoolean("PublicLoot", publicLoot);
         tag.putInt("Size", items.getContainerSize());
         ListTag list = new ListTag();
         for (int i = 0; i < items.getContainerSize(); i++) {
@@ -248,7 +302,9 @@ public class CorpseEntity extends Entity {
         this.looter = tag.hasUUID("Looter") ? tag.getUUID("Looter") : null;
         this.lockedTicks = tag.getInt("LockedTicks");
         this.entityData.set(DATA_LOCKED, tag.getBoolean("Locked") && looter != null);
-        this.items = new SimpleContainer(Math.max(54, tag.getInt("Size")));
+        this.createdAt = tag.contains("CreatedAt") ? tag.getLong("CreatedAt") : -1;
+        this.publicLoot = tag.getBoolean("PublicLoot");
+        this.items = new Contents(Math.max(54, tag.getInt("Size")));
         for (Tag t : tag.getList("Items", Tag.TAG_COMPOUND)) {
             CompoundTag c = (CompoundTag) t;
             int slot = c.getShort("Slot");
