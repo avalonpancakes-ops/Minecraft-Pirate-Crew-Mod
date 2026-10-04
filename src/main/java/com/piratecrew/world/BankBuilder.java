@@ -1,7 +1,10 @@
 package com.piratecrew.world;
 
 import com.piratecrew.PirateCrew;
+import com.piratecrew.entity.BankerEntity;
 import com.piratecrew.registry.ModBlocks;
+import com.piratecrew.registry.ModEntities;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -66,6 +69,7 @@ public class BankBuilder {
         }
         new BankBuilder(level, origin, facing).build();
         BarData.Bar bank = new BarData.Bar(origin, facing);
+        spawnBanker(level, bank);
         BarData.get(level).addBank(bank);
         PirateCrew.LOGGER.debug("Pirate Crew: built bank at {}", origin);
         return bank;
@@ -204,6 +208,30 @@ public class BankBuilder {
                 }
             }
         }
+    }
+
+    /** Where the banker stands: behind the counter, between the two teller windows. */
+    public static BlockPos bankerPos(BarData.Bar bank) {
+        return toWorld(bank.origin(), BarBuilder.rotationFor(bank.facing()), 4, 1, 6);
+    }
+
+    public static boolean hasBanker(ServerLevel level, BarData.Bar bank) {
+        BlockPos p = bankerPos(bank);
+        return !level.getEntitiesOfClass(BankerEntity.class, new AABB(p).inflate(4.0, 2.0, 4.0)).isEmpty();
+    }
+
+    /** Put a banker behind the counter, facing the customers. */
+    public static void spawnBanker(ServerLevel level, BarData.Bar bank) {
+        if (hasBanker(level, bank)) return;
+        BankerEntity banker = ModEntities.BANKER.get().create(level);
+        if (banker == null) return;
+        BlockPos p = bankerPos(bank);
+        // The bank's door faces bank.facing(), so customers stand on that side of the counter.
+        float yaw = bank.facing().toYRot();
+        banker.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, yaw, 0.0F);
+        banker.setYHeadRot(yaw);
+        banker.setYBodyRot(yaw);
+        level.addFreshEntity(banker);
     }
 
     private void wall(int lx, int ly, int lz) {

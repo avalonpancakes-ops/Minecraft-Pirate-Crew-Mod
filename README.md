@@ -85,7 +85,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ### Banks
 - Every village also gets **one bank**, a stone hall with a teller counter, built on its own spot at least 20 blocks from the bar so they never overlap. Villages you've already visited get theirs the next time you go there.
-- Right-click a **Bank Counter** to open your account. Your balance is just a number (1,200, 1,700...), so rubies stop taking up inventory space.
+- A **Banker** stands behind the counter of every bank (banks built before this update get one when you next visit). He can't be hurt, pushed or led away. Right-click him, or a **Bank Counter**, to open your account. Your balance is just a number (1,200, 1,700...), so rubies stop taking up inventory space.
 - Deposit +1 / +10 / +64 / All, withdraw -1 / -10 / -64 / Max (Max = as much as fits in your inventory), or type an exact amount. Ruby blocks count as 9 rubies when depositing.
 - Bounty rewards go straight into the bank. `/bank` shows your balance anywhere; deposits and withdrawals need a counter.
 

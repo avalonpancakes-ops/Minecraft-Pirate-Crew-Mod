@@ -178,10 +178,15 @@ public class VillageBarHandler {
         return new Candidate(new BlockPos(centre.getX(), median - 1, centre.getZ()), facing, score, wet);
     }
 
-    /** Bars built by older versions of the mod get their bounty board once they're loaded. */
+    /** Bars built by older versions of the mod get their bounty board once they're loaded; banks get their banker. */
     private static void addMissingBoards(MinecraftServer server) {
         for (ServerLevel level : server.getAllLevels()) {
             BarData data = BarData.get(level);
+            for (BarData.Bar bank : data.banks()) {
+                BlockPos p = BankBuilder.bankerPos(bank);
+                if (!level.isLoaded(p) || !level.hasNearbyAlivePlayer(p.getX(), p.getY(), p.getZ(), 48)) continue;
+                if (!BankBuilder.hasBanker(level, bank)) BankBuilder.spawnBanker(level, bank);
+            }
             for (BarData.Bar bar : data.bars()) {
                 if (data.hasBoard(bar)) continue;
                 BlockPos pos = BarBuilder.boardPos(bar);

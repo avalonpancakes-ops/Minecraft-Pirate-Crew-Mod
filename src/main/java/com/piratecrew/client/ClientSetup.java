@@ -34,6 +34,7 @@ public class ClientSetup {
         @SubscribeEvent
         public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.PIRATE.get(), PirateRenderer::new);
+            event.registerEntityRenderer(ModEntities.BANKER.get(), BankerRenderer::new);
         }
 
         @SubscribeEvent

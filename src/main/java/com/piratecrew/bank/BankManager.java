@@ -1,6 +1,8 @@
 package com.piratecrew.bank;
 
+import com.piratecrew.entity.BankerEntity;
 import com.piratecrew.network.BankSyncPacket;
+import net.minecraft.world.phys.AABB;
 import com.piratecrew.network.ModNetwork;
 import com.piratecrew.registry.ModBlocks;
 import com.piratecrew.registry.ModItems;
@@ -54,7 +56,8 @@ public class BankManager {
         BlockPos pos = OPEN_AT.get(player.getUUID());
         if (pos == null) return false;
         if (player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) > 8 * 8) return false;
-        return player.level().getBlockState(pos).is(ModBlocks.BANK_COUNTER.get());
+        if (player.level().getBlockState(pos).is(ModBlocks.BANK_COUNTER.get())) return true;
+        return !player.level().getEntitiesOfClass(BankerEntity.class, new AABB(pos).inflate(2.0)).isEmpty();
     }
 
     public static void sync(ServerPlayer player, boolean open) {

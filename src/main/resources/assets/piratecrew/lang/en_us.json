@@ -19,5 +19,6 @@
   "key.categories.piratecrew": "Pirate Crew",
   "key.piratecrew.crew_menu": "Open Crew Menu",
   "block.piratecrew.bounty_board": "Bounty Board",
-  "block.piratecrew.bank_counter": "Bank Counter"
+  "block.piratecrew.bank_counter": "Bank Counter",
+  "entity.piratecrew.banker": "Banker"
 }
