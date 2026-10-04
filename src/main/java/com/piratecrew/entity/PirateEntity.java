@@ -84,11 +84,11 @@ public class PirateEntity extends PathfinderMob {
     private static final int HOME_RADIUS = 6;
 
     private boolean initialized = false;
-    private String pirateName = "Pirate";
+    protected String pirateName = "Pirate";
     @Nullable private UUID leaderId;
     @Nullable private BlockPos holdPos;
     @Nullable private BlockPos home;
-    private int lastCombatTick = -1000;
+    protected int lastCombatTick = -1000;
     private final SimpleContainer pack = new SimpleContainer(PACK_SIZE);
     /** This pirate's own distance for switching to melee (varies inside its combat style's range). */
     private float meleeRange = 5.0F;
@@ -192,8 +192,17 @@ public class PirateEntity extends PathfinderMob {
         return Math.max(1.0F, 10.0F - getTier().ordinal() * 1.7F);
     }
 
+    /** Health and damage multiplier on top of the tier's stats (bounty hunters override this). */
+    protected double statMultiplier() {
+        return 1.0;
+    }
+
+    private double tierDamage() {
+        return getTier().attackDamage * statMultiplier();
+    }
+
     private void tierArrowBonus(AbstractArrow arrow) {
-        arrow.setBaseDamage(arrow.getBaseDamage() + (getTier().attackDamage - 1.0) * 0.25);
+        arrow.setBaseDamage(arrow.getBaseDamage() + (tierDamage() - 1.0) * 0.25);
     }
 
     private void aim(Projectile projectile, LivingEntity target, float velocity, float yawOffsetDeg) {
@@ -265,7 +274,7 @@ public class PirateEntity extends PathfinderMob {
         ItemStack weapon = getMainHandItem();
         ThrownTrident trident = new ThrownTrident(this.level(), this, weapon.copy());
         trident.pickup = AbstractArrow.Pickup.DISALLOWED;
-        trident.setBaseDamage(trident.getBaseDamage() + (getTier().attackDamage - 1.0) * 0.5);
+        trident.setBaseDamage(trident.getBaseDamage() + (tierDamage() - 1.0) * 0.5);
         aim(trident, target, 1.8F, 0);
         this.playSound(SoundEvents.TRIDENT_THROW, 1.0F, 1.0F / (getRandom().nextFloat() * 0.4F + 0.8F));
         this.level().addFreshEntity(trident);
@@ -308,12 +317,24 @@ public class PirateEntity extends PathfinderMob {
     public void initPirate(PirateTier tier) {
         this.initialized = true;
         this.entityData.set(DATA_TIER, tier.ordinal());
-        this.pirateName = PirateNames.random(this.random);
+        this.pirateName = rollName();
         rollCombatStyle();
         applyTierStats();
         this.setHealth(this.getMaxHealth());
-        this.entityData.set(DATA_SKIN, PirateSkins.random(this.random, tier));
+        this.entityData.set(DATA_SKIN, rollSkin(tier));
         updateDisplayName();
+    }
+
+    protected String rollName() {
+        return PirateNames.random(this.random);
+    }
+
+    protected String rollSkin(PirateTier tier) {
+        return PirateSkins.random(this.random, tier);
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
     private void rollCombatStyle() {
@@ -343,12 +364,12 @@ public class PirateEntity extends PathfinderMob {
         return pack;
     }
 
-    private void applyTierStats() {
+    protected void applyTierStats() {
         PirateTier tier = getTier();
         var hp = this.getAttribute(Attributes.MAX_HEALTH);
-        if (hp != null) hp.setBaseValue(tier.maxHealth);
+        if (hp != null) hp.setBaseValue(tier.maxHealth * statMultiplier());
         var dmg = this.getAttribute(Attributes.ATTACK_DAMAGE);
-        if (dmg != null) dmg.setBaseValue(tier.attackDamage);
+        if (dmg != null) dmg.setBaseValue(tier.attackDamage * statMultiplier());
     }
 
     public void setHome(BlockPos pos) {
@@ -819,7 +840,7 @@ public class PirateEntity extends PathfinderMob {
 
         // Pirates saved with an old or removed skin get a new one from the bundled set.
         if (this.tickCount % 100 == 0 && !PirateSkins.isValid(getSkinName()) && PirateSkins.count() > 0) {
-            this.entityData.set(DATA_SKIN, PirateSkins.random(this.random, getTier()));
+            this.entityData.set(DATA_SKIN, rollSkin(getTier()));
         }
 
         if (this.tickCount % 10 == 0 && this.getTarget() != null) chooseWeapon();

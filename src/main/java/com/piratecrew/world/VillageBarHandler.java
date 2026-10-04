@@ -204,7 +204,7 @@ public class VillageBarHandler {
                 BlockPos c = BarBuilder.interiorCentre(bar);
                 if (!level.hasChunksAt(c.getX() - 10, c.getZ() - 10, c.getX() + 10, c.getZ() + 10)) continue;
                 if (!level.hasNearbyAlivePlayer(c.getX(), c.getY(), c.getZ(), 96)) continue;
-                int free = level.getEntitiesOfClass(PirateEntity.class, new AABB(c).inflate(10, 5, 10), p -> !p.isRecruited()).size();
+                int free = level.getEntitiesOfClass(PirateEntity.class, new AABB(c).inflate(10, 5, 10), p -> !p.isRecruited() && !(p instanceof com.piratecrew.entity.BountyHunterEntity)).size();
                 if (free < min) BarBuilder.restock(level, bar);
             }
         }

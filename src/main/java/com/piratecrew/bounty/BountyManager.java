@@ -38,6 +38,8 @@ public class BountyManager {
     public static void onDeath(LivingEntity victim, @Nullable Entity killerEntity) {
         if (victim.level().isClientSide) return;
         if (!(victim instanceof ServerPlayer) && !(victim instanceof PirateEntity)) return;
+        // Bank business, not piracy: bounty hunters neither earn nor carry bounties.
+        if (victim instanceof com.piratecrew.entity.BountyHunterEntity || killerEntity instanceof com.piratecrew.entity.BountyHunterEntity) return;
         MinecraftServer server = victim.getServer();
         if (server == null) return;
         BountyData data = BountyData.get(server);

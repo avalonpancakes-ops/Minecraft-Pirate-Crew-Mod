@@ -1,6 +1,8 @@
 package com.piratecrew;
 
+import com.piratecrew.bank.LoanManager;
 import com.piratecrew.bounty.BountyManager;
+import com.piratecrew.entity.BountyHunterEntity;
 import com.piratecrew.crew.CrewCommands;
 import com.piratecrew.crew.CrewManager;
 import com.piratecrew.world.VillageBarHandler;
@@ -30,6 +32,7 @@ public class CommonEvents {
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             BountyManager.onLogin(sp);
+            LoanManager.onLogin(sp);
             CrewManager.sync(sp, false);
         }
     }
@@ -48,6 +51,9 @@ public class CommonEvents {
     @SubscribeEvent
     public static void death(LivingDeathEvent event) {
         BountyManager.onDeath(event.getEntity(), event.getSource().getEntity());
+        if (event.getEntity() instanceof ServerPlayer sp && event.getSource().getEntity() instanceof BountyHunterEntity h && h.isHunting(sp) && !h.isTestHunter()) {
+            LoanManager.onHunterKill(sp, h);
+        }
     }
 
     @SubscribeEvent
@@ -59,6 +65,8 @@ public class CommonEvents {
 
     @SubscribeEvent
     public static void serverTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) VillageBarHandler.tick(ServerLifecycleHooks.getCurrentServer());
+        if (event.phase != TickEvent.Phase.END) return;
+        VillageBarHandler.tick(ServerLifecycleHooks.getCurrentServer());
+        LoanManager.tick(ServerLifecycleHooks.getCurrentServer());
     }
 }

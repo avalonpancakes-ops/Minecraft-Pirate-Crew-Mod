@@ -4,6 +4,7 @@ Add Minecraft skin PNGs to the mod as pirate skins.
 
     python3 tools/add_skins.py [--tier S] skin1.png [--tier F] skin2.png folder/ ...
     python3 tools/add_skins.py --retier pirate_3 A        (change an existing skin's tier)
+    python3 tools/add_skins.py --hunter [--tier S] hunter.png ...   (bounty hunter skins)
 
 Tiers (F, D, C, B, A, S) decide which pirates wear the skin: a pirate rolled as S tier wears one
 of the S skins. --tier applies to every file after it. A file name starting with a tier and an
@@ -16,7 +17,8 @@ For every skin it:
     show up in game as holes / glitchy see-through patches)
   * clears overlay (hat/jacket/sleeve) areas that are completely solid filler
   * detects slim (Alex-style, 3px) arms
-then saves it as textures/entity/pirate/pirate_N.png and rewrites pirate_skins.txt.
+then saves it as textures/entity/pirate/pirate_N.png (hunter_N.png with --hunter: worn only by
+bounty hunters, never by pirates) and rewrites pirate_skins.txt.
 Also writes tools/skin_preview.png showing the front of every skin for a quick check.
 """
 import os
@@ -179,6 +181,10 @@ def main():
         print(f"{args[1]} is now tier {args[2].upper()}")
         return
 
+    prefix = "pirate"
+    if args[:1] == ["--hunter"]:
+        prefix = "hunter"
+        args = args[1:]
     used = {e[0] for e in entries}
     n = 1
     added, skipped = [], []
@@ -193,9 +199,9 @@ def main():
             continue
         slim = is_slim(img)
         img = fix(img)
-        while f"pirate_{n}" in used:
+        while f"{prefix}_{n}" in used:
             n += 1
-        name = f"pirate_{n}"
+        name = f"{prefix}_{n}"
         used.add(name)
         img.save(os.path.join(SKIN_DIR, name + ".png"))
         entries.append([name, slim, tier])
@@ -224,7 +230,7 @@ def preview(entries):
     for i, (name, tier, v) in enumerate(views):
         x, y = (i % cols) * 80 + 8, (i // cols) * 160 + 4
         sheet.alpha_composite(v, (x, y))
-        d.text((x, y + 132), f"{name.replace('pirate_', '#')}  {tier or 'any'}", fill=(255, 255, 255, 255))
+        d.text((x, y + 132), f"{name.replace('pirate_', '#').replace('hunter_', 'H')}  {tier or 'any'}", fill=(255, 255, 255, 255))
     sheet.save(os.path.join(ROOT, "tools/skin_preview.png"))
 
 

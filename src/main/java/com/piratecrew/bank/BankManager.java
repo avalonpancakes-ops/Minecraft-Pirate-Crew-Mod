@@ -52,7 +52,7 @@ public class BankManager {
         sync(player, true);
     }
 
-    private static boolean atCounter(ServerPlayer player) {
+    public static boolean atCounter(ServerPlayer player) {
         BlockPos pos = OPEN_AT.get(player.getUUID());
         if (pos == null) return false;
         if (player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) > 8 * 8) return false;
@@ -61,7 +61,13 @@ public class BankManager {
     }
 
     public static void sync(ServerPlayer player, boolean open) {
-        ModNetwork.sendTo(player, new BankSyncPacket(balance(player.server, player.getUUID()), countRubies(player.getInventory()), open));
+        LoanData.Loan loan = LoanData.get(player.server).get(player.getUUID());
+        long owed = loan == null ? 0 : loan.owed;
+        long ticksLeft = loan == null ? 0 : loan.deadline - LoanManager.now(player.server);
+        boolean overdue = loan != null && loan.defaulted;
+        ModNetwork.sendTo(player, new BankSyncPacket(balance(player.server, player.getUUID()), countRubies(player.getInventory()), open,
+                owed, ticksLeft, overdue, com.piratecrew.Config.LOAN_MAX.get(),
+                (int) Math.round(com.piratecrew.Config.LOAN_INTEREST.get() * 100), com.piratecrew.Config.LOAN_DAYS.get()));
     }
 
     /** amount < 0 means "everything". Ruby blocks in the inventory count as 9 each. */

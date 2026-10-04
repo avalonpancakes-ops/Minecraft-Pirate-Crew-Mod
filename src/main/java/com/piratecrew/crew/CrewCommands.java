@@ -7,6 +7,9 @@ import com.piratecrew.entity.PirateEntity;
 import com.piratecrew.entity.PirateTier;
 import com.piratecrew.registry.ModEntities;
 import com.piratecrew.bank.BankManager;
+import com.piratecrew.bank.LoanData;
+import com.piratecrew.bank.LoanManager;
+import com.piratecrew.entity.BountyHunterEntity;
 import com.piratecrew.world.BankBuilder;
 import com.piratecrew.world.BarBuilder;
 import net.minecraft.commands.CommandSourceStack;
@@ -45,6 +48,11 @@ public class CrewCommands {
             long bal = BankManager.balance(p.server, p.getUUID());
             c.getSource().sendSuccess(() -> Component.literal("Bank balance: " + String.format("%,d", bal) + " rubies. Visit a Bank Counter to deposit or withdraw.")
                     .withStyle(net.minecraft.ChatFormatting.GOLD), false);
+            LoanData.Loan loan = LoanManager.loanOf(p.server, p.getUUID());
+            if (loan != null) {
+                c.getSource().sendSuccess(() -> Component.literal(LoanManager.status(p.server, loan))
+                        .withStyle(loan.defaulted ? net.minecraft.ChatFormatting.RED : net.minecraft.ChatFormatting.YELLOW), false);
+            }
             return 1;
         }));
 
@@ -64,6 +72,40 @@ public class CrewCommands {
                     c.getSource().sendSuccess(() -> Component.literal("Built a bank."), true);
                     return 1;
                 }))
+                .then(Commands.literal("loandue").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    if (!LoanManager.forceDue(p)) {
+                        c.getSource().sendFailure(Component.literal("You don't have a loan."));
+                        return 0;
+                    }
+                    c.getSource().sendSuccess(() -> Component.literal("Your loan is now overdue."), true);
+                    return 1;
+                }))
+                .then(Commands.literal("spawnhunter").then(Commands.argument("tier", StringArgumentType.word())
+                        .suggests((c, b) -> {
+                            for (PirateTier t : PirateTier.values()) b.suggest(t.label);
+                            return b.buildFuture();
+                        })
+                        .executes(c -> {
+                            PirateTier tier = PirateTier.byLabel(StringArgumentType.getString(c, "tier"));
+                            if (tier == null) {
+                                c.getSource().sendFailure(Component.literal("Tier must be F, D, C, B, A or S"));
+                                return 0;
+                            }
+                            ServerPlayer p = c.getSource().getPlayerOrException();
+                            ServerLevel level = p.serverLevel();
+                            BountyHunterEntity h = ModEntities.BOUNTY_HUNTER.get().create(level);
+                            if (h == null) return 0;
+                            net.minecraft.world.phys.Vec3 pos = LoanManager.findSpot(level, p.blockPosition(), 8, 14, p.getRandom());
+                            if (pos == null) pos = p.position();
+                            h.moveTo(pos.x, pos.y, pos.z, p.getYRot(), 0);
+                            h.setupHunter(tier, p.getUUID(), -1);
+                            h.setTest(true);
+                            h.finalizeSpawn(level, level.getCurrentDifficultyAt(p.blockPosition()), MobSpawnType.COMMAND, null, null);
+                            level.addFreshEntity(h);
+                            c.getSource().sendSuccess(() -> Component.literal("A test bounty hunter is coming for you (switch to survival)."), true);
+                            return 1;
+                        })))
                 .then(Commands.literal("spawnpirate").then(Commands.argument("tier", StringArgumentType.word())
                         .suggests((c, b) -> {
                             for (PirateTier t : PirateTier.values()) b.suggest(t.label);

@@ -25,9 +25,12 @@ import java.util.Map;
  * no tier can be worn by any tier.
  * The list file is read from the jar on both client and server, so each pirate stores just the
  * skin name and every player sees the same skin.
+ * Skins whose name starts with hunter_ are bounty hunter skins and are never given to pirates.
  */
 public class PirateSkins {
     private static final String LIST = "pirate_skins.txt";
+    /** Skins named hunter_* are only worn by bounty hunters. */
+    public static final String HUNTER_PREFIX = "hunter_";
     private static List<String> names;
     private static Map<String, Boolean> slim;
     private static Map<String, PirateTier> tiers;
@@ -77,10 +80,30 @@ public class PirateSkins {
      */
     public static String random(RandomSource random, PirateTier tier) {
         load();
+        return pick(random, tier, false);
+    }
+
+    /**
+     * A skin for a bounty hunter: one of the hunter skins (named hunter_*) for its tier, else any
+     * hunter skin, else a pirate skin of that tier if no hunter skins are bundled.
+     */
+    public static String randomHunter(RandomSource random, PirateTier tier) {
+        load();
+        String s = pick(random, tier, true);
+        return s.isEmpty() ? pick(random, tier, false) : s;
+    }
+
+    public static boolean isHunterSkin(String name) {
+        return name.startsWith(HUNTER_PREFIX);
+    }
+
+    private static String pick(RandomSource random, PirateTier tier, boolean hunter) {
+        List<String> all = new ArrayList<>();
+        for (String n : names) if (isHunterSkin(n) == hunter) all.add(n);
         List<String> pool = new ArrayList<>();
-        for (String n : names) if (tiers.get(n) == tier) pool.add(n);
-        if (pool.isEmpty()) for (String n : names) if (!tiers.containsKey(n)) pool.add(n);
-        if (pool.isEmpty()) pool = names;
+        for (String n : all) if (tiers.get(n) == tier) pool.add(n);
+        if (pool.isEmpty()) for (String n : all) if (!tiers.containsKey(n)) pool.add(n);
+        if (pool.isEmpty()) pool = all;
         return pool.isEmpty() ? "" : pool.get(random.nextInt(pool.size()));
     }
 

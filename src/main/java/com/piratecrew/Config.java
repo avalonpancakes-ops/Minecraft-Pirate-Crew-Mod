@@ -33,6 +33,13 @@ public class Config {
     public static final ForgeConfigSpec.DoubleValue BOUNTY_CAPTAIN_CUT;
     public static final ForgeConfigSpec.IntValue BOUNTY_REPEAT_COOLDOWN;
 
+    // Loans
+    public static final ForgeConfigSpec.IntValue LOAN_MAX;
+    public static final ForgeConfigSpec.DoubleValue LOAN_INTEREST;
+    public static final ForgeConfigSpec.IntValue LOAN_DAYS;
+    public static final ForgeConfigSpec.DoubleValue HUNTER_STRENGTH;
+    public static final ForgeConfigSpec.IntValue HUNTER_MAX_PER_WAVE;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
@@ -66,6 +73,14 @@ public class Config {
         BOUNTY_SHARE = b.comment("Share of a claimed bounty that's added to the killer's own bounty (0.25 = 25%)").defineInRange("claimShare", 0.25, 0.0, 10.0);
         BOUNTY_CAPTAIN_CUT = b.comment("When a crew pirate kills a wanted target, its captain gets this share of the bounty in their bank (0.25 = 25%)").defineInRange("captainCut", 0.25, 0.0, 1.0);
         BOUNTY_REPEAT_COOLDOWN = b.comment("Seconds before killing the same target again counts toward bounties (stops kill farming)").defineInRange("repeatKillCooldown", 600, 0, 86400);
+        b.pop();
+
+        b.comment("Ruby loans from the banker, and the bounty hunters sent after players who don't pay").push("loans");
+        LOAN_MAX = b.comment("Most rubies a player can borrow").defineInRange("maxLoan", 500, 1, 1000000);
+        LOAN_INTEREST = b.comment("Interest added to a loan (0.25 = 25%)").defineInRange("interest", 0.25, 0.0, 10.0);
+        LOAN_DAYS = b.comment("Minecraft days to repay a loan before bounty hunters are sent").defineInRange("days", 15, 1, 1000);
+        HUNTER_STRENGTH = b.comment("Bounty hunters have this many times the health and damage of a pirate of the same tier").defineInRange("hunterStrength", 5.0, 1.0, 50.0);
+        HUNTER_MAX_PER_WAVE = b.comment("Most bounty hunters sent in one day").defineInRange("maxHuntersPerWave", 6, 1, 50);
         b.pop();
 
         SPEC = b.build();

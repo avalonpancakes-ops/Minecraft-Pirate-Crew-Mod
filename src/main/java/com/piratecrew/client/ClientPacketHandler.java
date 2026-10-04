@@ -17,7 +17,7 @@ public class ClientPacketHandler {
     }
 
     public static void handleBank(com.piratecrew.network.BankSyncPacket packet) {
-        BankScreen.update(packet.balance, packet.inventoryRubies);
+        BankScreen.update(packet);
         Minecraft mc = Minecraft.getInstance();
         if (packet.open && !(mc.screen instanceof BankScreen)) mc.setScreen(new BankScreen());
     }

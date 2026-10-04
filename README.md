@@ -36,7 +36,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Bars appear as villages load, a second or so after you arrive. Admins can also place one with `/piratecrew spawnbar`.
 
 ### Pirates
-- Look like players, each wearing a random skin from the set bundled in the mod (`src/main/resources/assets/piratecrew/textures/entity/pirate/`). No internet needed. Every skin can be given a tier: a pirate rolled as S tier always wears one of the S skins, so you can tell a pirate's rank by its look. Rarity odds don't change with the number of skins per tier. To add skins: `python3 tools/add_skins.py --tier S captain.png --tier F deckhand1.png deckhand2.png` (change one later with `--retier pirate_3 A`). The script fixes common skin problems and detects thin (Alex) arms. A tier with no skins borrows untiered skins; with no skins at all, pirates wear the default Steve/Alex skins.
+- Look like players, each wearing a random skin from the set bundled in the mod (`src/main/resources/assets/piratecrew/textures/entity/pirate/`). No internet needed. Every skin can be given a tier: a pirate rolled as S tier always wears one of the S skins, so you can tell a pirate's rank by its look. Rarity odds don't change with the number of skins per tier. To add skins: `python3 tools/add_skins.py --tier S captain.png --tier F deckhand1.png deckhand2.png` (change one later with `--retier pirate_3 A`). Add `--hunter` first to add bounty hunter skins instead (`python3 tools/add_skins.py --hunter --tier S hunter.png`). Hunters wear pirate skins until hunter skins are added. The script fixes common skin problems and detects thin (Alex) arms. A tier with no skins borrows untiered skins; with no skins at all, pirates wear the default Steve/Alex skins.
 - Rarity tiers (stats before weapons/armor):
 
 | Tier | Health | Base damage | How common | Cost (rubies) |
@@ -90,13 +90,26 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Deposit +1 / +10 / +64 / All, withdraw -1 / -10 / -64 / Max (Max = as much as fits in your inventory), or type an exact amount. Ruby blocks count as 9 rubies when depositing.
 - Bounty rewards go straight into the bank. `/bank` shows your balance anywhere; deposits and withdrawals need a counter.
 
+### Loans and bounty hunters
+- The banker lends rubies: borrow **up to 500** (quick buttons for 100 / 250 / 500, or type an amount). The rubies go into your bank account. One loan at a time.
+- You owe it back with **25% interest** (borrow 500, owe 625) within **15 Minecraft days**. That's in-game days, so sleeping through the night counts as a day passing. Repay from your bank balance at any bank; the bank screen shows what you owe and how many days are left. You're warned in chat when 3, 2 and 1 days are left.
+- **Miss the deadline and the banker sends a bounty hunter after you.** A new one comes every Minecraft day until the debt is paid:
+  - Day 1 an **F**-tier hunter, then **D**, **C**, **B**, **A**, **S**, but only if the last one failed to get you.
+  - After S: **S + F**, then S + D ... S + S, then S + S + F, and so on (up to 6 hunters a day).
+- **Bounty hunters are 5 times stronger than a pirate of the same tier** (an F hunter has 100 HP, an S hunter 280 HP and 35 base damage) and come armed: iron to netherite swords and armor by tier, with crossbows, bows and shields. They fight with the same styles as pirates, track you down if you run, and appear 20 to 30 blocks away so you see them coming.
+- They can't be recruited, only hunt the player who owes the debt (and anyone who attacks them, so your crew can help), and drop nothing but XP.
+- **If a hunter kills you**, the bank takes what you owe from your bank account. If that doesn't cover it, more hunters come the next day, at the same strength.
+- **Paying off the debt calls the hunters off** at once. Hunters also leave if you log out or change dimension.
+
 ### Commands
 - `/crew` — open the crew screen
 - `/crew create <name>`, `/crew invite <player>`, `/crew leave`, `/crew disband`, `/crew icon`
 - `/bank` — show your bank balance
 - `/piratecrew spawnbar` / `/piratecrew spawnbank` (op) — build a bar or bank in front of you
 - `/piratecrew spawnpirate <F|D|C|B|A|S>` (op) — spawn a pirate of a given tier
+- `/piratecrew spawnhunter <F|D|C|B|A|S>` (op) — send a test bounty hunter after yourself (doesn't touch your loan)
+- `/piratecrew loandue` (op) — make your loan overdue now, to test the hunters
 
 ## Config
 
-`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, friendly fire, bar restocking and bounty values.
+`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, friendly fire, bar restocking, bounty values, and loan size, interest, days and hunter strength.
