@@ -11,6 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ToolActions;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
@@ -92,6 +94,9 @@ public class PirateEntity extends PathfinderMob {
     private float meleeRange = 5.0F;
     @Nullable private BlockPos workCenter;
     private int lastWeaponSwap = -1000;
+    private int lastSwing = -1000;
+    /** Ticks the shield stays down after an axe knocks it aside. */
+    private int shieldCooldown = 0;
     private int lastSpeech = -100000;
     private String lastSpeechText = "";
 
@@ -271,6 +276,9 @@ public class PirateEntity extends PathfinderMob {
     @Override
     public boolean doHurtTarget(Entity target) {
         lastCombatTick = this.tickCount;
+        lastSwing = this.tickCount;
+        // Like a player: the shield comes down to swing.
+        if (raisingShield()) stopUsingItem();
         return super.doHurtTarget(target);
     }
 
@@ -706,6 +714,93 @@ public class PirateEntity extends PathfinderMob {
         inv.setChanged();
     }
 
+    // ------------------------------------------------------------------ shields
+
+    private static boolean isShield(ItemStack s) {
+        return !s.isEmpty() && s.canPerformAction(ToolActions.SHIELD_BLOCK);
+    }
+
+    /** Hand holding a shield: off hand normally, main hand if that's all it has. */
+    @Nullable
+    private InteractionHand shieldHand() {
+        if (isShield(getOffhandItem())) return InteractionHand.OFF_HAND;
+        if (isShield(getMainHandItem())) return InteractionHand.MAIN_HAND;
+        return null;
+    }
+
+    private boolean raisingShield() {
+        return isUsingItem() && isShield(getUseItem());
+    }
+
+    /** An arrow, trident or fireball flying at this pirate from someone who isn't a crewmate. */
+    private boolean projectileIncoming() {
+        for (Projectile p : this.level().getEntitiesOfClass(Projectile.class, this.getBoundingBox().inflate(10.0))) {
+            if (p.getOwner() == this || (p.getOwner() != null && CrewManager.areCrewmates(this, p.getOwner()))) continue;
+            if (p instanceof AbstractArrow a && a.isNoPhysics()) continue;
+            Vec3 vel = p.getDeltaMovement();
+            if (vel.lengthSqr() < 0.04) continue; // lying on the ground
+            Vec3 toMe = this.position().add(0, this.getBbHeight() * 0.5, 0).subtract(p.position());
+            if (vel.normalize().dot(toMe.normalize()) > 0.85) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Raise the shield against danger and lower it to strike. In melee the pirate blocks between its
+     * own swings; it also blocks incoming arrows and enemies drawing a bow at it.
+     */
+    private void tickShield() {
+        if (shieldCooldown > 0) shieldCooldown--;
+        InteractionHand hand = shieldHand();
+        LivingEntity target = getTarget();
+        if (hand == null || shieldCooldown > 0 || target == null || !target.isAlive()) {
+            if (raisingShield()) stopUsingItem();
+            return;
+        }
+        // Busy drawing a bow or loading a crossbow: don't interrupt.
+        if (isUsingItem() && !raisingShield()) return;
+
+        boolean rangedMode = isRangedWeapon(getMainHandItem());
+        double dist = this.distanceTo(target);
+        boolean incoming = projectileIncoming();
+        boolean aimedAt = target.isUsingItem() && isRangedWeapon(target.getUseItem()) && dist < 24
+                && (!(target instanceof Mob m) || m.getTarget() == this) && this.getSensing().hasLineOfSight(target);
+        boolean meleeDanger = !rangedMode && dist < 4.0 && this.tickCount - lastSwing >= 2 && this.tickCount - lastSwing < 14;
+        // Brawlers would rather swing than turtle; they only block what's flying at them.
+        if (getCombatStyle() == CombatStyle.BRAWLER) meleeDanger = meleeDanger && this.random.nextInt(3) == 0;
+
+        boolean want = incoming || (!rangedMode && aimedAt) || meleeDanger;
+        if (want && !raisingShield()) {
+            startUsingItem(hand);
+        } else if (!want && raisingShield()) {
+            stopUsingItem();
+        }
+    }
+
+    @Override
+    protected void hurtCurrentlyUsedShield(float damage) {
+        if (this.level().isClientSide || damage < 3.0F || !isShield(this.useItem)) return;
+        InteractionHand hand = getUsedItemHand();
+        int dmg = 1 + (int) Math.floor(damage);
+        this.useItem.hurtAndBreak(dmg, this, e -> e.broadcastBreakEvent(hand));
+        if (this.useItem.isEmpty()) {
+            this.setItemInHand(hand, ItemStack.EMPTY);
+            this.stopUsingItem();
+            this.playSound(SoundEvents.SHIELD_BREAK, 0.8F, 0.8F + this.random.nextFloat() * 0.4F);
+        }
+    }
+
+    /** Axes knock a pirate's shield aside for a few seconds, just like a player's. */
+    @Override
+    protected void blockUsingShield(LivingEntity attacker) {
+        super.blockUsingShield(attacker);
+        if (attacker.getMainHandItem().canDisableShield(this.useItem, this, attacker)) {
+            shieldCooldown = 100;
+            stopUsingItem();
+            this.level().broadcastEntityEvent(this, (byte) 30);
+        }
+    }
+
     // ------------------------------------------------------------------ ticking
 
     @Override
@@ -728,6 +823,7 @@ public class PirateEntity extends PathfinderMob {
         }
 
         if (this.tickCount % 10 == 0 && this.getTarget() != null) chooseWeapon();
+        tickShield();
 
         // Players regenerate, so do pirates (slowly, out of combat).
         if (this.tickCount % 60 == 0 && this.getHealth() < this.getMaxHealth()

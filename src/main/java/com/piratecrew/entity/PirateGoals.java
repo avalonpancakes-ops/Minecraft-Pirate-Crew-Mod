@@ -114,6 +114,9 @@ public class PirateGoals {
             pirate.getLookControl().setLookAt(target, 30.0F, 30.0F);
             pirate.lookAt(target, 30.0F, 30.0F);
 
+            // Shield raised in the off hand: hold fire until it comes down.
+            if (pirate.isUsingItem() && pirate.getUsedItemHand() != InteractionHand.MAIN_HAND) return;
+
             switch (type) {
                 case BOW -> tickDrawAndRelease(canSee, 20, () -> {
                     int drawn = pirate.getTicksUsingItem();

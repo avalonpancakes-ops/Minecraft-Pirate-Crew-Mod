@@ -56,6 +56,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 ### Pirate packs, fighting styles and jobs
 - Every pirate carries an **18-slot pack** (half a player's inventory), shown under its gear in its screen. Shift-click moves items between your inventory, its gear and its pack. Everything in the pack drops when it dies.
 - **Fighting style:** each pirate is a **Brawler** (charges in and switches to melee early), **Balanced** (melee up close, ranged further out) or **Marksman** (keeps its distance and only draws a blade when cornered), shown next to its tier. Each pirate also gets its own slightly different switch-over distance, so no two fight quite alike.
+- **Shields:** put a shield in a pirate's off hand and it blocks. In melee it raises the shield between its own swings, and it blocks arrows flying at it and enemies drawing a bow on it. Brawlers block less (they'd rather hit). Shields wear down as they take hits, and an axe knocks a pirate's shield aside for 5 seconds, just like a player's.
 - **Weapon switching:** give a pirate both a melee weapon and a bow, crossbow or trident (one in hand, one in its pack) and it swaps between them mid-fight depending on how close the enemy is and its style. It always grabs the hardest-hitting blade it has.
 - **Tasks:** press **Tasks...** in a crew pirate's screen and pick a job. It works within about 12 blocks of where it's standing when you choose:
   - **Mine Ore**: mines ore it can see (cave walls, cliffs, exposed veins). Needs a pickaxe good enough for the ore.

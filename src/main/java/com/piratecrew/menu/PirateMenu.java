@@ -103,6 +103,7 @@ public class PirateMenu extends AbstractContainerMenu {
                 Slot target = this.slots.get(i);
                 if (!target.hasItem() && target.mayPlace(stack)) moved = moveItemStackTo(stack, i, i + 1, false);
             }
+            if (!moved && !this.slots.get(5).hasItem() && stack.canPerformAction(net.minecraftforge.common.ToolActions.SHIELD_BLOCK)) moved = moveItemStackTo(stack, 5, 6, false);
             if (!moved && !this.slots.get(4).hasItem() && stack.getMaxStackSize() == 1) moved = moveItemStackTo(stack, 4, 5, false);
             if (!moved) moved = moveItemStackTo(stack, packStart, packEnd, false);
             if (!moved) return ItemStack.EMPTY;
