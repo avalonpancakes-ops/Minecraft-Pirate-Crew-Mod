@@ -1,6 +1,10 @@
 package com.piratecrew.bank;
 
 import com.piratecrew.Config;
+import com.piratecrew.bounty.BountyData;
+import com.piratecrew.crew.Crew;
+import com.piratecrew.crew.CrewData;
+import com.piratecrew.crew.CrewManager;
 import com.piratecrew.entity.BountyHunterEntity;
 import com.piratecrew.entity.PirateTier;
 import com.piratecrew.registry.ModEntities;
@@ -16,13 +20,17 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -220,27 +228,142 @@ public class LoanManager {
         return null;
     }
 
-    /** A hunter got the player: the bank takes what it can from their account. */
+    /**
+     * A hunter got the player. The bank claims the player's bounty and puts it toward the loan, then
+     * takes what it can from their bank account. Whatever is still owed, the hunter takes in items
+     * from the player's inventory (rubies first, then valuables), destroyed for good.
+     */
     public static void onHunterKill(ServerPlayer victim, BountyHunterEntity hunter) {
         MinecraftServer server = victim.server;
         LoanData data = LoanData.get(server);
         LoanData.Loan l = data.get(victim.getUUID());
         if (l == null) return;
-        long seized = BankData.get(server).take(victim.getUUID(), l.owed);
-        l.owed -= seized;
         l.waveDone = true;
+
+        // 1. The bounty on the player's head goes to the bank.
+        long fromBounty = 0;
+        BountyData bounties = BountyData.get(server);
+        BountyData.Entry be = bounties.get(victim.getUUID());
+        if (be != null && be.amount > 0) {
+            fromBounty = Math.min(be.amount, l.owed);
+            int claimed = be.amount;
+            be.amount = 0;
+            bounties.setDirty();
+            l.owed -= fromBounty;
+            server.getPlayerList().broadcastSystemMessage(Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
+                    .append(Component.literal("The bank").withStyle(ChatFormatting.GOLD))
+                    .append(Component.literal(" claimed the ").withStyle(ChatFormatting.YELLOW))
+                    .append(Component.literal(String.format("%,d ruby", claimed)).withStyle(ChatFormatting.RED))
+                    .append(Component.literal(" bounty on ").withStyle(ChatFormatting.YELLOW))
+                    .append(Component.literal(victim.getGameProfile().getName()).withStyle(ChatFormatting.GOLD))
+                    .append(Component.literal("!").withStyle(ChatFormatting.YELLOW)), false);
+            UUID crewId = CrewManager.crewIdOf(victim);
+            Crew crew = crewId == null ? null : CrewData.get(server).byId(crewId);
+            if (crew != null) CrewManager.syncCrew(server, crew);
+        }
+
+        // 2. Then the bank account.
+        long fromBank = l.owed > 0 ? BankData.get(server).take(victim.getUUID(), l.owed) : 0;
+        l.owed -= fromBank;
+
+        // 3. Then items, gone for good.
+        Map<String, Integer> taken = new LinkedHashMap<>();
+        long itemValue = 0;
+        if (l.owed > 0) {
+            long[] result = seizeItems(victim.getInventory(), l.owed, taken);
+            l.owed = Math.max(0, l.owed - result[0]);
+            itemValue = result[1];
+        }
         data.setDirty();
-        Component who = Component.literal(hunter.getPirateName()).withStyle(ChatFormatting.RED);
+
+        MutableComponent msg = Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
+                .append(Component.literal(hunter.getPirateName()).withStyle(ChatFormatting.RED))
+                .append(Component.literal(" collected for the bank:").withStyle(ChatFormatting.YELLOW));
+        victim.sendSystemMessage(msg);
+        if (fromBounty > 0) victim.sendSystemMessage(line(String.format("%,d rubies from the bounty on your head", fromBounty)));
+        if (fromBank > 0) victim.sendSystemMessage(line(String.format("%,d rubies from your bank account", fromBank)));
+        if (!taken.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            int shown = 0;
+            for (var e : taken.entrySet()) {
+                if (shown == 8) {
+                    sb.append(", and ").append(taken.size() - 8).append(" more");
+                    break;
+                }
+                if (shown > 0) sb.append(", ");
+                sb.append(e.getValue() > 1 ? e.getValue() + "x " : "").append(e.getKey());
+                shown++;
+            }
+            victim.sendSystemMessage(line(String.format("%,d rubies' worth of your items, destroyed: ", itemValue) + sb));
+        }
+        if (fromBounty == 0 && fromBank == 0 && taken.isEmpty()) victim.sendSystemMessage(line("nothing: you had nothing worth taking"));
+
         if (l.owed <= 0) {
             data.remove(victim.getUUID());
-            victim.sendSystemMessage(Component.literal("☠ ").withStyle(ChatFormatting.DARK_RED).append(who)
-                    .append(Component.literal(String.format(" took %,d rubies from your bank account. Your debt is settled.", seized)).withStyle(ChatFormatting.YELLOW)));
+            victim.sendSystemMessage(Component.literal("Your debt is settled.").withStyle(ChatFormatting.GREEN));
         } else {
-            victim.sendSystemMessage(Component.literal("☠ ").withStyle(ChatFormatting.DARK_RED).append(who)
-                    .append(Component.literal(seized > 0
-                            ? String.format(" took %,d rubies from your bank account. You still owe %,d. More hunters come tomorrow.", seized, l.owed)
-                            : String.format(" got you. You still owe %,d rubies. More hunters come tomorrow.", l.owed)).withStyle(ChatFormatting.YELLOW)));
+            victim.sendSystemMessage(Component.literal(String.format("You still owe %,d rubies. More hunters come tomorrow.", l.owed)).withStyle(ChatFormatting.RED));
         }
+    }
+
+    private static Component line(String text) {
+        return Component.literal("  - " + text).withStyle(ChatFormatting.GRAY);
+    }
+
+    /**
+     * Takes items worth at least {@code owed} rubies from the inventory (or everything of value if
+     * that's not enough): rubies first, then valuables, avoiding overshooting where it can.
+     * Returns {debt covered, value taken}.
+     */
+    static long[] seizeItems(Inventory inv, long owed, Map<String, Integer> taken) {
+        double remaining = owed;
+        double value = 0;
+        int rubies = BankManager.countRubies(inv);
+        if (rubies > 0) {
+            int t = BankManager.takeRubies(inv, (int) Math.min(rubies, owed));
+            remaining -= t;
+            value += t;
+            if (t > 0) taken.merge("Ruby", t, Integer::sum);
+        }
+        if (remaining > 0.5) {
+            List<Integer> slots = new ArrayList<>();
+            for (int i = 0; i < inv.getContainerSize(); i++) if (RubyValues.unitValue(inv.getItem(i)) > 0) slots.add(i);
+            slots.sort((a, b) -> Double.compare(RubyValues.unitValue(inv.getItem(b)), RubyValues.unitValue(inv.getItem(a))));
+            // Most valuable items first, as long as each one fits in what's still owed.
+            for (int slot : slots) {
+                ItemStack s = inv.getItem(slot);
+                double uv = RubyValues.unitValue(s);
+                while (!s.isEmpty() && remaining > 0.5 && uv <= remaining + 1e-6) {
+                    taken.merge(s.getHoverName().getString(), 1, Integer::sum);
+                    s.shrink(1);
+                    remaining -= uv;
+                    value += uv;
+                }
+                if (remaining <= 0.5) break;
+            }
+            // Still owed but everything left is worth more than that: take the cheapest one.
+            if (remaining > 0.5) {
+                int best = -1;
+                double bestV = Double.MAX_VALUE;
+                for (int i = 0; i < inv.getContainerSize(); i++) {
+                    double uv = RubyValues.unitValue(inv.getItem(i));
+                    if (uv > 0 && uv < bestV) {
+                        bestV = uv;
+                        best = i;
+                    }
+                }
+                if (best >= 0) {
+                    ItemStack s = inv.getItem(best);
+                    taken.merge(s.getHoverName().getString(), 1, Integer::sum);
+                    s.shrink(1);
+                    remaining -= bestV;
+                    value += bestV;
+                }
+            }
+            inv.setChanged();
+        }
+        long covered = remaining <= 0.5 ? owed : owed - (long) Math.ceil(remaining);
+        return new long[]{covered, Math.round(value)};
     }
 
     /** The last hunter of a wave fell. */

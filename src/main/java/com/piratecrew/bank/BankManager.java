@@ -108,6 +108,35 @@ public class BankManager {
         sync(player, false);
     }
 
+    // ------------------------------------------------------------------ shop
+
+    /** Buy {@code bundles} of a shop entry, paying from the bank first, then rubies carried. */
+    public static void buy(ServerPlayer player, int index, int bundles) {
+        if (!atCounter(player)) return;
+        ShopCatalog.Entry e = ShopCatalog.get(index);
+        if (e == null) return;
+        int n = Math.max(1, Math.min(bundles, 64));
+        long cost = (long) e.price() * n;
+        BankData data = BankData.get(player.server);
+        long bal = data.balance(player.getUUID());
+        int carried = countRubies(player.getInventory());
+        if (bal + carried < cost) {
+            player.displayClientMessage(Component.literal(String.format("That costs %,d rubies. You have %,d in the bank and %,d on you.", cost, bal, carried))
+                    .withStyle(ChatFormatting.RED), true);
+            return;
+        }
+        long fromBank = Math.min(bal, cost);
+        data.take(player.getUUID(), fromBank);
+        if (cost > fromBank) takeRubies(player.getInventory(), (int) (cost - fromBank));
+        ItemStack sample = e.make();
+        for (int i = 0; i < n; i++) ItemHandlerHelper.giveItemToPlayer(player, e.make());
+        player.level().playSound(null, player.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.PLAYERS, 0.6F, 0.9F);
+        int count = sample.getCount() * n;
+        player.displayClientMessage(Component.literal("Bought " + (count > 1 ? count + "x " : "") + sample.getHoverName().getString()
+                + String.format(" for %,d rubies.", cost)).withStyle(ChatFormatting.GREEN), true);
+        sync(player, false);
+    }
+
     // ------------------------------------------------------------------ inventory helpers
 
     /** Rubies in an inventory, counting ruby blocks as 9. */

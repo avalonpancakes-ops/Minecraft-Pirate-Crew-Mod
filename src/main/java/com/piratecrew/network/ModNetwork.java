@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ModNetwork {
-    private static final String VERSION = "5";
+    private static final String VERSION = "6";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             PirateCrew.id("main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -47,6 +47,11 @@ public class ModNetwork {
                 .encoder(CrewSyncPacket::encode)
                 .decoder(CrewSyncPacket::decode)
                 .consumerMainThread(CrewSyncPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(ShopBuyPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ShopBuyPacket::encode)
+                .decoder(ShopBuyPacket::decode)
+                .consumerMainThread(ShopBuyPacket::handle)
                 .add();
     }
 

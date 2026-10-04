@@ -32,6 +32,14 @@ public class BankScreen extends Screen {
         super(Component.literal("Ruby Bank"));
     }
 
+    public static long balance() {
+        return balance;
+    }
+
+    public static int inventoryRubies() {
+        return inventoryRubies;
+    }
+
     public static void update(com.piratecrew.network.BankSyncPacket p) {
         balance = p.balance;
         inventoryRubies = p.inventoryRubies;
@@ -68,6 +76,10 @@ public class BankScreen extends Screen {
     protected void init() {
         left = (width - W) / 2;
         top = (height - H) / 2;
+
+        addRenderableWidget(Button.builder(Component.literal("Shop").withStyle(ChatFormatting.GOLD), b -> minecraft.setScreen(new ShopScreen()))
+                .tooltip(Tooltip.create(Component.literal("Buy items with rubies")))
+                .bounds(left + W - 54, top + 5, 46, 16).build());
 
         int y = top + 81;
         int bw = 44, gap = 4, x0 = left + 12;

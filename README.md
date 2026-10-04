@@ -88,6 +88,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Every village also gets **one bank**, a stone hall with a teller counter, built on its own spot at least 20 blocks from the bar so they never overlap. Villages you've already visited get theirs the next time you go there.
 - A **Banker** stands behind the counter of every bank (banks built before this update get one when you next visit). He can't be hurt, pushed or led away. Right-click him, or a **Bank Counter**, to open your account. Your balance is just a number (1,200, 1,700...), so rubies stop taking up inventory space.
 - Deposit +1 / +10 / +64 / All, withdraw -1 / -10 / -64 / Max (Max = as much as fits in your inventory), or type an exact amount. Ruby blocks count as 9 rubies when depositing.
+- **Shop:** press **Shop** on the bank screen to buy items with rubies: food, materials (iron, gold, diamonds, netherite...), weapons and totems, iron and diamond gear, enchanted books (Mending, Sharpness V, Fortune III...) and odds and ends like ender pearls, saddles and name tags. Click to buy, shift-click to buy 5. It's paid from your bank balance first, then rubies you're carrying.
 - Bounty rewards go straight into the bank. `/bank` shows your balance anywhere; deposits and withdrawals need a counter.
 
 ### Loans and bounty hunters
@@ -96,9 +97,13 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **Miss the deadline and the banker sends a bounty hunter after you.** A new one comes every Minecraft day until the debt is paid:
   - Day 1 an **F**-tier hunter, then **D**, **C**, **B**, **A**, **S**, but only if the last one failed to get you.
   - After S: **S + F**, then S + D ... S + S, then S + S + F, and so on (up to 6 hunters a day).
-- **Bounty hunters are 5 times stronger than a pirate of the same tier** (an F hunter has 100 HP, an S hunter 280 HP and 35 base damage) They wear no armor, so you can see their skins, but they get the armor of a full set built into their stats: leather at F, then chainmail, iron, ruby, diamond and netherite at S. An F hunter carries a wooden sword, a bow and a shield. Higher tiers carry iron, ruby, diamond and netherite swords, with crossbows, bows and shields. Their weapons never break. They fight with the same styles as pirates, track you down if you run, and appear 20 to 30 blocks away so you see them coming.
+- **Bounty hunters are 5 times stronger than a pirate of the same tier** (an F hunter has 100 HP, an S hunter 280 HP and 35 base damage) They wear no armor, so you can see their skins, but they get the armor of a full set built into their stats: leather at F, then chainmail, iron, ruby, diamond and netherite at S. An F hunter carries a wooden sword, a bow and a shield; a D hunter a stone sword, a bow and a shield. Higher tiers carry ruby, diamond and netherite swords, with crossbows, bows and shields. Their weapons never break. They fight with the same styles as pirates, track you down if you run, and appear 20 to 30 blocks away so you see them coming.
 - They can't be recruited, only hunt the player who owes the debt (and anyone who attacks them, so your crew can help), and **drop nothing**: no gear, no XP. They're a punishment, not something to farm.
-- **If a hunter kills you**, the bank takes what you owe from your bank account. If that doesn't cover it, more hunters come the next day, at the same strength.
+- **If a hunter kills you**, the bank collects, in this order:
+  1. **Your bounty:** the bank claims the whole bounty on your head (announced to the server) and takes it off your debt.
+  2. **Your bank account:** as much as is still owed.
+  3. **Your items:** if you still owe more, the hunter takes items from your inventory worth that many rubies, and they're **destroyed for good**. Rubies you carry go first, then your most valuable things (diamonds, netherite, enchanted gear, elytra, totems...) until the debt is covered. Items are valued at the banker's shop prices; everyday blocks are worthless to him.
+  - If that still doesn't cover it, more hunters come the next day, at the same strength.
 - **Paying off the debt calls the hunters off** at once. Hunters also leave if you log out or change dimension.
 
 ### Commands

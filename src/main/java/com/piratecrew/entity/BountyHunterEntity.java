@@ -142,14 +142,14 @@ public class BountyHunterEntity extends PirateEntity {
 
         Item sword = switch (tier) {
             case F -> Items.WOODEN_SWORD;
-            case D -> Items.IRON_SWORD;
+            case D -> Items.STONE_SWORD;
             case C, B -> ModItems.RUBY_SWORD.get();
             case A -> Items.DIAMOND_SWORD;
             default -> Items.NETHERITE_SWORD;
         };
 
-        if (tier == PirateTier.F) {
-            // Wooden sword, bow and shield: bow in hand for marksmen, sword in hand for everyone else.
+        if (tier == PirateTier.F || tier == PirateTier.D) {
+            // Sword (wooden at F, stone at D), bow and shield: bow in hand for marksmen, sword for everyone else.
             boolean marksman = getCombatStyle() == CombatStyle.MARKSMAN;
             setItemSlot(EquipmentSlot.MAINHAND, gear(marksman ? Items.BOW : sword));
             getPack().setItem(0, gear(marksman ? sword : Items.BOW));
