@@ -36,7 +36,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Bars appear as villages load, a second or so after you arrive. Admins can also place one with `/piratecrew spawnbar`.
 
 ### Pirates
-- Look like players, each wearing a random skin from the set bundled in the mod (`src/main/resources/assets/piratecrew/textures/entity/pirate/`). No internet needed. To add skins, run `python3 tools/add_skins.py <skin files or folders>`: it fixes common skin problems, detects thin (Alex) arms and updates `pirate_skins.txt`. With no skins added, pirates wear the default Steve/Alex skins.
+- Look like players, each wearing a random skin from the set bundled in the mod (`src/main/resources/assets/piratecrew/textures/entity/pirate/`). No internet needed. Every skin can be given a tier: a pirate rolled as S tier always wears one of the S skins, so you can tell a pirate's rank by its look. Rarity odds don't change with the number of skins per tier. To add skins: `python3 tools/add_skins.py --tier S captain.png --tier F deckhand1.png deckhand2.png` (change one later with `--retier pirate_3 A`). The script fixes common skin problems and detects thin (Alex) arms. A tier with no skins borrows untiered skins; with no skins at all, pirates wear the default Steve/Alex skins.
 - Rarity tiers (stats before weapons/armor):
 
 | Tier | Health | Base damage | How common | Cost (rubies) |

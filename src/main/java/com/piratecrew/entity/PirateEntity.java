@@ -155,7 +155,7 @@ public class PirateEntity extends PathfinderMob {
         this.pirateName = PirateNames.random(this.random);
         applyTierStats();
         this.setHealth(this.getMaxHealth());
-        if (!PirateSkins.isValid(getSkinName())) this.entityData.set(DATA_SKIN, PirateSkins.random(this.random));
+        this.entityData.set(DATA_SKIN, PirateSkins.random(this.random, tier));
         updateDisplayName();
     }
 
@@ -405,7 +405,7 @@ public class PirateEntity extends PathfinderMob {
 
         // Pirates saved with an old or removed skin get a new one from the bundled set.
         if (this.tickCount % 100 == 0 && !PirateSkins.isValid(getSkinName()) && PirateSkins.count() > 0) {
-            this.entityData.set(DATA_SKIN, PirateSkins.random(this.random));
+            this.entityData.set(DATA_SKIN, PirateSkins.random(this.random, getTier()));
         }
 
         // Players regenerate, so do pirates (slowly, out of combat).
