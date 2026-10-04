@@ -20,3 +20,13 @@ pirate_17 slim D
 pirate_18 wide D
 pirate_19 wide D
 pirate_20 slim D
+pirate_21 wide C
+pirate_22 slim C
+pirate_23 wide C
+pirate_24 wide C
+pirate_25 slim C
+pirate_26 wide C
+pirate_27 wide C
+pirate_28 slim C
+pirate_29 slim C
+pirate_30 slim C
