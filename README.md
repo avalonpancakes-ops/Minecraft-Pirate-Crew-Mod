@@ -36,7 +36,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Bars appear as villages load, a second or so after you arrive. Admins can also place one with `/piratecrew spawnbar`.
 
 ### Pirates
-- Look like players, wearing random skins from **The Skindex** (minecraftskins.com). The server reads a few pages of the site's "Top" list at startup and caches them in `config/piratecrew_skin_pool.txt`. If the site can't be reached it falls back to skins from **mc-heads.net**, then to vanilla Steve/Alex skins.
+- Look like players, each wearing a random skin from the set bundled in the mod (`src/main/resources/assets/piratecrew/textures/entity/pirate/`). No internet needed. To add skins, run `python3 tools/add_skins.py <skin files or folders>`: it fixes common skin problems, detects thin (Alex) arms and updates `pirate_skins.txt`. With no skins added, pirates wear the default Steve/Alex skins.
 - Rarity tiers (stats before weapons/armor):
 
 | Tier | Health | Base damage | How common | Cost (rubies) |
@@ -69,4 +69,4 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ## Config
 
-`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, friendly fire, bar restocking, and skin settings (switch the skin list to `latest`, change how many pages are read, or edit the fallback usernames).
+`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, friendly fire and bar restocking.

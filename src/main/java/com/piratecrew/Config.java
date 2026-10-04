@@ -2,8 +2,6 @@ package com.piratecrew;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import java.util.List;
-
 public class Config {
     public static final ForgeConfigSpec SPEC;
 
@@ -25,14 +23,6 @@ public class Config {
     public static final ForgeConfigSpec.IntValue BAR_MIN_PIRATES;
     public static final ForgeConfigSpec.IntValue BAR_MAX_PIRATES;
     public static final ForgeConfigSpec.IntValue BAR_RESTOCK_TICKS;
-
-    // Skins
-    public static final ForgeConfigSpec.BooleanValue USE_SKIN_SITE;
-    public static final ForgeConfigSpec.ConfigValue<String> SKIN_SITE;
-    public static final ForgeConfigSpec.ConfigValue<String> SKIN_LIST;
-    public static final ForgeConfigSpec.IntValue SKIN_PAGES_TO_SCAN;
-    public static final ForgeConfigSpec.IntValue SKIN_MAX_PAGE;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> FALLBACK_USERNAMES;
 
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
@@ -57,18 +47,6 @@ public class Config {
         BAR_MIN_PIRATES = b.comment("A bar restocks pirates when it has fewer than this many unrecruited pirates").defineInRange("minPirates", 3, 0, 20);
         BAR_MAX_PIRATES = b.comment("Pirates placed in a freshly built bar").defineInRange("startPirates", 6, 0, 20);
         BAR_RESTOCK_TICKS = b.comment("Ticks between restock checks (24000 = one Minecraft day)").defineInRange("restockTicks", 12000, 200, 1000000);
-        b.pop();
-
-        b.comment("Where NPC skins come from").push("skins");
-        USE_SKIN_SITE = b.comment("Pull random skins from the skin site below").define("useSkinSite", true);
-        SKIN_SITE = b.comment("Base URL of The Skindex").define("skinSite", "https://www.minecraftskins.com");
-        SKIN_LIST = b.comment("Which list to sample: 'top' (community favourites) or 'latest' (newest uploads, unfiltered)").define("skinList", "top");
-        SKIN_PAGES_TO_SCAN = b.comment("How many random list pages to read at server start (50 skins per page)").defineInRange("pagesToScan", 4, 1, 20);
-        SKIN_MAX_PAGE = b.comment("Highest page number to pick from").defineInRange("maxPage", 30, 1, 500);
-        FALLBACK_USERNAMES = b.comment("If the skin site can't be reached, pirates wear the skins of these Minecraft accounts (via mc-heads.net). Empty = vanilla skins.")
-                .defineListAllowEmpty("fallbackUsernames",
-                        List.of("Notch", "jeb_", "Dinnerbone", "Grumm", "Searge", "Marc_IRL", "slicedlime", "Jappa"),
-                        o -> o instanceof String s && s.matches("[A-Za-z0-9_]{1,16}"));
         b.pop();
 
         SPEC = b.build();

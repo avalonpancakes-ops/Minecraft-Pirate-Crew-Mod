@@ -5,7 +5,7 @@ import com.piratecrew.crew.CrewData;
 import com.piratecrew.crew.CrewManager;
 import com.piratecrew.menu.PirateMenu;
 import com.piratecrew.registry.ModItems;
-import com.piratecrew.skin.SkinPool;
+import com.piratecrew.skin.PirateSkins;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -155,7 +155,7 @@ public class PirateEntity extends PathfinderMob {
         this.pirateName = PirateNames.random(this.random);
         applyTierStats();
         this.setHealth(this.getMaxHealth());
-        if (getSkinUrl().isEmpty()) this.entityData.set(DATA_SKIN, SkinPool.randomSkin(this.random));
+        if (!PirateSkins.isValid(getSkinName())) this.entityData.set(DATA_SKIN, PirateSkins.random(this.random));
         updateDisplayName();
     }
 
@@ -192,7 +192,7 @@ public class PirateEntity extends PathfinderMob {
         return PirateTier.byId(this.entityData.get(DATA_TIER));
     }
 
-    public String getSkinUrl() {
+    public String getSkinName() {
         return this.entityData.get(DATA_SKIN);
     }
 
@@ -403,9 +403,9 @@ public class PirateEntity extends PathfinderMob {
             }
         }
 
-        if (this.tickCount % 100 == 0 && getSkinUrl().isEmpty()) {
-            String skin = SkinPool.randomSkin(this.random);
-            if (!skin.isEmpty()) this.entityData.set(DATA_SKIN, skin);
+        // Pirates saved with an old or removed skin get a new one from the bundled set.
+        if (this.tickCount % 100 == 0 && !PirateSkins.isValid(getSkinName()) && PirateSkins.count() > 0) {
+            this.entityData.set(DATA_SKIN, PirateSkins.random(this.random));
         }
 
         // Players regenerate, so do pirates (slowly, out of combat).
@@ -449,7 +449,7 @@ public class PirateEntity extends PathfinderMob {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("PirateInit", initialized);
         tag.putInt("Tier", this.entityData.get(DATA_TIER));
-        tag.putString("Skin", getSkinUrl());
+        tag.putString("Skin", getSkinName());
         tag.putString("PirateName", pirateName);
         tag.putInt("Orders", this.entityData.get(DATA_ORDERS));
         UUID crew = getCrewId();

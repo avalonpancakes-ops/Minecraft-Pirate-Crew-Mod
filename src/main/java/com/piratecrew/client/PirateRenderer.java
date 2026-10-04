@@ -1,7 +1,9 @@
 package com.piratecrew.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.piratecrew.PirateCrew;
 import com.piratecrew.entity.PirateEntity;
+import com.piratecrew.skin.PirateSkins;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -10,6 +12,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 
@@ -28,8 +31,20 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
         this.shadowRadius = 0.5F;
     }
 
+    static boolean isSlim(PirateEntity pirate) {
+        String skin = pirate.getSkinName();
+        if (PirateSkins.isValid(skin)) return PirateSkins.isSlim(skin);
+        return "slim".equals(DefaultPlayerSkin.getSkinModelName(pirate.getUUID()));
+    }
+
+    static ResourceLocation texture(PirateEntity pirate) {
+        String skin = pirate.getSkinName();
+        if (PirateSkins.isValid(skin)) return PirateCrew.id("textures/entity/pirate/" + skin + ".png");
+        return DefaultPlayerSkin.getDefaultSkin(pirate.getUUID());
+    }
+
     private Body pick(PirateEntity pirate) {
-        return ClientSkins.isSlim(pirate) ? slim : wide;
+        return isSlim(pirate) ? slim : wide;
     }
 
     @Override
@@ -39,7 +54,7 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(PirateEntity entity) {
-        return pick(entity).getTextureLocation(entity);
+        return texture(entity);
     }
 
     public static class Body extends HumanoidMobRenderer<PirateEntity, PlayerModel<PirateEntity>> {
@@ -54,6 +69,7 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
         @Override
         public void render(PirateEntity entity, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffers, int light) {
             PlayerModel<PirateEntity> m = this.getModel();
+            m.setAllVisible(true);
             HumanoidModel.ArmPose main = entity.getMainHandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
             HumanoidModel.ArmPose off = entity.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
             boolean rightHanded = entity.getMainArm() == HumanoidArm.RIGHT;
@@ -70,7 +86,7 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
 
         @Override
         public ResourceLocation getTextureLocation(PirateEntity entity) {
-            return ClientSkins.texture(entity);
+            return texture(entity);
         }
     }
 }
