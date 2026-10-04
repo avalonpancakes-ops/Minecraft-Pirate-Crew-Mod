@@ -1,0 +1,21 @@
+{
+  "itemGroup.piratecrew": "Pirate Crew",
+  "item.piratecrew.ruby": "Ruby",
+  "block.piratecrew.ruby_ore": "Ruby Ore",
+  "block.piratecrew.deepslate_ruby_ore": "Deepslate Ruby Ore",
+  "block.piratecrew.ruby_block": "Block of Ruby",
+  "item.piratecrew.ruby_sword": "Ruby Cutlass",
+  "item.piratecrew.ruby_pickaxe": "Ruby Pickaxe",
+  "item.piratecrew.ruby_axe": "Ruby Axe",
+  "item.piratecrew.ruby_shovel": "Ruby Shovel",
+  "item.piratecrew.ruby_hoe": "Ruby Hoe",
+  "item.piratecrew.ruby_helmet": "Ruby Helmet",
+  "item.piratecrew.ruby_chestplate": "Ruby Chestplate",
+  "item.piratecrew.ruby_leggings": "Ruby Leggings",
+  "item.piratecrew.ruby_boots": "Ruby Boots",
+  "item.piratecrew.pirate_spawn_egg": "Pirate Spawn Egg",
+  "entity.piratecrew.pirate": "Pirate",
+  "container.piratecrew.pirate": "Pirate",
+  "key.piratecrew.crew": "Open Crew Menu",
+  "key.categories.piratecrew": "Pirate Crew"
+}

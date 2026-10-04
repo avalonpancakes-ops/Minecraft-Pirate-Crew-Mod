@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "piratecrew:ruby_ore"
+  },
+  "result": "piratecrew:ruby",
+  "experience": 1.0,
+  "cookingtime": 200
+}

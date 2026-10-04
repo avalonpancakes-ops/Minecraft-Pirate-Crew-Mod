@@ -1,0 +1,76 @@
+package com.piratecrew.client;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.piratecrew.entity.PirateEntity;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.HumanoidArm;
+
+/**
+ * Renders pirates exactly like players. Skins with thin arms use the slim model,
+ * so this hands each pirate to one of two body renderers.
+ */
+public class PirateRenderer extends EntityRenderer<PirateEntity> {
+    private final Body wide;
+    private final Body slim;
+
+    public PirateRenderer(EntityRendererProvider.Context ctx) {
+        super(ctx);
+        this.wide = new Body(ctx, false);
+        this.slim = new Body(ctx, true);
+        this.shadowRadius = 0.5F;
+    }
+
+    private Body pick(PirateEntity pirate) {
+        return ClientSkins.isSlim(pirate) ? slim : wide;
+    }
+
+    @Override
+    public void render(PirateEntity entity, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffers, int light) {
+        pick(entity).render(entity, yaw, partialTicks, pose, buffers, light);
+    }
+
+    @Override
+    public ResourceLocation getTextureLocation(PirateEntity entity) {
+        return pick(entity).getTextureLocation(entity);
+    }
+
+    public static class Body extends HumanoidMobRenderer<PirateEntity, PlayerModel<PirateEntity>> {
+        public Body(EntityRendererProvider.Context ctx, boolean slim) {
+            super(ctx, new PlayerModel<>(ctx.bakeLayer(slim ? ModelLayers.PLAYER_SLIM : ModelLayers.PLAYER), slim), 0.5F);
+            this.addLayer(new HumanoidArmorLayer<>(this,
+                    new HumanoidModel<>(ctx.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
+                    new HumanoidModel<>(ctx.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
+                    ctx.getModelManager()));
+        }
+
+        @Override
+        public void render(PirateEntity entity, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffers, int light) {
+            PlayerModel<PirateEntity> m = this.getModel();
+            HumanoidModel.ArmPose main = entity.getMainHandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
+            HumanoidModel.ArmPose off = entity.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
+            boolean rightHanded = entity.getMainArm() == HumanoidArm.RIGHT;
+            m.rightArmPose = rightHanded ? main : off;
+            m.leftArmPose = rightHanded ? off : main;
+            m.crouching = false;
+            super.render(entity, yaw, partialTicks, pose, buffers, light);
+        }
+
+        @Override
+        protected void scale(PirateEntity entity, PoseStack pose, float partialTicks) {
+            pose.scale(0.9375F, 0.9375F, 0.9375F); // same scale as players
+        }
+
+        @Override
+        public ResourceLocation getTextureLocation(PirateEntity entity) {
+            return ClientSkins.texture(entity);
+        }
+    }
+}
