@@ -50,3 +50,13 @@ pirate_47 wide A
 pirate_48 wide A
 pirate_49 slim A
 pirate_50 slim A
+pirate_51 wide S
+pirate_52 wide S
+pirate_53 wide S
+pirate_54 wide S
+pirate_55 wide S
+pirate_56 slim S
+pirate_57 slim S
+pirate_58 slim S
+pirate_59 wide S
+pirate_60 wide S
