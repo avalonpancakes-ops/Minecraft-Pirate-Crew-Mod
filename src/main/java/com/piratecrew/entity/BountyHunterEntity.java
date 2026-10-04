@@ -30,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -160,17 +161,17 @@ public class BountyHunterEntity extends PirateEntity {
             default -> Items.NETHERITE_SWORD;
         };
 
-        if (tier.ordinal() <= PirateTier.C.ordinal()) {
-            // Sword (wooden at F, stone at D, ruby at C), bow and shield: bow in hand for marksmen, sword for everyone else.
+        if (tier.ordinal() <= PirateTier.B.ordinal()) {
+            // Sword (wooden at F, stone at D, ruby at C, ruby with Sharpness II at B), bow and shield:
+            // bow in hand for marksmen, sword for everyone else.
+            ItemStack blade = gear(sword);
+            if (tier == PirateTier.B) blade.enchant(Enchantments.SHARPNESS, 2);
+            ItemStack bow = gear(Items.BOW);
             boolean marksman = getCombatStyle() == CombatStyle.MARKSMAN;
-            setItemSlot(EquipmentSlot.MAINHAND, gear(marksman ? Items.BOW : sword));
-            getPack().setItem(0, gear(marksman ? sword : Items.BOW));
+            setItemSlot(EquipmentSlot.MAINHAND, marksman ? bow : blade);
+            getPack().setItem(0, marksman ? blade : bow);
             setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
-            if (tier == PirateTier.C) {
-                // Poison splash potions to throw, and milk to purge debuffs. Hunters never run out.
-                getPack().setItem(1, PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), Potions.POISON));
-                getPack().setItem(2, new ItemStack(Items.MILK_BUCKET));
-            }
+            if (tier.ordinal() >= PirateTier.C.ordinal()) addPotions(false);
             return;
         }
 
@@ -191,6 +192,14 @@ public class BountyHunterEntity extends PirateEntity {
                 if (t >= PirateTier.C.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
             }
         }
+        if (tier == PirateTier.A) addPotions(true);
+    }
+
+    /** Poison splash potions to throw and milk to purge debuffs (plus strength from A tier). Never run out. */
+    private void addPotions(boolean strength) {
+        getPack().setItem(1, PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), Potions.POISON));
+        getPack().setItem(2, new ItemStack(Items.MILK_BUCKET));
+        if (strength) getPack().setItem(3, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.STRENGTH));
     }
 
     private static ItemStack gear(Item item) {

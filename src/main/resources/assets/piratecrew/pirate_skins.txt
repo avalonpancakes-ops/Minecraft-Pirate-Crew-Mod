@@ -63,3 +63,4 @@ pirate_60 wide S
 hunter_1 wide F
 hunter_2 wide D
 hunter_3 slim C
+hunter_4 wide B
