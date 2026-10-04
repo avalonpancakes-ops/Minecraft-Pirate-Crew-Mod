@@ -40,3 +40,13 @@ pirate_37 slim B
 pirate_38 slim B
 pirate_39 slim B
 pirate_40 slim B
+pirate_41 slim A
+pirate_42 wide A
+pirate_43 wide A
+pirate_44 wide A
+pirate_45 wide A
+pirate_46 wide A
+pirate_47 wide A
+pirate_48 wide A
+pirate_49 slim A
+pirate_50 slim A
