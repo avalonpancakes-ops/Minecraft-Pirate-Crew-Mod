@@ -92,12 +92,12 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ### Loans and bounty hunters
 - The banker lends rubies: borrow **up to 500** (quick buttons for 100 / 250 / 500, or type an amount). The rubies go into your bank account. One loan at a time.
-- You owe it back with **25% interest** (borrow 500, owe 625) within **15 Minecraft days**. That's in-game days, so sleeping through the night counts as a day passing. Repay from your bank balance at any bank; the bank screen shows what you owe and how many days are left. You're warned in chat when 3, 2 and 1 days are left.
+- You owe it back with **25% interest** (borrow 500, owe 625) within **7 Minecraft days**. That's in-game days, so sleeping through the night counts as a day passing. Repay from your bank balance at any bank; the bank screen shows what you owe and how many days are left. You're warned in chat when 3, 2 and 1 days are left.
 - **Miss the deadline and the banker sends a bounty hunter after you.** A new one comes every Minecraft day until the debt is paid:
   - Day 1 an **F**-tier hunter, then **D**, **C**, **B**, **A**, **S**, but only if the last one failed to get you.
   - After S: **S + F**, then S + D ... S + S, then S + S + F, and so on (up to 6 hunters a day).
-- **Bounty hunters are 5 times stronger than a pirate of the same tier** (an F hunter has 100 HP, an S hunter 280 HP and 35 base damage) and come armed: iron to netherite swords and armor by tier, with crossbows, bows and shields. They fight with the same styles as pirates, track you down if you run, and appear 20 to 30 blocks away so you see them coming.
-- They can't be recruited, only hunt the player who owes the debt (and anyone who attacks them, so your crew can help), and drop nothing but XP.
+- **Bounty hunters are 5 times stronger than a pirate of the same tier** (an F hunter has 100 HP, an S hunter 280 HP and 35 base damage) They wear no armor, so you can see their skins, but they get the armor of a full set built into their stats: leather at F, then chainmail, iron, ruby, diamond and netherite at S. An F hunter carries a wooden sword, a bow and a shield. Higher tiers carry iron, ruby, diamond and netherite swords, with crossbows, bows and shields. Their weapons never break. They fight with the same styles as pirates, track you down if you run, and appear 20 to 30 blocks away so you see them coming.
+- They can't be recruited, only hunt the player who owes the debt (and anyone who attacks them, so your crew can help), and **drop nothing**: no gear, no XP. They're a punishment, not something to farm.
 - **If a hunter kills you**, the bank takes what you owe from your bank account. If that doesn't cover it, more hunters come the next day, at the same strength.
 - **Paying off the debt calls the hunters off** at once. Hunters also leave if you log out or change dimension.
 

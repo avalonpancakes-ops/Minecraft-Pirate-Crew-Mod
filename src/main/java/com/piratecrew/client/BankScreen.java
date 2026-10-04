@@ -20,7 +20,7 @@ public class BankScreen extends Screen {
     private static long loanOwed;
     private static long loanTicksLeft;
     private static boolean loanOverdue;
-    private static int loanMax = 500, interestPct = 25, loanDays = 15;
+    private static int loanMax = 500, interestPct = 25, loanDays = 7;
 
     private final java.util.List<Button> borrowButtons = new java.util.ArrayList<>();
     private final java.util.List<Button> repayButtons = new java.util.ArrayList<>();

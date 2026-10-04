@@ -114,7 +114,7 @@ public class BountyHunterEntity extends PirateEntity {
         if (follow != null) follow.setBaseValue(64.0);
         var kb = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
         if (kb != null) kb.setBaseValue(0.1 * tier.ordinal());
-        this.xpReward = 20 + 15 * tier.ordinal();
+        this.xpReward = 0; // a punishment, not a mob to farm: no XP, no drops
         equip(tier);
     }
 
@@ -122,38 +122,64 @@ public class BountyHunterEntity extends PirateEntity {
         this.test = test;
     }
 
+    /**
+     * Hunters wear no armor (so their skins show) but get the armor points of a full set for their
+     * tier built into their stats. All their gear is unbreakable and none of it ever drops.
+     */
     private void equip(PirateTier tier) {
-        Item sword, helmet, chest, legs, boots;
-        switch (tier) {
-            case F -> { sword = Items.IRON_SWORD; helmet = Items.LEATHER_HELMET; chest = Items.LEATHER_CHESTPLATE; legs = Items.LEATHER_LEGGINGS; boots = Items.LEATHER_BOOTS; }
-            case D -> { sword = Items.IRON_SWORD; helmet = Items.CHAINMAIL_HELMET; chest = Items.CHAINMAIL_CHESTPLATE; legs = Items.CHAINMAIL_LEGGINGS; boots = Items.CHAINMAIL_BOOTS; }
-            case C -> { sword = ModItems.RUBY_SWORD.get(); helmet = Items.IRON_HELMET; chest = Items.IRON_CHESTPLATE; legs = Items.IRON_LEGGINGS; boots = Items.IRON_BOOTS; }
-            case B -> { sword = ModItems.RUBY_SWORD.get(); helmet = ModItems.RUBY_HELMET.get(); chest = ModItems.RUBY_CHESTPLATE.get(); legs = ModItems.RUBY_LEGGINGS.get(); boots = ModItems.RUBY_BOOTS.get(); }
-            case A -> { sword = Items.DIAMOND_SWORD; helmet = Items.DIAMOND_HELMET; chest = Items.DIAMOND_CHESTPLATE; legs = Items.DIAMOND_LEGGINGS; boots = Items.DIAMOND_BOOTS; }
-            default -> { sword = Items.NETHERITE_SWORD; helmet = Items.NETHERITE_HELMET; chest = Items.NETHERITE_CHESTPLATE; legs = Items.NETHERITE_LEGGINGS; boots = Items.NETHERITE_BOOTS; }
+        // Armor and toughness of a full set: leather, chainmail, iron, ruby, diamond, netherite.
+        double[] armor = {7, 12, 15, 18, 20, 20};
+        double[] toughness = {0, 0, 0, 1, 8, 12};
+        int t = tier.ordinal();
+        var a = this.getAttribute(Attributes.ARMOR);
+        if (a != null) a.setBaseValue(armor[t]);
+        var tough = this.getAttribute(Attributes.ARMOR_TOUGHNESS);
+        if (tough != null) tough.setBaseValue(toughness[t]);
+        if (tier == PirateTier.S) {
+            var kb = this.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+            if (kb != null) kb.setBaseValue(Math.max(kb.getBaseValue(), 0.4)); // like full netherite
         }
-        setItemSlot(EquipmentSlot.HEAD, new ItemStack(helmet));
-        setItemSlot(EquipmentSlot.CHEST, new ItemStack(chest));
-        setItemSlot(EquipmentSlot.LEGS, new ItemStack(legs));
-        setItemSlot(EquipmentSlot.FEET, new ItemStack(boots));
+
+        Item sword = switch (tier) {
+            case F -> Items.WOODEN_SWORD;
+            case D -> Items.IRON_SWORD;
+            case C, B -> ModItems.RUBY_SWORD.get();
+            case A -> Items.DIAMOND_SWORD;
+            default -> Items.NETHERITE_SWORD;
+        };
+
+        if (tier == PirateTier.F) {
+            // Wooden sword, bow and shield: bow in hand for marksmen, sword in hand for everyone else.
+            boolean marksman = getCombatStyle() == CombatStyle.MARKSMAN;
+            setItemSlot(EquipmentSlot.MAINHAND, gear(marksman ? Items.BOW : sword));
+            getPack().setItem(0, gear(marksman ? sword : Items.BOW));
+            setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
+            return;
+        }
 
         // Marksmen open with a crossbow, balanced hunters carry one in reserve, brawlers bring a shield.
-        ItemStack ranged = new ItemStack(this.random.nextInt(3) == 0 ? Items.BOW : Items.CROSSBOW);
+        ItemStack ranged = gear(this.random.nextInt(3) == 0 ? Items.BOW : Items.CROSSBOW);
         switch (getCombatStyle()) {
             case MARKSMAN -> {
                 setItemSlot(EquipmentSlot.MAINHAND, ranged);
-                getPack().setItem(0, new ItemStack(sword));
+                getPack().setItem(0, gear(sword));
             }
             case BALANCED -> {
-                setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(sword));
+                setItemSlot(EquipmentSlot.MAINHAND, gear(sword));
                 getPack().setItem(0, ranged);
-                if (tier.ordinal() >= PirateTier.A.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+                if (t >= PirateTier.A.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
             }
             default -> {
-                setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(sword));
-                if (tier.ordinal() >= PirateTier.C.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+                setItemSlot(EquipmentSlot.MAINHAND, gear(sword));
+                if (t >= PirateTier.C.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
             }
         }
+    }
+
+    private static ItemStack gear(Item item) {
+        ItemStack s = new ItemStack(item);
+        s.getOrCreateTag().putBoolean("Unbreakable", true);
+        return s;
     }
 
     // ------------------------------------------------------------------ getters
@@ -249,9 +275,18 @@ public class BountyHunterEntity extends PirateEntity {
         if (!this.level().isClientSide) LoanManager.onHunterDeath(this);
     }
 
-    /** Hunters don't drop their gear, so they can't be farmed for netherite. */
+    /** Hunters are a punishment, not loot: they drop nothing at all. */
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean hitByPlayer) {
+    }
+
+    @Override
+    protected void dropFromLootTable(DamageSource source, boolean hitByPlayer) {
+    }
+
+    @Override
+    public int getExperienceReward() {
+        return 0;
     }
 
     // ------------------------------------------------------------------ save / load

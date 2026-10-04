@@ -60,3 +60,4 @@ pirate_57 slim S
 pirate_58 slim S
 pirate_59 wide S
 pirate_60 wide S
+hunter_1 wide F
