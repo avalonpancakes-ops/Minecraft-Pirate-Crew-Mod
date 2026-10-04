@@ -3,6 +3,7 @@ package com.piratecrew.registry;
 import com.piratecrew.PirateCrew;
 import com.piratecrew.entity.BankerEntity;
 import com.piratecrew.entity.BountyHunterEntity;
+import com.piratecrew.entity.CorpseEntity;
 import com.piratecrew.entity.PirateEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -31,6 +32,13 @@ public class ModEntities {
                     .sized(0.6F, 1.8F)
                     .clientTrackingRange(10)
                     .build(PirateCrew.id("bounty_hunter").toString()));
+
+    public static final RegistryObject<EntityType<CorpseEntity>> CORPSE = ENTITIES.register("corpse",
+            () -> EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)
+                    .sized(1.2F, 0.5F)
+                    .fireImmune()
+                    .clientTrackingRange(10)
+                    .build(PirateCrew.id("corpse").toString()));
 
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(PIRATE.get(), PirateEntity.createAttributes().build());

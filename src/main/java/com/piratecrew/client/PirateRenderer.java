@@ -86,7 +86,7 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
             boolean rightHanded = entity.getMainArm() == HumanoidArm.RIGHT;
             m.rightArmPose = rightHanded ? main : off;
             m.leftArmPose = rightHanded ? off : main;
-            m.crouching = false;
+            m.crouching = entity.isCrouching();
             super.render(entity, yaw, partialTicks, pose, buffers, light);
         }
 

@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -72,6 +73,10 @@ public class BountyHunterEntity extends PirateEntity {
     private int summonCooldown;
     public static final int SUMMON_COOLDOWN = 6000; // 5 minutes
     public static final int SUMMON_COUNT = 4;
+    /** The corpse this hunter is walking to / searching after killing its debtor. */
+    @Nullable private UUID lootCorpse;
+    private int lootTicks;
+    private int lootTravel;
 
     private static final String[] FIRST = {
             "Vex", "Morrow", "Silas", "Grell", "Kade", "Thorne", "Ruthven", "Mordecai", "Jago", "Corvin",
@@ -451,6 +456,10 @@ public class BountyHunterEntity extends PirateEntity {
     public void aiStep() {
         super.aiStep();
         if (this.level().isClientSide || !(this.level() instanceof ServerLevel sl)) return;
+        if (lootCorpse != null) {
+            if (this.tickCount % 10 == 0) tickLooting(sl);
+            return;
+        }
         tickLaser(sl);
         if (this.tickCount % 20 != 0) return;
 
@@ -500,6 +509,54 @@ public class BountyHunterEntity extends PirateEntity {
                 this.getNavigation().stop();
                 unseenTicks = 0;
             }
+        }
+    }
+
+    /** Walk over to the debtor's corpse and search it for valuables. */
+    public void startLooting(CorpseEntity corpse) {
+        this.lootCorpse = corpse.getUUID();
+        this.lootTicks = 0;
+        this.lootTravel = 0;
+        this.setTarget(null);
+        this.laserCharge = -1;
+        if (isUsingItem()) stopUsingItem();
+    }
+
+    private void tickLooting(ServerLevel sl) {
+        Entity e = sl.getEntity(lootCorpse);
+        if (!(e instanceof CorpseEntity corpse) || !corpse.isAlive() || !corpse.isLockedBy(getUUID())) {
+            lootCorpse = null;
+            this.setPose(net.minecraft.world.entity.Pose.STANDING);
+            return;
+        }
+        this.setTarget(null);
+        double d = this.distanceToSqr(corpse);
+        if (d > 2.2 * 2.2) {
+            this.setPose(net.minecraft.world.entity.Pose.STANDING);
+            lootTravel += 10;
+            if (d > 48 * 48 || lootTravel > 600) {
+                Vec3 spot = LoanManager.findSpot(sl, corpse.blockPosition(), 1, 3, this.random);
+                if (spot != null) this.teleportTo(spot.x, spot.y, spot.z);
+                lootTravel = 0;
+            } else {
+                this.getNavigation().moveTo(corpse.getX(), corpse.getY(), corpse.getZ(), 1.2);
+            }
+            return;
+        }
+        // Crouch over the body and go through the pockets for a few seconds.
+        this.getNavigation().stop();
+        this.getLookControl().setLookAt(corpse.getX(), corpse.getY(), corpse.getZ());
+        this.setPose(net.minecraft.world.entity.Pose.CROUCHING);
+        lootTicks += 10;
+        if (lootTicks % 20 == 0) {
+            this.swing(InteractionHand.MAIN_HAND);
+            this.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 1.0F, 0.8F + this.random.nextFloat() * 0.3F);
+        }
+        if (lootTicks >= 80) {
+            this.setPose(net.minecraft.world.entity.Pose.STANDING);
+            lootCorpse = null;
+            LoanManager.seizeFromCorpse(corpse, this);
+            vanish();
         }
     }
 
@@ -554,6 +611,7 @@ public class BountyHunterEntity extends PirateEntity {
         tag.putBoolean("Minion", minion);
         if (summonerId != null) tag.putUUID("Summoner", summonerId);
         tag.putInt("SummonCooldown", summonCooldown);
+        if (lootCorpse != null) tag.putUUID("LootCorpse", lootCorpse);
     }
 
     @Override
@@ -562,6 +620,7 @@ public class BountyHunterEntity extends PirateEntity {
         this.minion = tag.getBoolean("Minion");
         this.summonerId = tag.hasUUID("Summoner") ? tag.getUUID("Summoner") : null;
         this.summonCooldown = tag.getInt("SummonCooldown");
+        this.lootCorpse = tag.hasUUID("LootCorpse") ? tag.getUUID("LootCorpse") : null;
         super.readAdditionalSaveData(tag);
         this.debtorId = tag.hasUUID("Debtor") ? tag.getUUID("Debtor") : null;
         this.waveSerial = tag.getInt("WaveSerial");

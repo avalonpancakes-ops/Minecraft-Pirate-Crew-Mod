@@ -139,8 +139,8 @@ public class BankManager {
 
     // ------------------------------------------------------------------ inventory helpers
 
-    /** Rubies in an inventory, counting ruby blocks as 9. */
-    public static int countRubies(Inventory inv) {
+    /** Rubies in any container (a corpse...), counting ruby blocks as 9. */
+    public static int countRubies(net.minecraft.world.Container inv) {
         int n = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
@@ -155,6 +155,13 @@ public class BankManager {
      * back as rubies). Returns how many were taken.
      */
     public static int takeRubies(Inventory inv, int amount) {
+        return takeRubies(inv, amount, c -> {
+            if (!inv.add(c) && !c.isEmpty()) inv.player.drop(c, false);
+        });
+    }
+
+    /** Same as above for any container; change from broken ruby blocks goes to {@code giveChange}. */
+    public static int takeRubies(net.minecraft.world.Container inv, int amount, java.util.function.Consumer<ItemStack> giveChange) {
         int left = amount;
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
             ItemStack s = inv.getItem(i);
@@ -175,10 +182,7 @@ public class BankManager {
             }
         }
         inv.setChanged();
-        if (change > 0) {
-            ItemStack c = new ItemStack(ModItems.RUBY.get(), change);
-            if (!inv.add(c) && !c.isEmpty()) inv.player.drop(c, false);
-        }
+        if (change > 0) giveChange.accept(new ItemStack(ModItems.RUBY.get(), change));
         return amount - left;
     }
 

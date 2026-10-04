@@ -3,6 +3,7 @@ package com.piratecrew;
 import com.piratecrew.bank.LoanManager;
 import com.piratecrew.bounty.BountyManager;
 import com.piratecrew.entity.BountyHunterEntity;
+import com.piratecrew.entity.CorpseEntity;
 import com.piratecrew.crew.CrewCommands;
 import com.piratecrew.crew.CrewManager;
 import com.piratecrew.world.VillageBarHandler;
@@ -54,6 +55,27 @@ public class CommonEvents {
         if (event.getEntity() instanceof ServerPlayer sp && event.getSource().getEntity() instanceof BountyHunterEntity h && h.isHunting(sp) && !h.isTestHunter()) {
             LoanManager.onHunterKill(sp, h);
         }
+    }
+
+    /** Players leave a corpse holding their items instead of scattering them. */
+    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOW)
+    public static void playerDrops(net.minecraftforge.event.entity.living.LivingDropsEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp) || event.isCanceled()) return;
+        java.util.List<net.minecraft.world.item.ItemStack> stacks = new java.util.ArrayList<>();
+        for (net.minecraft.world.entity.item.ItemEntity ie : event.getDrops()) {
+            if (!ie.getItem().isEmpty()) stacks.add(ie.getItem().copy());
+        }
+        if (stacks.isEmpty()) {
+            LoanManager.onCorpse(sp, null);
+            return;
+        }
+        event.setCanceled(true);
+        CorpseEntity corpse = CorpseEntity.create(sp, stacks);
+        sp.serverLevel().addFreshEntity(corpse);
+        sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(String.format(
+                "\u2620 Your belongings are on your corpse at %d, %d, %d. Right-click it to get them back.",
+                corpse.getBlockX(), corpse.getBlockY(), corpse.getBlockZ())).withStyle(net.minecraft.ChatFormatting.GRAY));
+        LoanManager.onCorpse(sp, corpse);
     }
 
     @SubscribeEvent

@@ -6,6 +6,8 @@ import com.piratecrew.crew.Crew;
 import com.piratecrew.crew.CrewData;
 import com.piratecrew.crew.CrewManager;
 import com.piratecrew.entity.BountyHunterEntity;
+import com.piratecrew.entity.CorpseEntity;
+import net.minecraft.world.entity.Entity;
 import com.piratecrew.entity.PirateTier;
 import com.piratecrew.registry.ModEntities;
 import net.minecraft.ChatFormatting;
@@ -28,6 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -228,10 +231,13 @@ public class LoanManager {
         return null;
     }
 
+    /** Debts still to be taken from a dead player's corpse: player -> the hunter who'll search it. */
+    private static final Map<UUID, UUID> PENDING = new HashMap<>();
+
     /**
      * A hunter got the player. The bank claims the player's bounty and puts it toward the loan, then
      * takes what it can from their bank account. Whatever is still owed, the hunter takes in items
-     * from the player's inventory (rubies first, then valuables), destroyed for good.
+     * from the player's corpse (rubies first, then valuables), destroyed for good.
      */
     public static void onHunterKill(ServerPlayer victim, BountyHunterEntity hunter) {
         MinecraftServer server = victim.server;
@@ -265,23 +271,93 @@ public class LoanManager {
         // 2. Then the bank account.
         long fromBank = l.owed > 0 ? BankData.get(server).take(victim.getUUID(), l.owed) : 0;
         l.owed -= fromBank;
-
-        // 3. Then items, gone for good.
-        Map<String, Integer> taken = new LinkedHashMap<>();
-        long itemValue = 0;
-        if (l.owed > 0) {
-            long[] result = seizeItems(victim.getInventory(), l.owed, taken);
-            l.owed = Math.max(0, l.owed - result[0]);
-            itemValue = result[1];
-        }
         data.setDirty();
 
-        MutableComponent msg = Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
+        victim.sendSystemMessage(Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
                 .append(Component.literal(hunter.getPirateName()).withStyle(ChatFormatting.RED))
-                .append(Component.literal(" collected for the bank:").withStyle(ChatFormatting.YELLOW));
-        victim.sendSystemMessage(msg);
+                .append(Component.literal(" collected for the bank:").withStyle(ChatFormatting.YELLOW)));
         if (fromBounty > 0) victim.sendSystemMessage(line(String.format("%,d rubies from the bounty on your head", fromBounty)));
         if (fromBank > 0) victim.sendSystemMessage(line(String.format("%,d rubies from your bank account", fromBank)));
+
+        if (l.owed <= 0) {
+            data.remove(victim.getUUID());
+            victim.sendSystemMessage(Component.literal("Your debt is settled.").withStyle(ChatFormatting.GREEN));
+            return;
+        }
+
+        // 3. Then items. Normally from the corpse; with keepInventory on there's no corpse, so straight from the inventory.
+        if (victim.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_KEEPINVENTORY)) {
+            Map<String, Integer> taken = new LinkedHashMap<>();
+            Inventory inv = victim.getInventory();
+            long[] result = seizeItems(inv, l.owed, taken, c -> {
+                if (!inv.add(c) && !c.isEmpty()) victim.drop(c, false);
+            });
+            finishItems(victim, l, data, taken, result);
+        } else {
+            PENDING.put(victim.getUUID(), hunter.getUUID());
+            victim.sendSystemMessage(line(String.format("...and %s is searching your corpse for the other %,d rubies", hunter.getPirateName(), l.owed)));
+        }
+    }
+
+    /** The dead player's corpse was made (or there was nothing to make one from). */
+    public static void onCorpse(ServerPlayer player, @Nullable CorpseEntity corpse) {
+        UUID hunterId = PENDING.remove(player.getUUID());
+        if (hunterId == null) return;
+        LoanData data = LoanData.get(player.server);
+        LoanData.Loan l = data.get(player.getUUID());
+        if (l == null) return;
+        if (corpse == null) {
+            finishItems(player, l, data, new LinkedHashMap<>(), new long[]{0, 0});
+            return;
+        }
+        Entity e = player.serverLevel().getEntity(hunterId);
+        if (e instanceof BountyHunterEntity hunter && hunter.isAlive()) {
+            corpse.lockFor(hunter);
+            hunter.startLooting(corpse);
+        } else {
+            // The hunter is already gone: the bank's men collect it themselves.
+            seizeFromCorpse(corpse, null);
+        }
+    }
+
+    /** The hunter finished searching the corpse (or took too long and the bank stepped in). */
+    public static void seizeFromCorpse(CorpseEntity corpse, @Nullable BountyHunterEntity hunter) {
+        MinecraftServer server = corpse.getServer();
+        UUID owner = corpse.getOwner();
+        corpse.unlock();
+        if (server == null || owner == null) return;
+        LoanData data = LoanData.get(server);
+        LoanData.Loan l = data.get(owner);
+        if (l == null || l.owed <= 0) return;
+        Map<String, Integer> taken = new LinkedHashMap<>();
+        long[] result = seizeItems(corpse.getItems(), l.owed, taken, c -> {
+            ItemStack left = corpse.getItems().addItem(c);
+            if (!left.isEmpty()) corpse.spawnAtLocation(left);
+        });
+        if (hunter != null) {
+            hunter.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            hunter.playSound(SoundEvents.ARMOR_EQUIP_LEATHER, 1.0F, 0.8F);
+        }
+        ServerPlayer p = server.getPlayerList().getPlayer(owner);
+        if (p != null) {
+            p.sendSystemMessage(Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
+                    .append(Component.literal(hunter != null ? hunter.getPirateName() : "The bank").withStyle(ChatFormatting.RED))
+                    .append(Component.literal(" went through your corpse:").withStyle(ChatFormatting.YELLOW)));
+            finishItems(p, l, data, taken, result);
+        } else {
+            l.owed = Math.max(0, l.owed - result[0]);
+            if (l.owed <= 0) data.remove(owner);
+            data.setDirty();
+        }
+    }
+
+    /** The hunter died before searching the corpse. */
+    public static void cancelSeizure(CorpseEntity corpse) {
+    }
+
+    private static void finishItems(ServerPlayer victim, LoanData.Loan l, LoanData data, Map<String, Integer> taken, long[] result) {
+        l.owed = Math.max(0, l.owed - result[0]);
+        data.setDirty();
         if (!taken.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             int shown = 0;
@@ -294,10 +370,10 @@ public class LoanManager {
                 sb.append(e.getValue() > 1 ? e.getValue() + "x " : "").append(e.getKey());
                 shown++;
             }
-            victim.sendSystemMessage(line(String.format("%,d rubies' worth of your items, destroyed: ", itemValue) + sb));
+            victim.sendSystemMessage(line(String.format("%,d rubies' worth of your items, destroyed: ", result[1]) + sb));
+        } else {
+            victim.sendSystemMessage(line("no items: you had nothing worth taking"));
         }
-        if (fromBounty == 0 && fromBank == 0 && taken.isEmpty()) victim.sendSystemMessage(line("nothing: you had nothing worth taking"));
-
         if (l.owed <= 0) {
             data.remove(victim.getUUID());
             victim.sendSystemMessage(Component.literal("Your debt is settled.").withStyle(ChatFormatting.GREEN));
@@ -315,12 +391,13 @@ public class LoanManager {
      * that's not enough): rubies first, then valuables, avoiding overshooting where it can.
      * Returns {debt covered, value taken}.
      */
-    static long[] seizeItems(Inventory inv, long owed, Map<String, Integer> taken) {
+    static long[] seizeItems(net.minecraft.world.Container inv, long owed, Map<String, Integer> taken,
+                             java.util.function.Consumer<ItemStack> giveChange) {
         double remaining = owed;
         double value = 0;
         int rubies = BankManager.countRubies(inv);
         if (rubies > 0) {
-            int t = BankManager.takeRubies(inv, (int) Math.min(rubies, owed));
+            int t = BankManager.takeRubies(inv, (int) Math.min(rubies, owed), giveChange);
             remaining -= t;
             value += t;
             if (t > 0) taken.merge("Ruby", t, Integer::sum);
