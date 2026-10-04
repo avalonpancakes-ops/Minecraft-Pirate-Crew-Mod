@@ -65,6 +65,7 @@ public class VillageBarHandler {
         if (server == null) return;
         ticks++;
         if (ticks % 20 == 0) processQueue(server);
+        if (ticks % 100 == 0) addMissingBoards(server);
         if (ticks % Config.BAR_RESTOCK_TICKS.get() == 0) restock(server);
     }
 
@@ -158,6 +159,18 @@ public class VillageBarHandler {
         boolean wet = water > heights.size() / 10;
         // Floor sits where the ground surface is (replacing the top block).
         return new Candidate(new BlockPos(centre.getX(), median - 1, centre.getZ()), facing, score, wet);
+    }
+
+    /** Bars built by older versions of the mod get their bounty board once they're loaded. */
+    private static void addMissingBoards(MinecraftServer server) {
+        for (ServerLevel level : server.getAllLevels()) {
+            BarData data = BarData.get(level);
+            for (BarData.Bar bar : data.bars()) {
+                if (data.hasBoard(bar)) continue;
+                BlockPos pos = BarBuilder.boardPos(bar);
+                if (level.isLoaded(pos)) BarBuilder.placeBoard(level, bar);
+            }
+        }
     }
 
     private static void restock(MinecraftServer server) {

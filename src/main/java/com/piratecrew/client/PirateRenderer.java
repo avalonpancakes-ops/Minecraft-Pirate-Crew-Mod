@@ -36,15 +36,21 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
     }
 
     static boolean isSlim(PirateEntity pirate) {
-        String skin = pirate.getSkinName();
-        if (PirateSkins.isValid(skin)) return PirateSkins.isSlim(skin);
-        return "slim".equals(DefaultPlayerSkin.getSkinModelName(pirate.getUUID()));
+        return isSlim(pirate.getSkinName(), pirate.getUUID());
     }
 
     static ResourceLocation texture(PirateEntity pirate) {
-        String skin = pirate.getSkinName();
+        return texture(pirate.getSkinName(), pirate.getUUID());
+    }
+
+    public static boolean isSlim(String skin, java.util.UUID id) {
+        if (PirateSkins.isValid(skin)) return PirateSkins.isSlim(skin);
+        return "slim".equals(DefaultPlayerSkin.getSkinModelName(id));
+    }
+
+    public static ResourceLocation texture(String skin, java.util.UUID id) {
         if (PirateSkins.isValid(skin)) return PirateCrew.id("textures/entity/pirate/" + skin + ".png");
-        return DefaultPlayerSkin.getDefaultSkin(pirate.getUUID());
+        return DefaultPlayerSkin.getDefaultSkin(id);
     }
 
     private Body pick(PirateEntity pirate) {

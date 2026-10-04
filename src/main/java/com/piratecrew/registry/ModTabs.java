@@ -19,6 +19,7 @@ public class ModTabs {
                 out.accept(ModItems.RUBY_ORE.get());
                 out.accept(ModItems.DEEPSLATE_RUBY_ORE.get());
                 out.accept(ModItems.RUBY_BLOCK.get());
+                out.accept(ModItems.BOUNTY_BOARD.get());
                 out.accept(ModItems.RUBY_SWORD.get());
                 out.accept(ModItems.RUBY_PICKAXE.get());
                 out.accept(ModItems.RUBY_AXE.get());

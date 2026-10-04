@@ -1,5 +1,6 @@
 package com.piratecrew;
 
+import com.piratecrew.bounty.BountyManager;
 import com.piratecrew.crew.CrewCommands;
 import com.piratecrew.crew.CrewManager;
 import com.piratecrew.world.VillageBarHandler;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,7 +28,10 @@ public class CommonEvents {
 
     @SubscribeEvent
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sp) CrewManager.sync(sp, false);
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            BountyManager.onLogin(sp);
+            CrewManager.sync(sp, false);
+        }
     }
 
     /** Crewmates (players and pirates) can't hurt each other unless friendly fire is on. */
@@ -38,6 +43,11 @@ public class CommonEvents {
         if (attacker != null && attacker != event.getEntity() && CrewManager.areCrewmates(attacker, event.getEntity())) {
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void death(LivingDeathEvent event) {
+        BountyManager.onDeath(event.getEntity(), event.getSource().getEntity());
     }
 
     @SubscribeEvent

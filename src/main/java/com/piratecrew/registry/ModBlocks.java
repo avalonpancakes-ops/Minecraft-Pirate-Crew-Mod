@@ -1,6 +1,7 @@
 package com.piratecrew.registry;
 
 import com.piratecrew.PirateCrew;
+import com.piratecrew.block.BountyBoardBlock;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DropExperienceBlock;
@@ -40,4 +41,13 @@ public class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .strength(5.0F, 6.0F)
                     .sound(SoundType.METAL)));
+
+    public static final RegistryObject<Block> BOUNTY_BOARD = BLOCKS.register("bounty_board",
+            () -> new BountyBoardBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .instrument(NoteBlockInstrument.BASS)
+                    .strength(1.5F)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()
+                    .ignitedByLava()));
 }

@@ -54,12 +54,21 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Crew pirates defend whoever they follow, attack what that player attacks, and fight hostile mobs (they leave creepers alone). Give them a **bow, crossbow or trident** and they fight at range: they keep their distance, draw or load, and fire. Better tiers aim straighter and hit harder. Arrows are unlimited; put tipped or spectral arrows in a pirate's off hand and it shoots those (and uses them up). Power, Punch, Flame, Piercing and Multishot all work. They teleport to you if left far behind, regenerate slowly out of combat, and drop all their gear when they die.
 
 ### Crews
-- Press **J** (rebindable under Controls → Pirate Crew) or type `/crew` to open the crew screen.
+- Press **I** (rebindable under Controls → Pirate Crew) or type `/crew` to open the crew screen.
 - Whoever creates the crew is **Captain**. The captain can appoint **2 Vice Captains**, either players or recruited pirates (use **+Vice** / **Demote** on their row). Pirate vice captains get a ☆ on their name tag. Only player vice captains can recruit and invite.
 - **Max 20 members**, of which at most **7 can be real players** — the rest have to be pirates.
 - Captain and vice captains can invite players, recruit and dismiss pirates, and set the crew icon. Vice captains can kick deckhands; the captain can kick anyone, promote/demote, hand over the captaincy, rename and disband.
 - **Crew icon:** hold any item and press **Set Icon**.
 - Crewmates can't hurt each other (toggle in the config).
+
+### Bounties
+- Crew members (players **and** recruited pirates) earn a ruby bounty by killing players and pirates outside their crew: **10 rubies per player**, **2 rubies per F-tier pirate +1 per tier above F** (doubled if the pirate belonged to a crew).
+- Kill a wanted crew member and you **claim their whole bounty in rubies**. Players get the rubies straight into their inventory; if a pirate gets the kill, the rubies drop where the target fell. The whole server is told who claimed what. The killer also adds 25% of the claimed bounty to their own.
+- Killing the same target again within 10 minutes doesn't count, so friends can't farm each other.
+- A dead pirate's poster comes down for good; a player's bounty resets to 0 when claimed.
+- Every pirate bar has a **Bounty Board** on its front wall (bars built before this update get one the next time they're loaded). Right-click it to see WANTED posters for everyone with a bounty, biggest first, with their face, name and bounty. Hover a poster for crew, tier and kills.
+- Craft your own board: planks top and bottom, paper-ruby-paper in the middle.
+- The crew screen shows your crew's total bounty, and hovering a member shows theirs.
 
 ### Commands
 - `/crew` — open the crew screen
@@ -69,4 +78,4 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ## Config
 
-`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, friendly fire and bar restocking.
+`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, friendly fire, bar restocking and bounty values.

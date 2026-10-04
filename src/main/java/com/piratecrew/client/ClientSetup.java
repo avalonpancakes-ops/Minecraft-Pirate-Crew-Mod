@@ -21,8 +21,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.lwjgl.glfw.GLFW;
 
 public class ClientSetup {
-    public static final KeyMapping OPEN_CREW = new KeyMapping("key.piratecrew.crew", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.categories.piratecrew");
+    public static final KeyMapping OPEN_CREW = new KeyMapping("key.piratecrew.crew_menu", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.categories.piratecrew");
 
     @Mod.EventBusSubscriber(modid = PirateCrew.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ModBus {

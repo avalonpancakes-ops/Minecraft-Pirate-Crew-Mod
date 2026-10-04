@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    "PRP",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "tag": "minecraft:planks"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "R": {
+      "item": "piratecrew:ruby"
+    }
+  },
+  "result": {
+    "item": "piratecrew:bounty_board"
+  }
+}

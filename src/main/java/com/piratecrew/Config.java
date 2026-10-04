@@ -24,6 +24,13 @@ public class Config {
     public static final ForgeConfigSpec.IntValue BAR_MAX_PIRATES;
     public static final ForgeConfigSpec.IntValue BAR_RESTOCK_TICKS;
 
+    // Bounties
+    public static final ForgeConfigSpec.IntValue BOUNTY_PER_PLAYER_KILL;
+    public static final ForgeConfigSpec.IntValue BOUNTY_PER_PIRATE_KILL;
+    public static final ForgeConfigSpec.IntValue BOUNTY_PER_PIRATE_TIER;
+    public static final ForgeConfigSpec.DoubleValue BOUNTY_SHARE;
+    public static final ForgeConfigSpec.IntValue BOUNTY_REPEAT_COOLDOWN;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
 
@@ -47,6 +54,14 @@ public class Config {
         BAR_MIN_PIRATES = b.comment("A bar restocks pirates when it has fewer than this many unrecruited pirates").defineInRange("minPirates", 3, 0, 20);
         BAR_MAX_PIRATES = b.comment("Pirates placed in a freshly built bar").defineInRange("startPirates", 6, 0, 20);
         BAR_RESTOCK_TICKS = b.comment("Ticks between restock checks (24000 = one Minecraft day)").defineInRange("restockTicks", 12000, 200, 1000000);
+        b.pop();
+
+        b.comment("Ruby bounties on crew members who kill players and pirates").push("bounties");
+        BOUNTY_PER_PLAYER_KILL = b.comment("Rubies added to a crew member's bounty for killing a player").defineInRange("perPlayerKill", 10, 0, 10000);
+        BOUNTY_PER_PIRATE_KILL = b.comment("Rubies added for killing an F-tier pirate (doubled if the pirate belonged to a crew)").defineInRange("perPirateKill", 2, 0, 10000);
+        BOUNTY_PER_PIRATE_TIER = b.comment("Extra rubies per tier above F for pirate kills (D +1x, C +2x ... S +5x)").defineInRange("perPirateTier", 1, 0, 10000);
+        BOUNTY_SHARE = b.comment("Share of a claimed bounty that's added to the killer's own bounty (0.25 = 25%)").defineInRange("claimShare", 0.25, 0.0, 10.0);
+        BOUNTY_REPEAT_COOLDOWN = b.comment("Seconds before killing the same target again counts toward bounties (stops kill farming)").defineInRange("repeatKillCooldown", 600, 0, 86400);
         b.pop();
 
         SPEC = b.build();

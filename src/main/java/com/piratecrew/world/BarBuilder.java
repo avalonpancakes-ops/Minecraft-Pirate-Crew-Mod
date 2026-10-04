@@ -3,7 +3,9 @@ package com.piratecrew.world;
 import com.piratecrew.Config;
 import com.piratecrew.PirateCrew;
 import com.piratecrew.entity.PirateEntity;
+import com.piratecrew.block.BountyBoardBlock;
 import com.piratecrew.entity.PirateTier;
+import com.piratecrew.registry.ModBlocks;
 import com.piratecrew.registry.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -94,7 +96,9 @@ public class BarBuilder {
         b.build();
         b.spawnInitialPirates();
         BarData.Bar bar = new BarData.Bar(origin, facing);
-        BarData.get(level).addBar(bar);
+        BarData data = BarData.get(level);
+        data.addBar(bar);
+        placeBoard(level, bar);
         PirateCrew.LOGGER.debug("Pirate Crew: built bar at {}", origin);
         return bar;
     }
@@ -298,6 +302,25 @@ public class BarBuilder {
     public static void restock(ServerLevel level, BarData.Bar bar) {
         int[] spot = SPOTS[level.random.nextInt(SPOTS.length)];
         spawnPirate(level, bar.origin(), rotationFor(bar.facing()), spot[0], spot[1]);
+    }
+
+    /** Where the bounty board hangs: on the front wall, left of the door as you face the bar. */
+    public static BlockPos boardPos(BarData.Bar bar) {
+        return toWorld(bar.origin(), rotationFor(bar.facing()), 1, 2, -1);
+    }
+
+    /** Hang the bounty board on a bar (also used to add boards to bars built before boards existed). */
+    public static void placeBoard(ServerLevel level, BarData.Bar bar) {
+        BarData data = BarData.get(level);
+        if (data.hasBoard(bar)) return;
+        BlockPos pos = boardPos(bar);
+        if (level.getBlockState(pos).canBeReplaced()) {
+            BlockState board = ModBlocks.BOUNTY_BOARD.get().defaultBlockState()
+                    .setValue(BountyBoardBlock.FACING, Direction.NORTH)
+                    .rotate(rotationFor(bar.facing()));
+            level.setBlock(pos, board, 3);
+        }
+        data.markBoard(bar);
     }
 
     public static BlockPos interiorCentre(BarData.Bar bar) {

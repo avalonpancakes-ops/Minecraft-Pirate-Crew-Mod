@@ -1,6 +1,7 @@
 package com.piratecrew.crew;
 
 import com.piratecrew.Config;
+import com.piratecrew.bounty.BountyManager;
 import com.piratecrew.entity.PirateEntity;
 import com.piratecrew.network.CrewSyncPacket;
 import com.piratecrew.network.ModNetwork;
@@ -433,11 +434,13 @@ public class CrewManager {
             CrewRole r = crew.roleOf(u);
             if (r == null) continue;
             Crew.NpcInfo npc = crew.npcs.get(u);
+            int bounty = BountyManager.bountyOf(server, u);
+            int[] kills = BountyManager.killsOf(server, u);
             if (npc != null) {
-                members.add(new CrewSyncPacket.Member(u, npc.name(), true, r.ordinal(), npc.tier(), true));
+                members.add(new CrewSyncPacket.Member(u, npc.name(), true, r.ordinal(), npc.tier(), true, bounty, kills[0], kills[1]));
             } else {
                 boolean online = server.getPlayerList().getPlayer(u) != null;
-                members.add(new CrewSyncPacket.Member(u, d.nameOf(u), false, r.ordinal(), 0, online));
+                members.add(new CrewSyncPacket.Member(u, d.nameOf(u), false, r.ordinal(), 0, online, bounty, kills[0], kills[1]));
             }
         }
 

@@ -250,6 +250,17 @@ public class CrewScreen extends Screen {
         CrewRole me = CrewRole.byId(d.myRole);
         String counts = "Players " + players + "/" + d.maxPlayers + "   Crew " + d.members.size() + "/" + d.maxSize;
         g.drawString(font, counts, left + 32, top + 20, GuiDraw.TEXT, false);
+        int totalBounty = d.members.stream().mapToInt(CrewSyncPacket.Member::bounty).sum();
+        if (totalBounty > 0) {
+            String b = String.format("%,d", totalBounty);
+            int bx = left + W - 10 - font.width(b);
+            g.drawString(font, b, bx, top + 20, 0xFFAA0000, false);
+            g.pose().pushPose();
+            g.pose().translate(bx - 11, top + 19, 0);
+            g.pose().scale(0.625F, 0.625F, 1);
+            g.renderItem(new net.minecraft.world.item.ItemStack(com.piratecrew.registry.ModItems.RUBY.get()), 0, 0);
+            g.pose().popPose();
+        }
         g.drawString(font, Component.literal(me.title).withStyle(me == CrewRole.MEMBER ? ChatFormatting.DARK_GRAY : ChatFormatting.DARK_RED),
                 left + W - 10 - font.width(me.title), top + 9, GuiDraw.TEXT, false);
 
@@ -293,6 +304,23 @@ public class CrewScreen extends Screen {
 
         int pages = Math.max(1, (d.members.size() + ROWS - 1) / ROWS);
         g.drawCenteredString(font, (page + 1) + "/" + pages, left + 52, top + PAGER_Y + 3, 0xFFFFFF);
+
+        // Hovering a member's name shows their bounty and kills
+        for (int i = 0; i < ROWS; i++) {
+            int idx = page * ROWS + i;
+            if (idx >= d.members.size()) break;
+            int rowY = top + LIST_Y + 1 + i * ROW_H;
+            CrewSyncPacket.Member m = d.members.get(idx);
+            int right = buttonsStart(rowButtons(d, m)) - 4;
+            if (mouseX >= left + 9 && mouseX < right && mouseY >= rowY && mouseY < rowY + ROW_H) {
+                List<Component> lines = new ArrayList<>();
+                lines.add(Component.literal(m.name()).withStyle(ChatFormatting.GOLD));
+                lines.add(Component.literal(m.bounty() > 0 ? "Bounty: " + String.format("%,d", m.bounty()) + " rubies" : "No bounty")
+                        .withStyle(m.bounty() > 0 ? ChatFormatting.RED : ChatFormatting.GRAY));
+                lines.add(Component.literal("Kills: " + m.playerKills() + " players, " + m.pirateKills() + " pirates").withStyle(ChatFormatting.GRAY));
+                g.renderComponentTooltip(font, lines, mouseX, mouseY);
+            }
+        }
 
         if (inviteBox == null && renameBox == null) {
             g.drawString(font, "Only the captain and vice captains", left + 10, top + ROW1_Y + 2, 0xFF707070, false);

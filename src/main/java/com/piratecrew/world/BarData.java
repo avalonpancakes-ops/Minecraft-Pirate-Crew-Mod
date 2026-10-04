@@ -23,6 +23,8 @@ public class BarData extends SavedData {
 
     private final Set<Long> processedVillages = new HashSet<>();
     private final List<Bar> bars = new ArrayList<>();
+    /** Bars (by origin) that already got their bounty board. */
+    private final Set<Long> boarded = new HashSet<>();
 
     public static BarData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(BarData::load, BarData::new, NAME);
@@ -45,9 +47,18 @@ public class BarData extends SavedData {
         return bars;
     }
 
+    public boolean hasBoard(Bar bar) {
+        return boarded.contains(bar.origin().asLong());
+    }
+
+    public void markBoard(Bar bar) {
+        if (boarded.add(bar.origin().asLong())) setDirty();
+    }
+
     @Override
     public CompoundTag save(CompoundTag tag) {
         tag.putLongArray("Villages", processedVillages.stream().mapToLong(Long::longValue).toArray());
+        tag.putLongArray("Boarded", boarded.stream().mapToLong(Long::longValue).toArray());
         ListTag list = new ListTag();
         for (Bar b : bars) {
             CompoundTag t = new CompoundTag();
@@ -62,6 +73,7 @@ public class BarData extends SavedData {
     public static BarData load(CompoundTag tag) {
         BarData d = new BarData();
         for (long l : tag.getLongArray("Villages")) d.processedVillages.add(l);
+        for (long l : tag.getLongArray("Boarded")) d.boarded.add(l);
         for (Tag t : tag.getList("Bars", Tag.TAG_COMPOUND)) {
             CompoundTag c = (CompoundTag) t;
             d.bars.add(new Bar(NbtUtils.readBlockPos(c.getCompound("Origin")), Direction.from2DDataValue(c.getInt("Facing"))));

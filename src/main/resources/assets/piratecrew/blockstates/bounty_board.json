@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "piratecrew:block/bounty_board"
+    },
+    "facing=east": {
+      "model": "piratecrew:block/bounty_board",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "piratecrew:block/bounty_board",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "piratecrew:block/bounty_board",
+      "y": 270
+    }
+  }
+}

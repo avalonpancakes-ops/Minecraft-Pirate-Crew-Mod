@@ -16,6 +16,7 @@
   "item.piratecrew.pirate_spawn_egg": "Pirate Spawn Egg",
   "entity.piratecrew.pirate": "Pirate",
   "container.piratecrew.pirate": "Pirate",
-  "key.piratecrew.crew": "Open Crew Menu",
-  "key.categories.piratecrew": "Pirate Crew"
+  "key.categories.piratecrew": "Pirate Crew",
+  "key.piratecrew.crew_menu": "Open Crew Menu",
+  "block.piratecrew.bounty_board": "Bounty Board"
 }
