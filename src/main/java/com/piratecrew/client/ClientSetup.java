@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -38,6 +39,11 @@ public class ClientSetup {
         @SubscribeEvent
         public static void keys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_CREW);
+        }
+
+        @SubscribeEvent
+        public static void packs(AddPackFindersEvent event) {
+            RubyToolsPack.register(event);
         }
     }
 
