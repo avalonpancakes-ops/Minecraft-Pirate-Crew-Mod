@@ -31,6 +31,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +53,13 @@ public class BountyHunterEntity extends PirateEntity {
     private int debtorMissing;
     private int unseenTicks;
     private boolean greeted;
+    /** A pirate summoned by an A-tier hunter rather than a hunter itself (pirate stats, diamond gear). */
+    private boolean minion;
+    @Nullable private UUID summonerId;
+    /** Ticks until an A-tier hunter can summon his crew again. */
+    private int summonCooldown;
+    public static final int SUMMON_COOLDOWN = 6000; // 5 minutes
+    public static final int SUMMON_COUNT = 4;
 
     private static final String[] FIRST = {
             "Vex", "Morrow", "Silas", "Grell", "Kade", "Thorne", "Ruthven", "Mordecai", "Jago", "Corvin",
@@ -90,6 +99,7 @@ public class BountyHunterEntity extends PirateEntity {
 
     @Override
     protected double statMultiplier() {
+        if (minion) return 1.0;
         try {
             return Config.HUNTER_STRENGTH.get();
         } catch (Exception e) {
@@ -99,11 +109,12 @@ public class BountyHunterEntity extends PirateEntity {
 
     @Override
     protected String rollSkin(PirateTier tier) {
-        return PirateSkins.randomHunter(this.random, tier);
+        return minion ? PirateSkins.random(this.random, tier) : PirateSkins.randomHunter(this.random, tier);
     }
 
     @Override
     protected String rollName() {
+        if (minion) return PirateNames.random(this.random);
         return FIRST[this.random.nextInt(FIRST.length)] + " " + TITLE[this.random.nextInt(TITLE.length)];
     }
 
@@ -111,7 +122,7 @@ public class BountyHunterEntity extends PirateEntity {
     public void updateDisplayName() {
         PirateTier tier = getTier();
         MutableComponent name = Component.literal("[" + tier.label + "] ").withStyle(tier.color, ChatFormatting.BOLD);
-        name.append(Component.literal("☠ " + pirateName).withStyle(s -> s.withBold(false).withColor(ChatFormatting.RED)));
+        name.append(Component.literal("☠ " + pirateName).withStyle(s -> s.withBold(false).withColor(minion ? ChatFormatting.DARK_RED : ChatFormatting.RED)));
         this.setCustomName(name);
         this.setCustomNameVisible(true);
     }
@@ -133,6 +144,31 @@ public class BountyHunterEntity extends PirateEntity {
 
     public void setTest(boolean test) {
         this.test = test;
+    }
+
+    /** A pirate summoned by an A-tier hunter: normal pirate stats, full diamond gear, hunts the same debtor. */
+    public void setupMinion(BountyHunterEntity leader) {
+        this.minion = true;
+        this.summonerId = leader.getUUID();
+        this.debtorId = leader.debtorId;
+        this.waveSerial = leader.waveSerial;
+        this.test = leader.test;
+        this.greeted = true;
+        initPirate(PirateTier.random(this.random));
+        var follow = this.getAttribute(Attributes.FOLLOW_RANGE);
+        if (follow != null) follow.setBaseValue(64.0);
+        this.xpReward = 0;
+        setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.DIAMOND_HELMET));
+        setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
+        setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.DIAMOND_LEGGINGS));
+        setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
+        boolean marksman = getCombatStyle() == CombatStyle.MARKSMAN;
+        setItemSlot(EquipmentSlot.MAINHAND, gear(marksman ? Items.BOW : Items.DIAMOND_SWORD));
+        getPack().setItem(0, gear(marksman ? Items.DIAMOND_SWORD : Items.BOW));
+    }
+
+    public boolean isMinion() {
+        return minion;
     }
 
     /**
@@ -175,6 +211,26 @@ public class BountyHunterEntity extends PirateEntity {
             return;
         }
 
+        if (tier == PirateTier.A) {
+            // Prefers range: a fully enchanted bow, a Sharpness II diamond sword only when cornered.
+            setCombatStyle(CombatStyle.MARKSMAN);
+            ItemStack bow = gear(Items.BOW);
+            bow.enchant(Enchantments.POWER_ARROWS, 5);
+            bow.enchant(Enchantments.PUNCH_ARROWS, 2);
+            bow.enchant(Enchantments.FLAMING_ARROWS, 1);
+            bow.enchant(Enchantments.INFINITY_ARROWS, 1);
+            bow.enchant(Enchantments.UNBREAKING, 3);
+            ItemStack blade = gear(sword);
+            blade.enchant(Enchantments.SHARPNESS, 2);
+            setItemSlot(EquipmentSlot.MAINHAND, bow);
+            getPack().setItem(0, blade);
+            setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
+            addPotions(true);
+            applyPermanentStrength();
+            summonCooldown = 0;
+            return;
+        }
+
         // Marksmen open with a crossbow, balanced hunters carry one in reserve, brawlers bring a shield.
         ItemStack ranged = gear(this.random.nextInt(3) == 0 ? Items.BOW : Items.CROSSBOW);
         switch (getCombatStyle()) {
@@ -192,14 +248,51 @@ public class BountyHunterEntity extends PirateEntity {
                 if (t >= PirateTier.C.ordinal()) setItemSlot(EquipmentSlot.OFFHAND, gear(Items.SHIELD));
             }
         }
-        if (tier == PirateTier.A) addPotions(true);
     }
 
-    /** Poison splash potions to throw and milk to purge debuffs (plus strength from A tier). Never run out. */
-    private void addPotions(boolean strength) {
+    private void applyPermanentStrength() {
+        if (!this.hasEffect(MobEffects.DAMAGE_BOOST)) {
+            this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, MobEffectInstance.INFINITE_DURATION, 0, false, true));
+        }
+    }
+
+    private boolean isSummoner() {
+        return !minion && getTier() == PirateTier.A;
+    }
+
+    /** Call in a crew of pirates in diamond gear to help. */
+    private void summonCrew(ServerLevel sl, ServerPlayer debtor) {
+        int alive = sl.getEntitiesOfClass(BountyHunterEntity.class, this.getBoundingBox().inflate(96),
+                h -> h.isAlive() && h.minion && getUUID().equals(h.summonerId)).size();
+        int count = Math.min(SUMMON_COUNT, 2 * SUMMON_COUNT - alive);
+        if (count <= 0) return;
+        int made = 0;
+        for (int i = 0; i < count; i++) {
+            Vec3 spot = LoanManager.findSpot(sl, this.blockPosition(), 2, 5, this.random);
+            if (spot == null) continue;
+            BountyHunterEntity m = com.piratecrew.registry.ModEntities.BOUNTY_HUNTER.get().create(sl);
+            if (m == null) continue;
+            m.moveTo(spot.x, spot.y, spot.z, this.getYRot(), 0);
+            m.setupMinion(this);
+            m.finalizeSpawn(sl, sl.getCurrentDifficultyAt(m.blockPosition()), net.minecraft.world.entity.MobSpawnType.MOB_SUMMONED, null, null);
+            m.setTarget(debtor);
+            sl.addFreshEntity(m);
+            sl.sendParticles(ParticleTypes.CLOUD, spot.x, spot.y + 1.0, spot.z, 12, 0.3, 0.6, 0.3, 0.02);
+            made++;
+        }
+        if (made == 0) return;
+        summonCooldown = SUMMON_COOLDOWN;
+        this.swing(InteractionHand.MAIN_HAND);
+        this.playSound(SoundEvents.EVOKER_PREPARE_SUMMON, 1.5F, 0.9F);
+        debtor.sendSystemMessage(Component.literal(pirateName + ": ").withStyle(ChatFormatting.DARK_RED)
+                .append(Component.literal("Lads! The bank pays double for this one. Take 'em!").withStyle(ChatFormatting.RED)));
+    }
+
+    /** Poison splash potions to throw and milk to purge debuffs (plus fire resistance from A tier). Never run out. */
+    private void addPotions(boolean fireResistance) {
         getPack().setItem(1, PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), Potions.POISON));
         getPack().setItem(2, new ItemStack(Items.MILK_BUCKET));
-        if (strength) getPack().setItem(3, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.STRENGTH));
+        if (fireResistance) getPack().setItem(3, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.FIRE_RESISTANCE));
     }
 
     private static ItemStack gear(Item item) {
@@ -246,6 +339,14 @@ public class BountyHunterEntity extends PirateEntity {
             return;
         }
         debtorMissing = 0;
+        if (isSummoner()) {
+            applyPermanentStrength();
+            if (summonCooldown > 0) summonCooldown -= 20;
+            if (summonCooldown <= 0 && getTarget() == debtor && this.distanceToSqr(debtor) < 24 * 24
+                    && this.getSensing().hasLineOfSight(debtor) && !debtor.isCreative()) {
+                summonCrew(sl, debtor);
+            }
+        }
         if (!greeted && this.distanceToSqr(debtor) < 40 * 40) {
             greeted = true;
             var loan = LoanManager.loanOf(sl.getServer(), debtorId);
@@ -324,10 +425,17 @@ public class BountyHunterEntity extends PirateEntity {
         tag.putInt("WaveSerial", waveSerial);
         tag.putBoolean("TestHunter", test);
         tag.putBoolean("Greeted", greeted);
+        tag.putBoolean("Minion", minion);
+        if (summonerId != null) tag.putUUID("Summoner", summonerId);
+        tag.putInt("SummonCooldown", summonCooldown);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
+        // Read the minion flag first: it decides the stats the pirate code applies while loading.
+        this.minion = tag.getBoolean("Minion");
+        this.summonerId = tag.hasUUID("Summoner") ? tag.getUUID("Summoner") : null;
+        this.summonCooldown = tag.getInt("SummonCooldown");
         super.readAdditionalSaveData(tag);
         this.debtorId = tag.hasUUID("Debtor") ? tag.getUUID("Debtor") : null;
         this.waveSerial = tag.getInt("WaveSerial");

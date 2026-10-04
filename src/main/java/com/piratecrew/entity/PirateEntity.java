@@ -348,6 +348,12 @@ public class PirateEntity extends PathfinderMob {
         return initialized;
     }
 
+    /** Force a fighting style (bounty hunters with a fixed style). */
+    protected void setCombatStyle(CombatStyle style) {
+        this.entityData.set(DATA_STYLE, style.ordinal());
+        this.meleeRange = style.meleeMin + this.random.nextFloat() * (style.meleeMax - style.meleeMin);
+    }
+
     private void rollCombatStyle() {
         CombatStyle style = CombatStyle.random(this.random);
         this.entityData.set(DATA_STYLE, style.ordinal());
