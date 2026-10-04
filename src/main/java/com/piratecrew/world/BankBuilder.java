@@ -104,7 +104,7 @@ public class BankBuilder {
                 boolean edge = lx == 0 || lx == W - 1 || lz == 0 || lz == D - 1;
                 set(lx, 0, lz, edge ? smooth : ((lx + lz) % 2 == 0 ? andesite : Blocks.POLISHED_DIORITE.defaultBlockState()));
             }
-        for (int lx = 3; lx <= 5; lx++) set(lx, 0, -1, Blocks.STONE_BRICK_SLAB.defaultBlockState().setValue(SlabType.TOP));
+        for (int lx = 3; lx <= 5; lx++) set(lx, 0, -1, Blocks.STONE_BRICK_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.TOP));
 
         // 3. Walls: stone bricks, chiseled corners, andesite base trim
         for (int ly = 1; ly <= 4; ly++) {
@@ -141,7 +141,7 @@ public class BankBuilder {
             set(0, 6, lz, (lz % 2 == 0) ? chiseled : Blocks.STONE_BRICK_SLAB.defaultBlockState());
             set(W - 1, 6, lz, (lz % 2 == 0) ? chiseled : Blocks.STONE_BRICK_SLAB.defaultBlockState());
         }
-        for (int lx = 2; lx <= 6; lx++) set(lx, 5, -1, Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabType.BOTTOM));
+        for (int lx = 2; lx <= 6; lx++) set(lx, 5, -1, Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
         set(2, 5, -1, Blocks.STONE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST).setValue(StairBlock.HALF, Half.TOP));
         set(6, 5, -1, Blocks.STONE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST).setValue(StairBlock.HALF, Half.TOP));
 
