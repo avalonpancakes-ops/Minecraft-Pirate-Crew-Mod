@@ -53,6 +53,18 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Right-click **your own crew's** pirate to open its gear screen: armor slots, main hand and off hand, plus orders — **Follow**, **Hold** (guard this spot), **Roam** (wander nearby) and **Dismiss**.
 - Crew pirates defend whoever they follow, attack what that player attacks, and fight hostile mobs (they leave creepers alone). Give them a **bow, crossbow or trident** and they fight at range: they keep their distance, draw or load, and fire. Better tiers aim straighter and hit harder. Arrows are unlimited; put tipped or spectral arrows in a pirate's off hand and it shoots those (and uses them up). Power, Punch, Flame, Piercing and Multishot all work. They teleport to you if left far behind, regenerate slowly out of combat, and drop all their gear when they die.
 
+### Pirate packs, fighting styles and jobs
+- Every pirate carries an **18-slot pack** (half a player's inventory), shown under its gear in its screen. Shift-click moves items between your inventory, its gear and its pack. Everything in the pack drops when it dies.
+- **Fighting style:** each pirate is a **Brawler** (charges in and switches to melee early), **Balanced** (melee up close, ranged further out) or **Marksman** (keeps its distance and only draws a blade when cornered), shown next to its tier. Each pirate also gets its own slightly different switch-over distance, so no two fight quite alike.
+- **Weapon switching:** give a pirate both a melee weapon and a bow, crossbow or trident (one in hand, one in its pack) and it swaps between them mid-fight depending on how close the enemy is and its style. It always grabs the hardest-hitting blade it has.
+- **Tasks:** press **Tasks...** in a crew pirate's screen and pick a job. It works within about 12 blocks of where it's standing when you choose:
+  - **Mine Ore**: mines ore it can see (cave walls, cliffs, exposed veins). Needs a pickaxe good enough for the ore.
+  - **Farm Crops**: harvests fully grown wheat, carrots, potatoes, beetroot (and modded crops) and replants them.
+  - **Go Fishing**: walks to the nearest shore and fishes (fish, junk and the odd bit of treasure). Needs a fishing rod; Lure and Luck of the Sea work.
+  - **Chop Wood**: fells trees from the trunk up and replants saplings. Faster with an axe.
+- Tools come out of the pack automatically and wear down like a player's. What it gathers goes into its pack; when the pack is full it empties it into the **nearest chest or barrel** near its work spot, keeping its gear and up to 16 seeds or saplings for replanting. With no chest nearby it stops and tells you.
+- Pirates stop working to fight, then go back to their job. **Stop Working** (or Follow, Hold or Roam) ends the job.
+
 ### Crews
 - Press **I** (rebindable under Controls → Pirate Crew) or type `/crew` to open the crew screen.
 - Whoever creates the crew is **Captain**. The captain can appoint **2 Vice Captains**, either players or recruited pirates (use **+Vice** / **Demote** on their row). Pirate vice captains get a ☆ on their name tag. Only player vice captains can recruit and invite.

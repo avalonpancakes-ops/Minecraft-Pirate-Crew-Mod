@@ -22,16 +22,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class PirateMenu extends AbstractContainerMenu {
     public static final int PIRATE_SLOTS = 6;
-    public static final int INV_Y = 114;
+    public static final int PACK_SLOTS = PirateEntity.PACK_SIZE;
+    public static final int PACK_Y = 118;
+    public static final int INV_Y = 170;
 
     @Nullable
     private final PirateEntity pirate;
     private final Container equipment;
+    private final Container pack;
 
     public PirateMenu(int id, Inventory playerInv, @Nullable PirateEntity pirate) {
         super(ModMenus.PIRATE.get(), id);
         this.pirate = pirate;
         this.equipment = pirate != null ? new PirateEquipmentContainer(pirate) : new SimpleContainer(PIRATE_SLOTS);
+        this.pack = pirate != null ? pirate.getPack() : new SimpleContainer(PACK_SLOTS);
 
         // Armor column
         addSlot(new GearSlot(equipment, 0, 8, 18, EquipmentSlot.HEAD, InventoryMenu.EMPTY_ARMOR_SLOT_HELMET));
@@ -41,6 +45,13 @@ public class PirateMenu extends AbstractContainerMenu {
         // Hands
         addSlot(new GearSlot(equipment, 4, 80, 18, EquipmentSlot.MAINHAND, new ResourceLocation("item/empty_slot_sword")));
         addSlot(new GearSlot(equipment, 5, 80, 36, EquipmentSlot.OFFHAND, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
+
+        // Pirate's pack: 2 rows of 9
+        for (int row = 0; row < 2; row++) {
+            for (int col = 0; col < 9; col++) {
+                addSlot(new Slot(pack, col + row * 9, 8 + col * 18, PACK_Y + row * 18));
+            }
+        }
 
         // Player inventory
         for (int row = 0; row < 3; row++) {
@@ -76,20 +87,24 @@ public class PirateMenu extends AbstractContainerMenu {
         if (!slot.hasItem()) return ItemStack.EMPTY;
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
-        int invStart = PIRATE_SLOTS;
-        int invEnd = this.slots.size();
+        int packStart = PIRATE_SLOTS, packEnd = PIRATE_SLOTS + PACK_SLOTS;
+        int invStart = packEnd, invEnd = this.slots.size();
 
         if (index < PIRATE_SLOTS) {
+            // gear -> pack, then player
+            if (!moveItemStackTo(stack, packStart, packEnd, false) && !moveItemStackTo(stack, invStart, invEnd, true)) return ItemStack.EMPTY;
+        } else if (index < packEnd) {
+            // pack -> player
             if (!moveItemStackTo(stack, invStart, invEnd, true)) return ItemStack.EMPTY;
         } else {
+            // player -> armour slot / empty hands, otherwise the pack
             boolean moved = false;
-            // Armor goes to its slot, everything else to main hand, then off hand.
             for (int i = 0; i < 4 && !moved; i++) {
                 Slot target = this.slots.get(i);
                 if (!target.hasItem() && target.mayPlace(stack)) moved = moveItemStackTo(stack, i, i + 1, false);
             }
-            if (!moved && !this.slots.get(4).hasItem()) moved = moveItemStackTo(stack, 4, 5, false);
-            if (!moved && !this.slots.get(5).hasItem()) moved = moveItemStackTo(stack, 5, 6, false);
+            if (!moved && !this.slots.get(4).hasItem() && stack.getMaxStackSize() == 1) moved = moveItemStackTo(stack, 4, 5, false);
+            if (!moved) moved = moveItemStackTo(stack, packStart, packEnd, false);
             if (!moved) return ItemStack.EMPTY;
         }
 

@@ -38,6 +38,13 @@ public class PirateGoals {
         public boolean canContinueToUse() {
             return pirate.getRangedType() == PirateEntity.Ranged.NONE && super.canContinueToUse();
         }
+
+        @Override
+        public void tick() {
+            super.tick();
+            // Brawlers charge in faster, marksmen approach warily.
+            if (!pirate.getNavigation().isDone()) pirate.getNavigation().setSpeedModifier(pirate.getCombatStyle().chargeSpeed);
+        }
     }
 
     /**
@@ -93,14 +100,16 @@ public class PirateGoals {
             double dist = pirate.distanceToSqr(target);
             boolean canSee = pirate.getSensing().hasLineOfSight(target);
             unseenTicks = canSee ? 0 : unseenTicks + 1;
-            double range = type == PirateEntity.Ranged.TRIDENT ? 12.0 : 18.0;
+            float keep = pirate.getCombatStyle().keepDistance;
+            double range = Math.max(type == PirateEntity.Ranged.TRIDENT ? 12.0 : 18.0, keep + 4.0);
 
             // Movement
             if (!canSee || dist > range * range) {
                 pirate.getNavigation().moveTo(target, 1.1);
             } else {
                 pirate.getNavigation().stop();
-                if (dist < 16.0) pirate.getMoveControl().strafe(-0.6F, 0.0F); // too close: step back
+                // Too close for comfort: back off to this pirate's preferred distance.
+                if (dist < (keep - 2.0) * (keep - 2.0)) pirate.getMoveControl().strafe(-0.6F, 0.0F);
             }
             pirate.getLookControl().setLookAt(target, 30.0F, 30.0F);
             pirate.lookAt(target, 30.0F, 30.0F);

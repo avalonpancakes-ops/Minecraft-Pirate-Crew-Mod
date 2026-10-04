@@ -11,6 +11,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import java.util.function.Predicate;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -61,12 +66,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PirateEntity extends PathfinderMob {
-    public enum Orders { FOLLOW, HOLD, WANDER }
+    public enum Orders { FOLLOW, HOLD, WANDER, WORK }
 
     private static final EntityDataAccessor<Integer> DATA_TIER = SynchedEntityData.defineId(PirateEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<String> DATA_SKIN = SynchedEntityData.defineId(PirateEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Optional<UUID>> DATA_CREW = SynchedEntityData.defineId(PirateEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Integer> DATA_ORDERS = SynchedEntityData.defineId(PirateEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_STYLE = SynchedEntityData.defineId(PirateEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_TASK = SynchedEntityData.defineId(PirateEntity.class, EntityDataSerializers.INT);
+
+    /** Half of a player's 36-slot inventory. */
+    public static final int PACK_SIZE = 18;
+    public static final int WORK_RADIUS = 12;
 
     private static final int HOME_RADIUS = 6;
 
@@ -76,6 +87,13 @@ public class PirateEntity extends PathfinderMob {
     @Nullable private BlockPos holdPos;
     @Nullable private BlockPos home;
     private int lastCombatTick = -1000;
+    private final SimpleContainer pack = new SimpleContainer(PACK_SIZE);
+    /** This pirate's own distance for switching to melee (varies inside its combat style's range). */
+    private float meleeRange = 5.0F;
+    @Nullable private BlockPos workCenter;
+    private int lastWeaponSwap = -1000;
+    private int lastSpeech = -100000;
+    private String lastSpeechText = "";
 
     public PirateEntity(EntityType<? extends PirateEntity> type, Level level) {
         super(type, level);
@@ -102,6 +120,8 @@ public class PirateEntity extends PathfinderMob {
         this.entityData.define(DATA_SKIN, "");
         this.entityData.define(DATA_CREW, Optional.empty());
         this.entityData.define(DATA_ORDERS, Orders.WANDER.ordinal());
+        this.entityData.define(DATA_STYLE, CombatStyle.BALANCED.ordinal());
+        this.entityData.define(DATA_TASK, PirateTask.NONE.ordinal());
     }
 
     // ------------------------------------------------------------------ AI
@@ -113,6 +133,7 @@ public class PirateEntity extends PathfinderMob {
         this.goalSelector.addGoal(1, new PirateGoals.PirateMeleeGoal(this, 1.2));
         this.goalSelector.addGoal(2, new PirateGoals.FollowLeaderGoal(this, 1.15, 5.0F, 2.5F));
         this.goalSelector.addGoal(3, new PirateGoals.HoldPositionGoal(this, 1.0));
+        this.goalSelector.addGoal(3, new WorkGoal(this));
         this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8));
         this.goalSelector.addGoal(6, new PirateGoals.IdleStrollGoal(this, 0.6));
@@ -280,10 +301,38 @@ public class PirateEntity extends PathfinderMob {
         this.initialized = true;
         this.entityData.set(DATA_TIER, tier.ordinal());
         this.pirateName = PirateNames.random(this.random);
+        rollCombatStyle();
         applyTierStats();
         this.setHealth(this.getMaxHealth());
         this.entityData.set(DATA_SKIN, PirateSkins.random(this.random, tier));
         updateDisplayName();
+    }
+
+    private void rollCombatStyle() {
+        CombatStyle style = CombatStyle.random(this.random);
+        this.entityData.set(DATA_STYLE, style.ordinal());
+        this.meleeRange = style.meleeMin + this.random.nextFloat() * (style.meleeMax - style.meleeMin);
+    }
+
+    public CombatStyle getCombatStyle() {
+        return CombatStyle.byId(this.entityData.get(DATA_STYLE));
+    }
+
+    public float getMeleeRange() {
+        return meleeRange;
+    }
+
+    public PirateTask getTask() {
+        return PirateTask.byId(this.entityData.get(DATA_TASK));
+    }
+
+    @Nullable
+    public BlockPos getWorkCenter() {
+        return workCenter;
+    }
+
+    public SimpleContainer getPack() {
+        return pack;
     }
 
     private void applyTierStats() {
@@ -301,7 +350,9 @@ public class PirateEntity extends PathfinderMob {
 
     /** Free pirates stay near their bar; crew pirates told to roam stay near where they were told. */
     private void applyRestriction() {
-        if (home != null && (!isRecruited() || getOrders() == Orders.WANDER)) {
+        if (isRecruited() && getOrders() == Orders.WORK && workCenter != null) {
+            this.restrictTo(workCenter, WORK_RADIUS + 10);
+        } else if (home != null && (!isRecruited() || getOrders() == Orders.WANDER)) {
             this.restrictTo(home, isRecruited() ? 12 : HOME_RADIUS);
         } else {
             this.clearRestriction();
@@ -403,6 +454,8 @@ public class PirateEntity extends PathfinderMob {
         this.entityData.set(DATA_CREW, Optional.empty());
         this.leaderId = null;
         this.holdPos = null;
+        this.workCenter = null;
+        this.entityData.set(DATA_TASK, PirateTask.NONE.ordinal());
         this.entityData.set(DATA_ORDERS, Orders.WANDER.ordinal());
         this.setTarget(null);
         this.setHome(this.blockPosition());
@@ -411,6 +464,7 @@ public class PirateEntity extends PathfinderMob {
 
     public void setOrders(Orders orders, Player by) {
         this.entityData.set(DATA_ORDERS, orders.ordinal());
+        this.entityData.set(DATA_TASK, PirateTask.NONE.ordinal());
         this.leaderId = by.getUUID();
         this.getNavigation().stop();
         applyRestriction();
@@ -424,6 +478,132 @@ public class PirateEntity extends PathfinderMob {
                 this.setHome(this.blockPosition());
                 by.displayClientMessage(Component.literal(pirateName + ": I'll stretch me legs around here.").withStyle(ChatFormatting.YELLOW), true);
             }
+            default -> {}
+        }
+    }
+
+    /** Send the pirate to work around where it stands now. NONE stops work and has it follow. */
+    public void startTask(PirateTask task, Player by) {
+        if (task == PirateTask.NONE) {
+            setOrders(Orders.FOLLOW, by);
+            return;
+        }
+        this.leaderId = by.getUUID();
+        this.workCenter = this.blockPosition();
+        this.entityData.set(DATA_ORDERS, Orders.WORK.ordinal());
+        this.entityData.set(DATA_TASK, task.ordinal());
+        this.getNavigation().stop();
+        applyRestriction();
+        String line = switch (task) {
+            case MINE -> "Aye, I'll dig out what ore I can find.";
+            case FARM -> "I'll tend the crops, Cap'n.";
+            case FISH -> "Off to catch us some supper!";
+            case WOOD -> "Timber it is!";
+            default -> "Aye.";
+        };
+        by.displayClientMessage(Component.literal(pirateName + ": " + line).withStyle(ChatFormatting.YELLOW), true);
+    }
+
+    /** Tell the crew leader something (rate-limited so the pirate doesn't nag). */
+    public void say(String text) {
+        if (this.tickCount - lastSpeech < 600 && text.equals(lastSpeechText)) return;
+        if (this.tickCount - lastSpeech < 100) return;
+        Player leader = getLeader();
+        if (leader == null || leader.distanceToSqr(this) > 64 * 64) return;
+        lastSpeech = this.tickCount;
+        lastSpeechText = text;
+        leader.sendSystemMessage(Component.literal(pirateName + ": ").withStyle(ChatFormatting.GOLD)
+                .append(Component.literal(text).withStyle(ChatFormatting.YELLOW)));
+    }
+
+    // ------------------------------------------------------------------ pack & gear
+
+    public static boolean isRangedWeapon(ItemStack s) {
+        Item i = s.getItem();
+        return i instanceof BowItem || i instanceof CrossbowItem || i instanceof TridentItem;
+    }
+
+    /** Extra melee damage an item gives in the main hand (0 for most items). */
+    public static double meleeDamage(ItemStack s) {
+        if (s.isEmpty()) return 0;
+        double dmg = 0;
+        for (AttributeModifier mod : s.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
+            if (mod.getOperation() == AttributeModifier.Operation.ADDITION) dmg += mod.getAmount();
+        }
+        return dmg;
+    }
+
+    /** Swap the main-hand item with a pack slot. */
+    public void swapWithPack(int slot) {
+        ItemStack main = getMainHandItem().copy();
+        setItemSlot(EquipmentSlot.MAINHAND, pack.getItem(slot).copy());
+        pack.setItem(slot, main);
+        if (isUsingItem()) stopUsingItem();
+        lastWeaponSwap = this.tickCount;
+    }
+
+    /** Make sure the main hand holds an item matching {@code want}, taking one from the pack if needed. */
+    public boolean equipFromPack(Predicate<ItemStack> want) {
+        if (want.test(getMainHandItem())) return true;
+        for (int i = 0; i < pack.getContainerSize(); i++) {
+            if (want.test(pack.getItem(i))) {
+                swapWithPack(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasInHandOrPack(Predicate<ItemStack> want) {
+        if (want.test(getMainHandItem())) return true;
+        for (int i = 0; i < pack.getContainerSize(); i++) if (want.test(pack.getItem(i))) return true;
+        return false;
+    }
+
+    public boolean packFull() {
+        for (int i = 0; i < pack.getContainerSize(); i++) if (pack.getItem(i).isEmpty()) return false;
+        return true;
+    }
+
+    /** Put an item in the pack; whatever doesn't fit is dropped at the pirate's feet. */
+    public void addToPack(ItemStack stack) {
+        ItemStack left = pack.addItem(stack);
+        if (!left.isEmpty()) this.spawnAtLocation(left);
+    }
+
+    /**
+     * In a fight, pick melee or ranged from what's in hand and in the pack, based on distance and
+     * this pirate's combat style.
+     */
+    private void chooseWeapon() {
+        LivingEntity target = getTarget();
+        if (target == null || this.tickCount - lastWeaponSwap < 30 || isUsingItem()) return;
+        ItemStack main = getMainHandItem();
+        boolean holdingRanged = isRangedWeapon(main);
+        int rangedSlot = -1, meleeSlot = -1;
+        double bestMelee = holdingRanged ? 0 : meleeDamage(main);
+        for (int i = 0; i < pack.getContainerSize(); i++) {
+            ItemStack s = pack.getItem(i);
+            if (s.isEmpty()) continue;
+            if (isRangedWeapon(s)) {
+                if (rangedSlot < 0) rangedSlot = i;
+            } else {
+                double dmg = meleeDamage(s);
+                if (dmg > bestMelee) {
+                    bestMelee = dmg;
+                    meleeSlot = i;
+                }
+            }
+        }
+        boolean hasRanged = holdingRanged || rangedSlot >= 0;
+        double dist = this.distanceTo(target);
+        // A little stickiness so it doesn't flip back and forth at the boundary.
+        float threshold = holdingRanged ? meleeRange : meleeRange + 1.5F;
+        boolean wantMelee = !hasRanged || dist < threshold;
+        if (wantMelee) {
+            if (meleeSlot >= 0) swapWithPack(meleeSlot);
+        } else if (!holdingRanged && rangedSlot >= 0) {
+            swapWithPack(rangedSlot);
         }
     }
 
@@ -547,6 +727,8 @@ public class PirateEntity extends PathfinderMob {
             this.entityData.set(DATA_SKIN, PirateSkins.random(this.random, getTier()));
         }
 
+        if (this.tickCount % 10 == 0 && this.getTarget() != null) chooseWeapon();
+
         // Players regenerate, so do pirates (slowly, out of combat).
         if (this.tickCount % 60 == 0 && this.getHealth() < this.getMaxHealth()
                 && this.getTarget() == null && this.tickCount - lastCombatTick > 200) {
@@ -579,6 +761,10 @@ public class PirateEntity extends PathfinderMob {
             }
             this.setItemSlot(slot, ItemStack.EMPTY);
         }
+        for (int i = 0; i < pack.getContainerSize(); i++) {
+            ItemStack stack = pack.removeItemNoUpdate(i);
+            if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack)) this.spawnAtLocation(stack);
+        }
     }
 
     // ------------------------------------------------------------------ save / load
@@ -596,6 +782,20 @@ public class PirateEntity extends PathfinderMob {
         if (leaderId != null) tag.putUUID("Leader", leaderId);
         if (holdPos != null) tag.put("HoldPos", NbtUtils.writeBlockPos(holdPos));
         if (home != null) tag.put("Home", NbtUtils.writeBlockPos(home));
+        tag.putInt("Style", this.entityData.get(DATA_STYLE));
+        tag.putFloat("MeleeRange", meleeRange);
+        tag.putInt("Task", this.entityData.get(DATA_TASK));
+        if (workCenter != null) tag.put("WorkCenter", NbtUtils.writeBlockPos(workCenter));
+        ListTag packTag = new ListTag();
+        for (int i = 0; i < pack.getContainerSize(); i++) {
+            ItemStack stack = pack.getItem(i);
+            if (stack.isEmpty()) continue;
+            CompoundTag t = new CompoundTag();
+            t.putByte("Slot", (byte) i);
+            stack.save(t);
+            packTag.add(t);
+        }
+        tag.put("Pack", packTag);
     }
 
     @Override
@@ -609,6 +809,20 @@ public class PirateEntity extends PathfinderMob {
         this.entityData.set(DATA_CREW, tag.hasUUID("Crew") ? Optional.of(tag.getUUID("Crew")) : Optional.empty());
         this.leaderId = tag.hasUUID("Leader") ? tag.getUUID("Leader") : null;
         this.holdPos = tag.contains("HoldPos") ? NbtUtils.readBlockPos(tag.getCompound("HoldPos")) : null;
+        if (tag.contains("Style")) {
+            this.entityData.set(DATA_STYLE, tag.getInt("Style"));
+            this.meleeRange = tag.getFloat("MeleeRange");
+        } else {
+            rollCombatStyle(); // pirates from before combat styles existed
+        }
+        this.entityData.set(DATA_TASK, tag.getInt("Task"));
+        this.workCenter = tag.contains("WorkCenter") ? NbtUtils.readBlockPos(tag.getCompound("WorkCenter")) : null;
+        for (int i = 0; i < pack.getContainerSize(); i++) pack.setItem(i, ItemStack.EMPTY);
+        for (Tag t : tag.getList("Pack", Tag.TAG_COMPOUND)) {
+            CompoundTag c = (CompoundTag) t;
+            int slot = c.getByte("Slot") & 255;
+            if (slot < pack.getContainerSize()) pack.setItem(slot, ItemStack.of(c));
+        }
         if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")));
         if (initialized) {
             applyTierStats();

@@ -2,6 +2,7 @@ package com.piratecrew.network;
 
 import com.piratecrew.crew.CrewManager;
 import com.piratecrew.entity.PirateEntity;
+import com.piratecrew.entity.PirateTask;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -11,7 +12,7 @@ import java.util.function.Supplier;
 
 /** Client -> server: order a crew pirate (from its equipment screen). */
 public class PirateCommandPacket {
-    public enum Command { FOLLOW, HOLD, WANDER, DISMISS }
+    public enum Command { FOLLOW, HOLD, WANDER, DISMISS, TASK_MINE, TASK_FARM, TASK_FISH, TASK_WOOD, TASK_STOP }
 
     public final int entityId;
     public final Command command;
@@ -34,13 +35,18 @@ public class PirateCommandPacket {
         ServerPlayer player = ctx.get().getSender();
         if (player == null) return;
         Entity e = player.level().getEntity(entityId);
-        if (!(e instanceof PirateEntity pirate) || pirate.distanceToSqr(player) > 16 * 16) return;
+        if (!(e instanceof PirateEntity pirate) || pirate.distanceToSqr(player) > 24 * 24) return;
         if (!CrewManager.isInSameCrew(player, pirate)) return;
 
         switch (command) {
             case FOLLOW -> pirate.setOrders(PirateEntity.Orders.FOLLOW, player);
             case HOLD -> pirate.setOrders(PirateEntity.Orders.HOLD, player);
             case WANDER -> pirate.setOrders(PirateEntity.Orders.WANDER, player);
+            case TASK_MINE -> pirate.startTask(PirateTask.MINE, player);
+            case TASK_FARM -> pirate.startTask(PirateTask.FARM, player);
+            case TASK_FISH -> pirate.startTask(PirateTask.FISH, player);
+            case TASK_WOOD -> pirate.startTask(PirateTask.WOOD, player);
+            case TASK_STOP -> pirate.startTask(PirateTask.NONE, player);
             case DISMISS -> {
                 player.closeContainer();
                 CrewManager.dismissPirate(player, pirate);
