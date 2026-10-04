@@ -2,7 +2,13 @@ package com.piratecrew.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -13,6 +19,137 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import java.util.EnumSet;
 
 public class PirateGoals {
+
+    /** Normal melee, used whenever the pirate isn't holding a bow, crossbow or trident. */
+    public static class PirateMeleeGoal extends MeleeAttackGoal {
+        private final PirateEntity pirate;
+
+        public PirateMeleeGoal(PirateEntity pirate, double speed) {
+            super(pirate, speed, true);
+            this.pirate = pirate;
+        }
+
+        @Override
+        public boolean canUse() {
+            return pirate.getRangedType() == PirateEntity.Ranged.NONE && super.canUse();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return pirate.getRangedType() == PirateEntity.Ranged.NONE && super.canContinueToUse();
+        }
+    }
+
+    /**
+     * Bow / crossbow / trident combat: get within range and line of sight, back off if the target
+     * is too close, draw (or load) the weapon and fire.
+     */
+    public static class RangedWeaponGoal extends Goal {
+        private final PirateEntity pirate;
+        private LivingEntity target;
+        private int cooldown;
+        private int unseenTicks;
+
+        public RangedWeaponGoal(PirateEntity pirate) {
+            this.pirate = pirate;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            LivingEntity t = pirate.getTarget();
+            if (t == null || !t.isAlive() || pirate.getRangedType() == PirateEntity.Ranged.NONE) return false;
+            target = t;
+            return true;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return canUse();
+        }
+
+        @Override
+        public void start() {
+            cooldown = 10;
+            unseenTicks = 0;
+        }
+
+        @Override
+        public void stop() {
+            target = null;
+            if (pirate.isUsingItem()) pirate.stopUsingItem();
+            pirate.getNavigation().stop();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            if (target == null) return;
+            PirateEntity.Ranged type = pirate.getRangedType();
+            double dist = pirate.distanceToSqr(target);
+            boolean canSee = pirate.getSensing().hasLineOfSight(target);
+            unseenTicks = canSee ? 0 : unseenTicks + 1;
+            double range = type == PirateEntity.Ranged.TRIDENT ? 12.0 : 18.0;
+
+            // Movement
+            if (!canSee || dist > range * range) {
+                pirate.getNavigation().moveTo(target, 1.1);
+            } else {
+                pirate.getNavigation().stop();
+                if (dist < 16.0) pirate.getMoveControl().strafe(-0.6F, 0.0F); // too close: step back
+            }
+            pirate.getLookControl().setLookAt(target, 30.0F, 30.0F);
+            pirate.lookAt(target, 30.0F, 30.0F);
+
+            switch (type) {
+                case BOW -> tickDrawAndRelease(canSee, 20, () -> {
+                    int drawn = pirate.getTicksUsingItem();
+                    pirate.stopUsingItem();
+                    pirate.shootBow(target, BowItem.getPowerForTime(drawn));
+                    cooldown = 15 + pirate.getRandom().nextInt(10);
+                });
+                case TRIDENT -> tickDrawAndRelease(canSee, 12, () -> {
+                    pirate.stopUsingItem();
+                    pirate.throwTrident(target);
+                    cooldown = 30 + pirate.getRandom().nextInt(10);
+                });
+                case CROSSBOW -> tickCrossbow(canSee);
+                default -> {}
+            }
+        }
+
+        private void tickDrawAndRelease(boolean canSee, int drawTicks, Runnable fire) {
+            if (pirate.isUsingItem()) {
+                if (unseenTicks > 60) {
+                    pirate.stopUsingItem();
+                } else if (canSee && pirate.getTicksUsingItem() >= drawTicks) {
+                    fire.run();
+                }
+            } else if (--cooldown <= 0 && canSee) {
+                pirate.startUsingItem(InteractionHand.MAIN_HAND);
+            }
+        }
+
+        private void tickCrossbow(boolean canSee) {
+            ItemStack crossbow = pirate.getMainHandItem();
+            if (!CrossbowItem.isCharged(crossbow)) {
+                if (!pirate.isUsingItem()) {
+                    pirate.startUsingItem(InteractionHand.MAIN_HAND);
+                } else if (pirate.getTicksUsingItem() >= CrossbowItem.getChargeDuration(crossbow)) {
+                    pirate.stopUsingItem();
+                    CrossbowItem.setCharged(crossbow, true);
+                    pirate.playSound(SoundEvents.CROSSBOW_LOADING_END, 1.0F, 1.0F);
+                    cooldown = 10 + pirate.getRandom().nextInt(15);
+                }
+            } else if (--cooldown <= 0 && canSee) {
+                pirate.shootCrossbow(target);
+            }
+        }
+    }
 
     /** Follows the crew leader like a tamed wolf; teleports if left far behind. */
     public static class FollowLeaderGoal extends Goal {

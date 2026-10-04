@@ -17,6 +17,7 @@ public class Crew {
     public final UUID id;
     public String name;
     public UUID captain;
+    /** Up to two vice captains: real players or recruited pirates. */
     public final List<UUID> viceCaptains = new ArrayList<>();
     /** Real players, including the captain. */
     public final LinkedHashSet<UUID> players = new LinkedHashSet<>();
@@ -43,15 +44,21 @@ public class Crew {
         return players.size() >= Config.MAX_REAL_PLAYERS.get();
     }
 
-    public CrewRole roleOf(UUID player) {
-        if (player.equals(captain)) return CrewRole.CAPTAIN;
-        if (viceCaptains.contains(player)) return CrewRole.VICE_CAPTAIN;
-        if (players.contains(player)) return CrewRole.MEMBER;
+    /** Role of a player or pirate in this crew, or null if not a member. */
+    public CrewRole roleOf(UUID member) {
+        if (member.equals(captain)) return CrewRole.CAPTAIN;
+        if (viceCaptains.contains(member)) return CrewRole.VICE_CAPTAIN;
+        if (players.contains(member) || npcs.containsKey(member)) return CrewRole.MEMBER;
         return null;
     }
 
-    /** Captain and vice captains can recruit, invite and kick ordinary members. */
+    public boolean isNpc(UUID member) {
+        return npcs.containsKey(member);
+    }
+
+    /** Players who are captain or vice captain can recruit, invite and kick ordinary members. */
     public boolean isOfficer(UUID player) {
+        if (!players.contains(player)) return false;
         CrewRole r = roleOf(player);
         return r == CrewRole.CAPTAIN || r == CrewRole.VICE_CAPTAIN;
     }

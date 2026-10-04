@@ -13,12 +13,14 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 /** Crew management: members, ranks, invites, icon, name. Opened with J (rebindable) or /crew. */
 public class CrewScreen extends Screen {
-    private static final int W = 260, H = 230;
+    private static final int W = 260, H = 246;
+    private static final int LIST_Y = 37, PAGER_Y = LIST_Y + 8 * 16 + 5, ROW1_Y = PAGER_Y + 22, ROW2_Y = ROW1_Y + 24;
     private static final int ROWS = 8, ROW_H = 16;
 
     private int left, top;
@@ -105,63 +107,72 @@ public class CrewScreen extends Screen {
 
     // ------------------------------------------------------------------ crew
 
+    /** A button shown at the right end of a member row. */
+    private record RowButton(String label, int width, Button.OnPress press) {}
+
+    /** The buttons a member's row gets, given who is looking. Shared by init() and render(). */
+    private List<RowButton> rowButtons(CrewSyncPacket d, CrewSyncPacket.Member m) {
+        List<RowButton> out = new ArrayList<>();
+        UUID self = minecraft != null && minecraft.player != null ? minecraft.player.getUUID() : null;
+        if (m.id().equals(self)) return out;
+        CrewRole me = CrewRole.byId(d.myRole);
+        boolean captain = me == CrewRole.CAPTAIN;
+        boolean officer = captain || me == CrewRole.VICE_CAPTAIN;
+        CrewRole r = CrewRole.byId(m.role());
+        if (r == CrewRole.CAPTAIN) return out;
+        long vices = d.members.stream().filter(x -> x.role() == CrewRole.VICE_CAPTAIN.ordinal()).count();
+
+        // Right-to-left order: Kick, Captain, Vice/Demote
+        boolean canKick = captain || (officer && r == CrewRole.MEMBER);
+        if (canKick) out.add(new RowButton("Kick", 28, b -> { if (confirm("kick" + m.id(), b)) send(Action.KICK, "", m.id()); }));
+        if (captain && !m.npc()) out.add(new RowButton("Capt", 30, b -> { if (confirm("capt" + m.id(), b)) send(Action.MAKE_CAPTAIN, "", m.id()); }));
+        if (captain) {
+            if (r == CrewRole.VICE_CAPTAIN) out.add(new RowButton("Demote", 38, b -> send(Action.DEMOTE, "", m.id())));
+            else if (vices < 2) out.add(new RowButton("+Vice", 34, b -> send(Action.PROMOTE, "", m.id())));
+        }
+        return out;
+    }
+
+    /** x where a row's buttons start (left edge of the leftmost one). */
+    private int buttonsStart(List<RowButton> buttons) {
+        int x = left + W - 12;
+        for (RowButton rb : buttons) x -= rb.width() + 2;
+        return x;
+    }
+
     private void initCrew(CrewSyncPacket d) {
         CrewRole me = CrewRole.byId(d.myRole);
         boolean captain = me == CrewRole.CAPTAIN;
         boolean officer = captain || me == CrewRole.VICE_CAPTAIN;
-        UUID self = minecraft != null && minecraft.player != null ? minecraft.player.getUUID() : null;
 
         int pages = Math.max(1, (d.members.size() + ROWS - 1) / ROWS);
         page = Math.min(page, pages - 1);
-        long vices = d.members.stream().filter(m -> !m.npc() && m.role() == CrewRole.VICE_CAPTAIN.ordinal()).count();
 
-        List<CrewSyncPacket.Member> members = d.members;
         for (int i = 0; i < ROWS; i++) {
             int idx = page * ROWS + i;
-            if (idx >= members.size()) break;
-            CrewSyncPacket.Member m = members.get(idx);
-            int rowY = top + 39 + i * ROW_H;
-            int bx = left + W - 12; // buttons are laid out right-to-left
-
-            if (m.id().equals(self)) continue;
-
-            if (m.npc()) {
-                if (officer) {
-                    bx -= 30;
-                    addRenderableWidget(small("Kick", bx, rowY, 30, b -> { if (confirm("kick" + m.id(), b)) send(Action.KICK, "", m.id()); }));
-                }
-                continue;
-            }
-
-            CrewRole r = CrewRole.byId(m.role());
-            boolean canKick = captain || (me == CrewRole.VICE_CAPTAIN && r == CrewRole.MEMBER);
-            if (canKick) {
-                bx -= 30;
-                addRenderableWidget(small("Kick", bx, rowY, 30, b -> { if (confirm("kick" + m.id(), b)) send(Action.KICK, "", m.id()); }));
-            }
-            if (captain) {
-                bx -= 34;
-                addRenderableWidget(small("Capt.", bx, rowY, 34, b -> { if (confirm("capt" + m.id(), b)) send(Action.MAKE_CAPTAIN, "", m.id()); }));
-                if (r == CrewRole.VICE_CAPTAIN) {
-                    bx -= 40;
-                    addRenderableWidget(small("Demote", bx, rowY, 40, b -> send(Action.DEMOTE, "", m.id())));
-                } else if (vices < 2) {
-                    bx -= 40;
-                    addRenderableWidget(small("+Vice", bx, rowY, 40, b -> send(Action.PROMOTE, "", m.id())));
-                }
+            if (idx >= d.members.size()) break;
+            CrewSyncPacket.Member m = d.members.get(idx);
+            int rowY = top + LIST_Y + 1 + i * ROW_H;
+            int bx = left + W - 12;
+            for (RowButton rb : rowButtons(d, m)) {
+                bx -= rb.width() + 2;
+                addRenderableWidget(small(rb.label(), bx + 2, rowY, rb.width(), rb.press()));
             }
         }
 
-        // Pager
-        int pagerY = top + 39 + ROWS * ROW_H + 4;
-        Button prev = addRenderableWidget(small("<", left + 10, pagerY, 20, b -> { page--; rebuild(); }));
-        Button next = addRenderableWidget(small(">", left + 90, pagerY, 20, b -> { page++; rebuild(); }));
+        // Pager + leave
+        int py = top + PAGER_Y;
+        Button prev = addRenderableWidget(small("<", left + 10, py - 1, 20, b -> { page--; rebuild(); }));
+        Button next = addRenderableWidget(small(">", left + 74, py - 1, 20, b -> { page++; rebuild(); }));
         prev.active = page > 0;
         next.active = page < pages - 1;
+        addRenderableWidget(small("Leave Crew", left + W - 72, py - 1, 62, b -> {
+            if (confirm("leave", b)) send(Action.LEAVE, "", null);
+        }));
 
-        int y1 = top + 182, y2 = top + 204;
+        int y1 = top + ROW1_Y, y2 = top + ROW2_Y;
         if (officer) {
-            inviteBox = new EditBox(font, left + 10, y1, 120, 18, Component.literal("Player name"));
+            inviteBox = new EditBox(font, left + 10, y1, 124, 18, Component.literal("Player name"));
             inviteBox.setMaxLength(16);
             inviteBox.setValue(inviteText);
             inviteBox.setHint(Component.literal("Player to invite...").withStyle(ChatFormatting.DARK_GRAY));
@@ -169,26 +180,23 @@ public class CrewScreen extends Screen {
             addRenderableWidget(Button.builder(Component.literal("Invite"), b -> {
                 send(Action.INVITE, inviteBox.getValue(), null);
                 inviteBox.setValue("");
-            }).bounds(left + 134, y1 - 1, 50, 20).build());
+            }).bounds(left + 138, y1 - 1, 52, 20).build());
             addRenderableWidget(Button.builder(Component.literal("Set Icon"), b -> send(Action.SET_ICON, "", null))
                     .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Uses the item in your main hand as the crew icon")))
-                    .bounds(left + 188, y1 - 1, 62, 20).build());
+                    .bounds(left + 194, y1 + 1, 56, 16).build());
         }
         if (captain) {
-            renameBox = new EditBox(font, left + 10, y2, 120, 18, Component.literal("New name"));
+            renameBox = new EditBox(font, left + 10, y2, 124, 18, Component.literal("New name"));
             renameBox.setMaxLength(24);
             renameBox.setValue(renameText);
             renameBox.setHint(Component.literal("Rename crew...").withStyle(ChatFormatting.DARK_GRAY));
             addRenderableWidget(renameBox);
             addRenderableWidget(Button.builder(Component.literal("Rename"), b -> send(Action.RENAME, renameBox.getValue(), null))
-                    .bounds(left + 134, y2 - 1, 50, 20).build());
+                    .bounds(left + 138, y2 - 1, 52, 20).build());
             addRenderableWidget(Button.builder(Component.literal("Disband").withStyle(ChatFormatting.RED), b -> {
                 if (confirm("disband", b)) send(Action.DISBAND, "", null);
-            }).bounds(left + 188, y2 - 1, 62, 20).build());
+            }).bounds(left + 194, y2 - 1, 56, 20).build());
         }
-        addRenderableWidget(Button.builder(Component.literal("Leave Crew"), b -> {
-            if (confirm("leave", b)) send(Action.LEAVE, "", null);
-        }).bounds(left + W - 72, pagerY - 2, 62, 18).build());
     }
 
     private Button small(String label, int x, int y, int w, Button.OnPress press) {
@@ -242,45 +250,53 @@ public class CrewScreen extends Screen {
         CrewRole me = CrewRole.byId(d.myRole);
         String counts = "Players " + players + "/" + d.maxPlayers + "   Crew " + d.members.size() + "/" + d.maxSize;
         g.drawString(font, counts, left + 32, top + 20, GuiDraw.TEXT, false);
-        g.drawString(font, Component.literal(me.title).withStyle(me.color == ChatFormatting.WHITE ? ChatFormatting.DARK_GRAY : ChatFormatting.DARK_RED),
+        g.drawString(font, Component.literal(me.title).withStyle(me == CrewRole.MEMBER ? ChatFormatting.DARK_GRAY : ChatFormatting.DARK_RED),
                 left + W - 10 - font.width(me.title), top + 9, GuiDraw.TEXT, false);
 
         // Member list
-        GuiDraw.inset(g, left + 8, top + 37, W - 16, ROWS * ROW_H + 2);
+        GuiDraw.inset(g, left + 8, top + LIST_Y, W - 16, ROWS * ROW_H + 2);
         UUID self = minecraft != null && minecraft.player != null ? minecraft.player.getUUID() : null;
         for (int i = 0; i < ROWS; i++) {
             int idx = page * ROWS + i;
-            int rowY = top + 38 + i * ROW_H;
+            int rowY = top + LIST_Y + 1 + i * ROW_H;
             GuiDraw.row(g, left + 9, rowY, W - 18, ROW_H, i % 2 == 1);
             if (idx >= d.members.size()) continue;
             CrewSyncPacket.Member m = d.members.get(idx);
+            CrewRole r = CrewRole.byId(m.role());
 
-            Component tag;
+            // Left tag: tier for pirates, rank star for players
+            int nameX;
             if (m.npc()) {
                 PirateTier t = PirateTier.byId(m.tier());
-                tag = Component.literal("[" + t.label + "]").withStyle(t.color, ChatFormatting.BOLD);
+                g.drawString(font, Component.literal("[" + t.label + "]").withStyle(t.color, ChatFormatting.BOLD), left + 12, rowY + 4, 0xFFFFFFFF, true);
+                nameX = left + 32;
             } else {
-                CrewRole r = CrewRole.byId(m.role());
-                tag = Component.literal(r == CrewRole.CAPTAIN ? "★" : r == CrewRole.VICE_CAPTAIN ? "☆" : "•")
+                Component star = Component.literal(r == CrewRole.CAPTAIN ? "\u2605" : r == CrewRole.VICE_CAPTAIN ? "\u2606" : "\u2022")
                         .withStyle(r == CrewRole.MEMBER ? ChatFormatting.DARK_GRAY : ChatFormatting.GOLD);
+                g.drawString(font, star, left + 14, rowY + 4, 0xFFFFFFFF, true);
+                nameX = left + 26;
             }
-            g.drawString(font, tag, left + 13, rowY + 4, 0xFFFFFFFF, true);
+
+            String sub = (m.npc() ? (r == CrewRole.VICE_CAPTAIN ? "Vice Captain" : "Pirate") : r.title)
+                    + (!m.npc() && !m.online() ? " (offline)" : "");
+            String name = m.name() + (m.id().equals(self) ? " (you)" : "");
+            int right = buttonsStart(rowButtons(d, m)) - 4;
+            int subW = font.width(sub);
+            int nameMax = right - nameX - subW - 8;
+            if (nameMax < 50) { sub = ""; nameMax = right - nameX; }
 
             int nameColor = m.npc() ? 0xFF3A3A3A : (m.online() ? 0xFF1E5A1E : 0xFF6A6A6A);
-            String name = m.name() + (m.id().equals(self) ? " (you)" : "");
-            g.drawString(font, font.plainSubstrByWidth(name, 96), left + 32, rowY + 4, nameColor, false);
-
-            String sub = m.npc() ? "Pirate" : CrewRole.byId(m.role()).title + (m.online() ? "" : " - offline");
-            g.drawString(font, font.plainSubstrByWidth(sub, 70), left + 132, rowY + 4, 0xFF555555, false);
+            if (m.npc() && r == CrewRole.VICE_CAPTAIN) nameColor = 0xFF7A4A00;
+            g.drawString(font, font.plainSubstrByWidth(name, nameMax), nameX, rowY + 4, nameColor, false);
+            if (!sub.isEmpty()) g.drawString(font, sub, right - font.width(sub), rowY + 4, 0xFF555555, false);
         }
 
         int pages = Math.max(1, (d.members.size() + ROWS - 1) / ROWS);
-        int pagerY = top + 39 + ROWS * ROW_H + 4;
-        g.drawCenteredString(font, (page + 1) + "/" + pages, left + 60, pagerY + 4, 0xFFFFFF);
+        g.drawCenteredString(font, (page + 1) + "/" + pages, left + 52, top + PAGER_Y + 3, 0xFFFFFF);
 
         if (inviteBox == null && renameBox == null) {
-            g.drawString(font, "Only the captain and vice captains", left + 10, top + 186, 0xFF707070, false);
-            g.drawString(font, "can invite, recruit and dismiss.", left + 10, top + 196, 0xFF707070, false);
+            g.drawString(font, "Only the captain and vice captains", left + 10, top + ROW1_Y + 2, 0xFF707070, false);
+            g.drawString(font, "can invite, recruit and dismiss.", left + 10, top + ROW1_Y + 12, 0xFF707070, false);
         }
 
         if (mouseX >= left + 10 && mouseX < left + 26 && mouseY >= top + 9 && mouseY < top + 25 && !d.icon.isEmpty()) {

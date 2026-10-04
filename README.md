@@ -51,11 +51,11 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **Right-click** a pirate to see its tier and price. **Hold rubies and right-click** to recruit (rubies are taken from anywhere in your inventory). If you're not in a crew yet, one is created for you.
 - **Hit a pirate you didn't recruit and it fights back.** It won't join you afterwards while it's angry at you.
 - Right-click **your own crew's** pirate to open its gear screen: armor slots, main hand and off hand, plus orders — **Follow**, **Hold** (guard this spot), **Roam** (wander nearby) and **Dismiss**.
-- Crew pirates defend whoever they follow, attack what that player attacks, and fight hostile mobs (they leave creepers alone). They teleport to you if left far behind, regenerate slowly out of combat, and drop all their gear when they die.
+- Crew pirates defend whoever they follow, attack what that player attacks, and fight hostile mobs (they leave creepers alone). Give them a **bow, crossbow or trident** and they fight at range: they keep their distance, draw or load, and fire. Better tiers aim straighter and hit harder. Arrows are unlimited; put tipped or spectral arrows in a pirate's off hand and it shoots those (and uses them up). Power, Punch, Flame, Piercing and Multishot all work. They teleport to you if left far behind, regenerate slowly out of combat, and drop all their gear when they die.
 
 ### Crews
 - Press **J** (rebindable under Controls → Pirate Crew) or type `/crew` to open the crew screen.
-- Whoever creates the crew is **Captain**. The captain can appoint **2 Vice Captains**.
+- Whoever creates the crew is **Captain**. The captain can appoint **2 Vice Captains**, either players or recruited pirates (use **+Vice** / **Demote** on their row). Pirate vice captains get a ☆ on their name tag. Only player vice captains can recruit and invite.
 - **Max 20 members**, of which at most **7 can be real players** — the rest have to be pirates.
 - Captain and vice captains can invite players, recruit and dismiss pirates, and set the crew icon. Vice captains can kick deckhands; the captain can kick anyone, promote/demote, hand over the captaincy, rename and disband.
 - **Crew icon:** hold any item and press **Set Icon**.

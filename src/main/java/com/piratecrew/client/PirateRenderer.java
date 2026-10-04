@@ -14,7 +14,11 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseAnim;
 
 /**
  * Renders pirates exactly like players. Skins with thin arms use the slim model,
@@ -70,13 +74,31 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
         public void render(PirateEntity entity, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffers, int light) {
             PlayerModel<PirateEntity> m = this.getModel();
             m.setAllVisible(true);
-            HumanoidModel.ArmPose main = entity.getMainHandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
-            HumanoidModel.ArmPose off = entity.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
+            HumanoidModel.ArmPose main = armPose(entity, InteractionHand.MAIN_HAND);
+            HumanoidModel.ArmPose off = armPose(entity, InteractionHand.OFF_HAND);
+            if (main.isTwoHanded()) off = entity.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
             boolean rightHanded = entity.getMainArm() == HumanoidArm.RIGHT;
             m.rightArmPose = rightHanded ? main : off;
             m.leftArmPose = rightHanded ? off : main;
             m.crouching = false;
             super.render(entity, yaw, partialTicks, pose, buffers, light);
+        }
+
+        /** Same poses players use: drawing a bow, loading/holding a crossbow, raising a trident. */
+        private static HumanoidModel.ArmPose armPose(PirateEntity entity, InteractionHand hand) {
+            ItemStack stack = entity.getItemInHand(hand);
+            if (stack.isEmpty()) return HumanoidModel.ArmPose.EMPTY;
+            if (entity.isUsingItem() && entity.getUsedItemHand() == hand) {
+                UseAnim anim = stack.getUseAnimation();
+                if (anim == UseAnim.BOW) return HumanoidModel.ArmPose.BOW_AND_ARROW;
+                if (anim == UseAnim.SPEAR) return HumanoidModel.ArmPose.THROW_SPEAR;
+                if (anim == UseAnim.CROSSBOW) return HumanoidModel.ArmPose.CROSSBOW_CHARGE;
+                if (anim == UseAnim.BLOCK) return HumanoidModel.ArmPose.BLOCK;
+            }
+            if (hand == InteractionHand.MAIN_HAND && stack.getItem() instanceof CrossbowItem && CrossbowItem.isCharged(stack)) {
+                return HumanoidModel.ArmPose.CROSSBOW_HOLD;
+            }
+            return HumanoidModel.ArmPose.ITEM;
         }
 
         @Override

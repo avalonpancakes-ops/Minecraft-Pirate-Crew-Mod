@@ -132,7 +132,8 @@ public class CrewManager {
 
         if (player.getUUID().equals(crew.captain)) {
             // Hand the ship to a vice captain, then any other player, otherwise disband.
-            UUID next = !crew.viceCaptains.isEmpty() ? crew.viceCaptains.get(0) : null;
+            UUID next = null;
+            for (UUID v : crew.viceCaptains) if (crew.players.contains(v)) { next = v; break; }
             if (next == null) {
                 for (UUID u : crew.players) if (!u.equals(player.getUUID())) { next = u; break; }
             }
@@ -219,7 +220,9 @@ public class CrewManager {
 
         if (crew.npcs.containsKey(target)) {
             if (!crew.isOfficer(actor.getUUID())) { err(actor, "Only officers can dismiss pirates."); return; }
+            if (crew.viceCaptains.contains(target) && myRole != CrewRole.CAPTAIN) { err(actor, "Only the captain can dismiss a vice captain."); return; }
             Crew.NpcInfo info = crew.npcs.remove(target);
+            crew.viceCaptains.remove(target);
             d.setDirty();
             releaseNpcEntity(actor.server, target);
             tellCrew(actor.server, crew, info.name() + " was dismissed from the crew.");
@@ -243,6 +246,12 @@ public class CrewManager {
         syncCrew(actor.server, crew);
     }
 
+    private static String memberName(CrewData d, Crew crew, UUID id) {
+        Crew.NpcInfo npc = crew.npcs.get(id);
+        return npc != null ? npc.name() : d.nameOf(id);
+    }
+
+    /** Captain appoints a player or a recruited pirate as one of the two vice captains. */
     public static void promote(ServerPlayer actor, UUID target) {
         CrewData d = data(actor.server);
         Crew crew = d.crewOf(actor.getUUID());
@@ -254,19 +263,37 @@ public class CrewManager {
         }
         crew.viceCaptains.add(target);
         d.setDirty();
-        tellCrew(actor.server, crew, d.nameOf(target) + " is now a Vice Captain.");
+        tellCrew(actor.server, crew, memberName(d, crew, target) + " is now a Vice Captain.");
+        updatePirateRank(actor.server, target);
         syncCrew(actor.server, crew);
     }
 
+    /** Captain demotes a vice captain (player or pirate) back to an ordinary member. */
     public static void demote(ServerPlayer actor, UUID target) {
         CrewData d = data(actor.server);
         Crew crew = d.crewOf(actor.getUUID());
         if (crew == null || !actor.getUUID().equals(crew.captain)) return;
         if (crew.viceCaptains.remove(target)) {
             d.setDirty();
-            tellCrew(actor.server, crew, d.nameOf(target) + " is no longer a Vice Captain.");
+            tellCrew(actor.server, crew, memberName(d, crew, target) + " is no longer a Vice Captain.");
+            updatePirateRank(actor.server, target);
             syncCrew(actor.server, crew);
         }
+    }
+
+    /** Refresh a pirate's name tag after its rank changed (if it's loaded). */
+    private static void updatePirateRank(MinecraftServer server, UUID id) {
+        for (ServerLevel level : server.getAllLevels()) {
+            if (level.getEntity(id) instanceof PirateEntity p) {
+                p.updateDisplayName();
+                return;
+            }
+        }
+    }
+
+    public static boolean isViceCaptain(MinecraftServer server, UUID crewId, UUID member) {
+        Crew crew = data(server).byId(crewId);
+        return crew != null && crew.viceCaptains.contains(member);
     }
 
     public static void transferCaptain(ServerPlayer actor, UUID target) {
@@ -337,6 +364,7 @@ public class CrewManager {
         Crew crew = d.byId(crewId);
         if (crew == null) return;
         Crew.NpcInfo info = crew.npcs.remove(pirateId);
+        crew.viceCaptains.remove(pirateId);
         if (info != null) {
             d.setDirty();
             if (deathNote != null) tellCrew(server, crew, deathNote);
@@ -392,21 +420,26 @@ public class CrewManager {
         }
 
         List<CrewSyncPacket.Member> members = new ArrayList<>();
-        // Captain first, then vices, then deckhands, then pirates (highest tier first).
+        // Captain, vice captains (players and pirates), deckhands, then pirates (highest tier first).
         List<UUID> order = new ArrayList<>();
         if (crew.captain != null) order.add(crew.captain);
         order.addAll(crew.viceCaptains);
         for (UUID u : crew.players) if (!order.contains(u)) order.add(u);
+        crew.npcs.entrySet().stream()
+                .filter(e -> !order.contains(e.getKey()))
+                .sorted((a, b) -> Integer.compare(b.getValue().tier(), a.getValue().tier()))
+                .forEach(e -> order.add(e.getKey()));
         for (UUID u : order) {
             CrewRole r = crew.roleOf(u);
             if (r == null) continue;
-            boolean online = server.getPlayerList().getPlayer(u) != null;
-            members.add(new CrewSyncPacket.Member(u, d.nameOf(u), false, r.ordinal(), 0, online));
+            Crew.NpcInfo npc = crew.npcs.get(u);
+            if (npc != null) {
+                members.add(new CrewSyncPacket.Member(u, npc.name(), true, r.ordinal(), npc.tier(), true));
+            } else {
+                boolean online = server.getPlayerList().getPlayer(u) != null;
+                members.add(new CrewSyncPacket.Member(u, d.nameOf(u), false, r.ordinal(), 0, online));
+            }
         }
-        crew.npcs.entrySet().stream()
-                .sorted((a, b) -> Integer.compare(b.getValue().tier(), a.getValue().tier()))
-                .forEach(e -> members.add(new CrewSyncPacket.Member(e.getKey(), e.getValue().name(), true,
-                        CrewRole.MEMBER.ordinal(), e.getValue().tier(), true)));
 
         CrewRole myRole = crew.roleOf(player.getUUID());
         ModNetwork.sendTo(player, new CrewSyncPacket(open, true, crew.id, crew.name, crew.icon.copy(),

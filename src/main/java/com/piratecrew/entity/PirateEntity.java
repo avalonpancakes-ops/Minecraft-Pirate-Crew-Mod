@@ -12,6 +12,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -38,6 +39,18 @@ import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -96,7 +109,8 @@ public class PirateEntity extends PathfinderMob {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.2, true));
+        this.goalSelector.addGoal(1, new PirateGoals.RangedWeaponGoal(this));
+        this.goalSelector.addGoal(1, new PirateGoals.PirateMeleeGoal(this, 1.2));
         this.goalSelector.addGoal(2, new PirateGoals.FollowLeaderGoal(this, 1.15, 5.0F, 2.5F));
         this.goalSelector.addGoal(3, new PirateGoals.HoldPositionGoal(this, 1.0));
         this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
@@ -118,6 +132,119 @@ public class PirateEntity extends PathfinderMob {
     public boolean canAttack(LivingEntity target) {
         if (!this.level().isClientSide && CrewManager.areCrewmates(this, target)) return false;
         return super.canAttack(target);
+    }
+
+    // ------------------------------------------------------------------ ranged combat
+
+    public enum Ranged { NONE, BOW, CROSSBOW, TRIDENT }
+
+    /** What ranged weapon (if any) the pirate holds in its main hand. Modded bows/crossbows count too. */
+    public Ranged getRangedType() {
+        Item item = getMainHandItem().getItem();
+        if (item instanceof CrossbowItem) return Ranged.CROSSBOW;
+        if (item instanceof BowItem) return Ranged.BOW;
+        if (item instanceof TridentItem) return Ranged.TRIDENT;
+        return Ranged.NONE;
+    }
+
+    /**
+     * Arrows to shoot: whatever arrows are in the off hand (tipped, spectral...), otherwise an
+     * endless supply of plain arrows.
+     */
+    @Override
+    public ItemStack getProjectile(ItemStack weapon) {
+        if (weapon.getItem() instanceof ProjectileWeaponItem) {
+            ItemStack off = getOffhandItem();
+            if (off.getItem() instanceof ArrowItem) return off;
+            return new ItemStack(Items.ARROW);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    /** Better tiers hit harder and aim straighter. */
+    private float inaccuracy() {
+        return Math.max(1.0F, 10.0F - getTier().ordinal() * 1.7F);
+    }
+
+    private void tierArrowBonus(AbstractArrow arrow) {
+        arrow.setBaseDamage(arrow.getBaseDamage() + (getTier().attackDamage - 1.0) * 0.25);
+    }
+
+    private void aim(Projectile projectile, LivingEntity target, float velocity, float yawOffsetDeg) {
+        double dx = target.getX() - getX();
+        double dy = target.getY(0.3333333333333333) - projectile.getY();
+        double dz = target.getZ() - getZ();
+        if (yawOffsetDeg != 0) {
+            double r = Math.toRadians(yawOffsetDeg);
+            double nx = dx * Math.cos(r) - dz * Math.sin(r);
+            double nz = dx * Math.sin(r) + dz * Math.cos(r);
+            dx = nx;
+            dz = nz;
+        }
+        double flat = Math.sqrt(dx * dx + dz * dz);
+        projectile.shoot(dx, dy + flat * 0.2, dz, velocity, inaccuracy());
+    }
+
+    private void useAmmo(ItemStack ammo, ItemStack weapon) {
+        if (ammo == getOffhandItem() && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, weapon) == 0) {
+            ammo.shrink(1);
+        }
+    }
+
+    private void wearWeapon() {
+        getMainHandItem().hurtAndBreak(1, this, e -> e.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+    }
+
+    public void shootBow(LivingEntity target, float power) {
+        ItemStack weapon = getMainHandItem();
+        ItemStack ammo = getProjectile(weapon);
+        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, ammo, power);
+        if (weapon.getItem() instanceof BowItem bow) arrow = bow.customArrow(arrow);
+        tierArrowBonus(arrow);
+        aim(arrow, target, 1.6F + power * 0.4F, 0);
+        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level().addFreshEntity(arrow);
+        useAmmo(ammo, weapon);
+        wearWeapon();
+        lastCombatTick = this.tickCount;
+    }
+
+    public void shootCrossbow(LivingEntity target) {
+        ItemStack weapon = getMainHandItem();
+        ItemStack ammo = getProjectile(weapon);
+        int pierce = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PIERCING, weapon);
+        boolean multishot = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, weapon) > 0;
+        float[] angles = multishot ? new float[]{0F, -10F, 10F} : new float[]{0F};
+        for (float angle : angles) {
+            AbstractArrow arrow = ProjectileUtil.getMobArrow(this, ammo, 1.0F);
+            arrow.setShotFromCrossbow(true);
+            arrow.setSoundEvent(SoundEvents.CROSSBOW_HIT);
+            if (pierce > 0) arrow.setPierceLevel((byte) pierce);
+            if (angle != 0) arrow.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+            tierArrowBonus(arrow);
+            arrow.setBaseDamage(arrow.getBaseDamage() + 1.0); // crossbows hit a bit harder than bows
+            aim(arrow, target, 2.6F, angle);
+            this.level().addFreshEntity(arrow);
+        }
+        this.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (getRandom().nextFloat() * 0.4F + 0.8F));
+        useAmmo(ammo, weapon);
+        wearWeapon();
+        CrossbowItem.setCharged(weapon, false);
+        // Forget any projectiles a player loaded before handing it over, so they aren't fired twice later.
+        if (weapon.getTag() != null) weapon.getTag().remove("ChargedProjectiles");
+        lastCombatTick = this.tickCount;
+    }
+
+    public void throwTrident(LivingEntity target) {
+        ItemStack weapon = getMainHandItem();
+        ThrownTrident trident = new ThrownTrident(this.level(), this, weapon.copy());
+        trident.pickup = AbstractArrow.Pickup.DISALLOWED;
+        trident.setBaseDamage(trident.getBaseDamage() + (getTier().attackDamage - 1.0) * 0.5);
+        aim(trident, target, 1.8F, 0);
+        this.playSound(SoundEvents.TRIDENT_THROW, 1.0F, 1.0F / (getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level().addFreshEntity(trident);
+        wearWeapon();
+        lastCombatTick = this.tickCount;
     }
 
     @Override
@@ -240,11 +367,23 @@ public class PirateEntity extends PathfinderMob {
 
     public void updateDisplayName() {
         PirateTier tier = getTier();
-        Component name = Component.literal("[" + tier.label + "] ").withStyle(tier.color, ChatFormatting.BOLD)
-                .append(Component.literal(pirateName).withStyle(s -> s.withBold(false)
+        MutableComponent name = Component.literal("[" + tier.label + "] ").withStyle(tier.color, ChatFormatting.BOLD);
+        if (isViceCaptain()) name.append(Component.literal("\u2606 ").withStyle(s -> s.withBold(false).withColor(ChatFormatting.GOLD)));
+        name.append(Component.literal(pirateName).withStyle(s -> s.withBold(false)
                         .withColor(isRecruited() ? ChatFormatting.WHITE : ChatFormatting.GRAY)));
         this.setCustomName(name);
         this.setCustomNameVisible(true);
+    }
+
+    /** Server side: is this pirate one of its crew's vice captains? */
+    public boolean isViceCaptain() {
+        UUID crew = getCrewId();
+        if (crew == null || this.level().isClientSide || !(this.level() instanceof ServerLevel sl)) return false;
+        try {
+            return CrewManager.isViceCaptain(sl.getServer(), crew, getUUID());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     // ------------------------------------------------------------------ crew
