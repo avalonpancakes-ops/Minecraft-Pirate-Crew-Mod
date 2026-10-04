@@ -30,3 +30,13 @@ pirate_27 wide C
 pirate_28 slim C
 pirate_29 slim C
 pirate_30 slim C
+pirate_31 wide B
+pirate_32 wide B
+pirate_33 wide B
+pirate_34 wide B
+pirate_35 slim B
+pirate_36 wide B
+pirate_37 slim B
+pirate_38 slim B
+pirate_39 slim B
+pirate_40 slim B
