@@ -23,6 +23,8 @@ import org.lwjgl.glfw.GLFW;
 public class ClientSetup {
     public static final KeyMapping OPEN_CREW = new KeyMapping("key.piratecrew.crew_menu", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.categories.piratecrew");
+    public static final KeyMapping PACT_POWER = new KeyMapping("key.piratecrew.pact_power", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.piratecrew");
 
     @Mod.EventBusSubscriber(modid = PirateCrew.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ModBus {
@@ -49,6 +51,7 @@ public class ClientSetup {
         @SubscribeEvent
         public static void keys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_CREW);
+            event.register(PACT_POWER);
         }
 
         @SubscribeEvent
@@ -68,6 +71,9 @@ public class ClientSetup {
                 if (mc.player != null && mc.screen == null) {
                     ModNetwork.sendToServer(CrewActionPacket.simple(CrewActionPacket.Action.REQUEST_SYNC));
                 }
+            }
+            while (PACT_POWER.consumeClick()) {
+                if (mc.player != null && mc.screen == null) ModNetwork.sendToServer(new com.piratecrew.network.PactAbilityPacket());
             }
         }
     }

@@ -68,7 +68,7 @@ public class Config {
         BAR_MAX_PIRATES = b.comment("Pirates placed in a freshly built bar").defineInRange("startPirates", 6, 0, 20);
         BAR_RESTOCK_TICKS = b.comment("Ticks between restock checks (24000 = one Minecraft day)").defineInRange("restockTicks", 12000, 200, 1000000);
         GENERATE_CAMPS = b.comment("Generate raider pirate camps in the Overworld").define("generateCamps", true);
-        CAMP_CHANCE = b.comment("A raider camp is tried in 1 of every this many newly generated Overworld chunks").defineInRange("campChance", 250, 1, 100000);
+        CAMP_CHANCE = b.comment("A raider camp is tried in 1 of every this many newly generated Overworld chunks (twice as often on Sundered Sea islands)").defineInRange("campChance", 250, 1, 100000);
         CAMP_SPACING = b.comment("Minimum blocks between two raider camps").defineInRange("campSpacing", 320, 16, 100000);
         b.pop();
 

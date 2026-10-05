@@ -117,6 +117,21 @@ public class CrewCommands {
                     c.getSource().sendSuccess(() -> Component.literal("Built a marine outpost."), true);
                     return 1;
                 }))
+                .then(Commands.literal("spawnshrine").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    ServerLevel level = p.serverLevel();
+                    net.minecraft.core.BlockPos centre = p.blockPosition().relative(p.getDirection(), 10);
+                    int h = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre.getX(), centre.getZ());
+                    com.piratecrew.sundered.ShrineBuilder.build(level, new net.minecraft.core.BlockPos(centre.getX(), h - 1, centre.getZ()));
+                    c.getSource().sendSuccess(() -> Component.literal("Built a Pact Shrine."), true);
+                    return 1;
+                }))
+                .then(Commands.literal("clearpact").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    com.piratecrew.pact.SoulPacts.set(p, null);
+                    c.getSource().sendSuccess(() -> Component.literal("Your soul is free of its pact."), true);
+                    return 1;
+                }))
                 .then(Commands.literal("spawnmarines").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     int n = com.piratecrew.sundered.Marines.spawnSquad(p.serverLevel(), p.blockPosition().relative(p.getDirection(), 10), 4, false).size();

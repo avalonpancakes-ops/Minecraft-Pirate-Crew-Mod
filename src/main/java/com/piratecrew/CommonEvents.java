@@ -165,5 +165,80 @@ public class CommonEvents {
         com.piratecrew.crew.EmperorManager.tick(ServerLifecycleHooks.getCurrentServer());
         com.piratecrew.sundered.SunderedStructures.tick(ServerLifecycleHooks.getCurrentServer());
         com.piratecrew.sundered.Marines.tick(ServerLifecycleHooks.getCurrentServer());
+        com.piratecrew.pact.PactPowers.tick();
+    }
+
+    // ------------------------------------------------------------------ soul pacts
+
+    /** Use a Soul Pact on one of your crew's pirates to bind it to them (before the pirate's own menu opens). */
+    @SubscribeEvent
+    public static void pactOnPirate(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
+        net.minecraft.world.item.ItemStack stack = event.getItemStack();
+        if (!(stack.getItem() instanceof com.piratecrew.pact.SoulPactItem item)) return;
+        if (!(event.getTarget() instanceof com.piratecrew.entity.PirateEntity pirate)) return;
+        event.setCanceled(true);
+        event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        if (!pirate.isRecruited() || !CrewManager.isInSameCrew(sp, pirate)) {
+            sp.displayClientMessage(net.minecraft.network.chat.Component.literal("Only a pirate of your own crew can take your pact.")
+                    .withStyle(net.minecraft.ChatFormatting.RED), true);
+            return;
+        }
+        var current = pirate.getPact();
+        if (current == item.pact) {
+            sp.displayClientMessage(net.minecraft.network.chat.Component.literal(pirate.getPirateName() + " already holds the " + item.pact.title() + "."), true);
+            return;
+        }
+        if (current != null && !sp.isShiftKeyDown()) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(pirate.getPirateName() + " is bound to the " + current.title()
+                    + ". Sneak and use the pact on them to replace it (the old pact will be lost).").withStyle(net.minecraft.ChatFormatting.YELLOW));
+            return;
+        }
+        pirate.bindPact(item.pact);
+        com.piratecrew.pact.SoulPactItem.bindEffects(sp.serverLevel(), pirate, item.pact);
+        pirate.say("The " + item.pact.title() + " is mine now... I feel it. " + item.pact.power + "!");
+        sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u2726 " + pirate.getPirateName() + " is bound to the " + item.pact.title()
+                + " and now fights " + (item.pact.ranged ? "from range" : "up close") + ", using " + item.pact.power + " on their own.")
+                .withStyle(item.pact.color));
+        if (!sp.getAbilities().instabuild) stack.shrink(1);
+    }
+
+    @SubscribeEvent
+    public static void pactHits(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
+        if (event.getEntity().level().isClientSide) return;
+        var source = event.getSource();
+        if (!(source.getEntity() instanceof net.minecraft.world.entity.LivingEntity attacker) || source.getDirectEntity() != attacker) return;
+        var victim = event.getEntity();
+        var pact = com.piratecrew.pact.SoulPacts.of(attacker);
+        if (pact != null) event.setAmount(com.piratecrew.pact.PactPowers.onMeleeHit(attacker, pact, victim, event.getAmount()));
+        var victimPact = com.piratecrew.pact.SoulPacts.of(victim);
+        if (victimPact != null) com.piratecrew.pact.PactPowers.onStruck(victim, victimPact, attacker);
+    }
+
+    @SubscribeEvent
+    public static void pactFall(net.minecraftforge.event.entity.living.LivingFallEvent event) {
+        if (event.getEntity().level().isClientSide) return;
+        if (com.piratecrew.pact.SoulPacts.of(event.getEntity()) == com.piratecrew.pact.SoulPact.GALE) event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void pactPoison(net.minecraftforge.event.entity.living.MobEffectEvent.Applicable event) {
+        if (event.getEntity().level().isClientSide) return;
+        if (event.getEffectInstance().getEffect() == net.minecraft.world.effect.MobEffects.POISON
+                && com.piratecrew.pact.SoulPacts.of(event.getEntity()) == com.piratecrew.pact.SoulPact.VENOM) {
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
+        }
+    }
+
+    @SubscribeEvent
+    public static void pactPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide || event.player.tickCount % 20 != 0) return;
+        var pact = com.piratecrew.pact.SoulPacts.of(event.player);
+        if (pact != null && !event.player.isSpectator()) com.piratecrew.pact.PactPowers.passives(event.player, pact);
+    }
+
+    @SubscribeEvent
+    public static void pactClone(PlayerEvent.Clone event) {
+        com.piratecrew.pact.SoulPacts.copy(event.getOriginal(), event.getEntity());
     }
 }

@@ -175,6 +175,16 @@ public class ModItems {
     public static final RegistryObject<Item> FLEET_ADMIRAL_SPAWN_EGG = ITEMS.register("fleet_admiral_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.FLEET_ADMIRAL, 0x0E0E10, 0xAA141E, new Item.Properties()));
 
+    // ------------------------------------------------------------------ soul pacts
+
+    public static final Map<com.piratecrew.pact.SoulPact, RegistryObject<Item>> SOUL_PACTS = new EnumMap<>(com.piratecrew.pact.SoulPact.class);
+
+    static {
+        for (com.piratecrew.pact.SoulPact p : com.piratecrew.pact.SoulPact.values()) {
+            SOUL_PACTS.put(p, ITEMS.register("soul_pact_" + p.id, () -> new com.piratecrew.pact.SoulPactItem(p, new Item.Properties())));
+        }
+    }
+
     public static final RegistryObject<Item> AGGRO_STICK = ITEMS.register("aggro_stick",
             () -> new com.piratecrew.item.AggroStickItem(new Item.Properties()));
 

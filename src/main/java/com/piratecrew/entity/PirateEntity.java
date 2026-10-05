@@ -470,12 +470,38 @@ public class PirateEntity extends PathfinderMob {
         return null;
     }
 
+    // ------------------------------------------------------------------ soul pacts
+
+    @Nullable
+    private com.piratecrew.pact.SoulPact pact;
+    /** Ticks until this pirate can use its pact's power again. */
+    public int pactCooldown;
+
+    @Nullable
+    public com.piratecrew.pact.SoulPact getPact() {
+        return pact;
+    }
+
+    /** Bind a Soul Pact to this pirate: its whole fighting style changes to suit the pact. */
+    public void bindPact(com.piratecrew.pact.SoulPact pact) {
+        this.pact = pact;
+        this.pactCooldown = 40;
+        setCombatStyle(pact.ranged ? CombatStyle.MARKSMAN : CombatStyle.BRAWLER);
+        updateDisplayName();
+    }
+
+    /** A pact mark after the name, in the pact's colour. */
+    protected void appendPactTag(MutableComponent name) {
+        if (pact != null) name.append(Component.literal(" \u2726" + pact.label).withStyle(s -> s.withBold(false).withColor(pact.color)));
+    }
+
     public void updateDisplayName() {
         PirateTier tier = getTier();
         MutableComponent name = Component.literal("[" + tier.label + "] ").withStyle(tier.color, ChatFormatting.BOLD);
         if (isViceCaptain()) name.append(Component.literal("\u2606 ").withStyle(s -> s.withBold(false).withColor(ChatFormatting.GOLD)));
         name.append(Component.literal(pirateName).withStyle(s -> s.withBold(false)
                         .withColor(isRecruited() ? ChatFormatting.WHITE : ChatFormatting.GRAY)));
+        appendPactTag(name);
         this.setCustomName(name);
         this.setCustomNameVisible(true);
     }
@@ -1252,6 +1278,7 @@ public class PirateEntity extends PathfinderMob {
         tickShield();
         if (this.tickCount % 10 == 0) tickConsumables();
         tickBuilding();
+        if (pact != null) com.piratecrew.pact.PactPowers.pirateTick(this);
 
         // Players regenerate, so do pirates (slowly, out of combat).
         if (this.tickCount % 60 == 0 && this.getHealth() < this.getMaxHealth()
@@ -1279,6 +1306,11 @@ public class PirateEntity extends PathfinderMob {
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean hitByPlayer) {
         if (consuming != null) stopUsingItem();
+        // A pact outlives its holder: the scroll returns when a pirate falls.
+        if (pact != null) {
+            this.spawnAtLocation(new ItemStack(com.piratecrew.registry.ModItems.SOUL_PACTS.get(pact).get()));
+            pact = null;
+        }
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             ItemStack stack = this.getItemBySlot(slot);
             if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack)) {
@@ -1321,6 +1353,7 @@ public class PirateEntity extends PathfinderMob {
             packTag.add(t);
         }
         tag.put("Pack", packTag);
+        if (pact != null) tag.putString("SoulPact", pact.id);
         if (consuming != null) {
             tag.put("Consuming", consuming.save(new CompoundTag()));
             tag.put("StashedOffhand", stashedOffhand.save(new CompoundTag()));
@@ -1330,6 +1363,7 @@ public class PirateEntity extends PathfinderMob {
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        this.pact = com.piratecrew.pact.SoulPact.byId(tag.getString("SoulPact"));
         this.initialized = tag.getBoolean("PirateInit");
         this.entityData.set(DATA_TIER, tag.getInt("Tier"));
         this.entityData.set(DATA_SKIN, tag.getString("Skin"));

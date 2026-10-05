@@ -22,13 +22,16 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/** Places Order of the Tide outposts on flat island ground as the Sundered Sea is explored. */
+/** Places Order of the Tide outposts and ruined Pact Shrines on flat island ground as the Sundered Sea is explored. */
 public class SunderedStructures {
     public static final TagKey<Biome> ISLES = TagKey.create(Registries.BIOME, new ResourceLocation("piratecrew", "sundered_isles"));
     private static final int OUTPOST_CHANCE = 30;   // 1 in N new island chunks
     private static final int OUTPOST_SPACING = 260;
 
-    private record Pending(BlockPos centre, int attempts) {}
+    private static final int SHRINE_CHANCE = 70;
+    private static final int SHRINE_SPACING = 350;
+
+    private record Pending(BlockPos centre, int attempts, boolean shrine) {}
 
     private static final Queue<Pending> QUEUE = new ConcurrentLinkedQueue<>();
     private static int ticks;
@@ -38,8 +41,8 @@ public class SunderedStructures {
         BlockPos mid = chunk.getPos().getMiddleBlockPosition(64);
         int h = chunk.getHeight(Heightmap.Types.WORLD_SURFACE_WG, mid.getX() & 15, mid.getZ() & 15);
         if (h <= level.getSeaLevel() + 2) return; // open water
-        if (level.getRandom().nextInt(OUTPOST_CHANCE) != 0) return;
-        QUEUE.add(new Pending(mid, 0));
+        if (level.getRandom().nextInt(OUTPOST_CHANCE) == 0) QUEUE.add(new Pending(mid, 0, false));
+        else if (level.getRandom().nextInt(SHRINE_CHANCE) == 0) QUEUE.add(new Pending(mid, 0, true));
     }
 
     public static void tick(MinecraftServer server) {
@@ -50,18 +53,26 @@ public class SunderedStructures {
             return;
         }
         int n = QUEUE.size();
-        int margin = OutpostBuilder.RADIUS + 4;
         for (int i = 0; i < n; i++) {
             Pending p = QUEUE.poll();
             if (p == null) break;
+            int radius = p.shrine() ? ShrineBuilder.RADIUS : OutpostBuilder.RADIUS;
+            int margin = radius + 4;
             int x = p.centre().getX(), z = p.centre().getZ();
             if (!level.hasChunksAt(x - margin, z - margin, x + margin, z + margin)) {
-                if (p.attempts() < 30) QUEUE.add(new Pending(p.centre(), p.attempts() + 1));
+                if (p.attempts() < 30) QUEUE.add(new Pending(p.centre(), p.attempts() + 1, p.shrine()));
                 continue;
             }
-            BlockPos floor = flatIslandGround(level, x, z, OutpostBuilder.RADIUS);
+            BlockPos floor = flatIslandGround(level, x, z, radius);
             Data data = Data.get(level);
-            if (floor != null && !data.near(floor, OUTPOST_SPACING)) {
+            if (floor == null) continue;
+            if (p.shrine()) {
+                if (!data.nearShrine(floor, SHRINE_SPACING) && !data.near(floor, 40)) {
+                    ShrineBuilder.build(level, floor);
+                    data.addShrine(floor);
+                    return;
+                }
+            } else if (!data.near(floor, OUTPOST_SPACING)) {
                 OutpostBuilder.build(level, floor);
                 data.add(floor);
                 return;
@@ -94,6 +105,20 @@ public class SunderedStructures {
     /** Where outposts have been built. */
     public static class Data extends SavedData {
         private final List<BlockPos> outposts = new ArrayList<>();
+        private final List<BlockPos> shrines = new ArrayList<>();
+
+        public void addShrine(BlockPos p) {
+            shrines.add(p.immutable());
+            setDirty();
+        }
+
+        public boolean nearShrine(BlockPos p, double dist) {
+            for (BlockPos o : shrines) {
+                double dx = o.getX() - p.getX(), dz = o.getZ() - p.getZ();
+                if (dx * dx + dz * dz < dist * dist) return true;
+            }
+            return false;
+        }
 
         public static Data get(ServerLevel level) {
             return level.getDataStorage().computeIfAbsent(Data::load, Data::new, "piratecrew_outposts");
@@ -117,12 +142,16 @@ public class SunderedStructures {
             ListTag l = new ListTag();
             for (BlockPos p : outposts) l.add(LongTag.valueOf(p.asLong()));
             tag.put("Outposts", l);
+            ListTag sl = new ListTag();
+            for (BlockPos p : shrines) sl.add(LongTag.valueOf(p.asLong()));
+            tag.put("Shrines", sl);
             return tag;
         }
 
         public static Data load(CompoundTag tag) {
             Data d = new Data();
             for (Tag t : tag.getList("Outposts", Tag.TAG_LONG)) d.outposts.add(BlockPos.of(((LongTag) t).getAsLong()));
+            for (Tag t : tag.getList("Shrines", Tag.TAG_LONG)) d.shrines.add(BlockPos.of(((LongTag) t).getAsLong()));
             return d;
         }
     }

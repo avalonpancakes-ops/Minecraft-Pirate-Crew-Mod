@@ -23,28 +23,33 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * chunks, on flat dry ground, away from villages, bars, banks and other camps.
  */
 public class RaiderCampHandler {
-    private record Pending(BlockPos centre, int attempts) {}
+    private record Pending(net.minecraft.resources.ResourceKey<Level> dim, BlockPos centre, int attempts) {}
 
     private static final Queue<Pending> QUEUE = new ConcurrentLinkedQueue<>();
     private static final int MARGIN = CampBuilder.RADIUS + 4;
     private static int ticks;
 
     public static void onChunkLoad(ServerLevel level, LevelChunk chunk, boolean newChunk) {
-        if (!newChunk || level.dimension() != Level.OVERWORLD || !Config.GENERATE_CAMPS.get()) return;
-        if (level.getRandom().nextInt(Math.max(1, Config.CAMP_CHANCE.get())) != 0) return;
-        QUEUE.add(new Pending(chunk.getPos().getMiddleBlockPosition(64), 0));
+        // Overworld, and the islands of the Sundered Sea (a sea ruled by pirates has plenty of them).
+        boolean sea = level.dimension() == com.piratecrew.sundered.SunderedSea.LEVEL;
+        if (!newChunk || (level.dimension() != Level.OVERWORLD && !sea) || !Config.GENERATE_CAMPS.get()) return;
+        int chance = Math.max(1, Config.CAMP_CHANCE.get());
+        if (sea) chance = Math.max(1, chance / 2);
+        if (level.getRandom().nextInt(chance) != 0) return;
+        QUEUE.add(new Pending(level.dimension(), chunk.getPos().getMiddleBlockPosition(64), 0));
     }
 
     public static void tick(MinecraftServer server) {
         if (server == null || ++ticks % 20 != 0 || QUEUE.isEmpty()) return;
-        ServerLevel level = server.overworld();
         int n = QUEUE.size();
         for (int i = 0; i < n; i++) {
             Pending p = QUEUE.poll();
             if (p == null) break;
+            ServerLevel level = server.getLevel(p.dim());
+            if (level == null) continue;
             int x = p.centre().getX(), z = p.centre().getZ();
             if (!level.hasChunksAt(x - MARGIN, z - MARGIN, x + MARGIN, z + MARGIN)) {
-                if (p.attempts() < 30) QUEUE.add(new Pending(p.centre(), p.attempts() + 1));
+                if (p.attempts() < 30) QUEUE.add(new Pending(p.dim(), p.centre(), p.attempts() + 1));
                 continue;
             }
             BlockPos floor = suitableFloor(level, x, z);

@@ -47,7 +47,7 @@ public class ValkyrienPiratesCompat {
 
     public static void onJoin(EntityJoinLevelEvent event) {
         if (!isLoaded() || event.loadedFromDisk() || !(event.getLevel() instanceof ServerLevel level)) return;
-        if (level.dimension() != Level.OVERWORLD) return;
+        if (level.dimension() != Level.OVERWORLD && level.dimension() != com.piratecrew.sundered.SunderedSea.LEVEL) return;
         Entity e = event.getEntity();
         if (!VP_PIRATE.equals(ForgeRegistries.ENTITY_TYPES.getKey(e.getType()))) return;
         PENDING.add(new Sighting(level, e.getUUID(), level.getGameTime()));

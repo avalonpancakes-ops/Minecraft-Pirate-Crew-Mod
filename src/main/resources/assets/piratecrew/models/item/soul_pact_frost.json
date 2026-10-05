@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "piratecrew:item/soul_pact_frost"
+  }
+}

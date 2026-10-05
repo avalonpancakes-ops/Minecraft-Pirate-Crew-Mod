@@ -52,6 +52,7 @@ public class ModTabs {
                 for (var m : java.util.List.of(ModItems.SIGNAL_FLARE, ModItems.KRAKEN_LURE, ModItems.STORM_SIGIL, ModItems.LEVIATHAN_HORN,
                         ModItems.ADMIRALS_WARRANT, ModItems.COMMODORE_SPAWN_EGG, ModItems.KRAKEN_SPAWN_EGG, ModItems.TEMPEST_ADMIRAL_SPAWN_EGG,
                         ModItems.LEVIATHAN_SPAWN_EGG, ModItems.FLEET_ADMIRAL_SPAWN_EGG)) out.accept(m.get());
+                for (var p : ModItems.SOUL_PACTS.values()) out.accept(p.get());
             })
             .build());
 }

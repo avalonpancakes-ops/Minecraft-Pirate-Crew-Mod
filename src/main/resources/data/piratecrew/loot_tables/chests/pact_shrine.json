@@ -1,0 +1,149 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_ember"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_tempest"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_frost"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_iron"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_gale"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_shadow"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_quake"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_venom"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_gravity"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:soul_pact_blood"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 6
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:ruby",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 6,
+                "max": 20
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_ingot",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:prismarine_crystals",
+          "weight": 5,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:abyssal_shard",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:nautilus_shell",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:experience_bottle",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_apple",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

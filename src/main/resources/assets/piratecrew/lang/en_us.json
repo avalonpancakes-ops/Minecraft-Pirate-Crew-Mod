@@ -112,5 +112,16 @@
   "entity.piratecrew.leviathan": "The Leviathan",
   "item.piratecrew.leviathan_spawn_egg": "Leviathan Spawn Egg",
   "entity.piratecrew.fleet_admiral": "Fleet Admiral Vane",
-  "item.piratecrew.fleet_admiral_spawn_egg": "Fleet Admiral Vane Spawn Egg"
+  "item.piratecrew.fleet_admiral_spawn_egg": "Fleet Admiral Vane Spawn Egg",
+  "item.piratecrew.soul_pact_ember": "Ember Soul Pact",
+  "item.piratecrew.soul_pact_tempest": "Tempest Soul Pact",
+  "item.piratecrew.soul_pact_frost": "Frost Soul Pact",
+  "item.piratecrew.soul_pact_iron": "Iron Soul Pact",
+  "item.piratecrew.soul_pact_gale": "Gale Soul Pact",
+  "item.piratecrew.soul_pact_shadow": "Shadow Soul Pact",
+  "item.piratecrew.soul_pact_quake": "Quake Soul Pact",
+  "item.piratecrew.soul_pact_venom": "Venom Soul Pact",
+  "item.piratecrew.soul_pact_gravity": "Gravity Soul Pact",
+  "item.piratecrew.soul_pact_blood": "Blood Soul Pact",
+  "key.piratecrew.pact_power": "Use Soul Pact Power"
 }

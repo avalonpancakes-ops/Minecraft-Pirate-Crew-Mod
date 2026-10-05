@@ -119,6 +119,33 @@ public class SmokeTest {
                 if (boss.getMaxHealth() < 500) throw new IllegalStateException("boss health cap not raised: " + boss.getMaxHealth());
                 boss.discard();
             }
+            // Every Soul Pact power fires from a crew pirate at a target without errors.
+            var dummy = net.minecraft.world.entity.EntityType.ZOMBIE.create(sea);
+            var caster = com.piratecrew.registry.ModEntities.PIRATE.get().create(sea);
+            if (dummy != null && caster != null) {
+                dummy.moveTo(bossAt.getX() + 4.5, bossAt.getY(), bossAt.getZ() + 0.5, 0, 0);
+                caster.moveTo(bossAt.getX() + 0.5, bossAt.getY(), bossAt.getZ() + 0.5, 0, 0);
+                caster.finalizeSpawn(sea, sea.getCurrentDifficultyAt(bossAt), net.minecraft.world.entity.MobSpawnType.EVENT, null, null);
+                sea.addFreshEntity(dummy);
+                sea.addFreshEntity(caster);
+                StringBuilder fired = new StringBuilder();
+                for (var pact : com.piratecrew.pact.SoulPact.values()) {
+                    caster.bindPact(pact);
+                    boolean ok = com.piratecrew.pact.PactPowers.activate(caster, pact, dummy, dummy.getEyePosition());
+                    com.piratecrew.pact.PactPowers.passives(caster, pact);
+                    fired.append(pact.id).append(ok ? "+ " : "- ");
+                }
+                PirateCrew.LOGGER.info("PIRATECREW SMOKETEST pact powers: {} (pirate now '{}')", fired.toString().trim(), caster.getDisplayName().getString());
+                dummy.discard();
+                caster.discard();
+            }
+            if (outpost != null) {
+                int sx = outpost.getX() + 24, sz = outpost.getZ();
+                for (int cx = (sx - 8) >> 4; cx <= (sx + 8) >> 4; cx++) for (int cz = (sz - 8) >> 4; cz <= (sz + 8) >> 4; cz++) sea.getChunk(cx, cz);
+                int sh = sea.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sx, sz);
+                com.piratecrew.sundered.ShrineBuilder.build(sea, new net.minecraft.core.BlockPos(sx, sh - 1, sz));
+                PirateCrew.LOGGER.info("PIRATECREW SMOKETEST pact shrine built at {} {} {}", sx, sh - 1, sz);
+            }
             for (var check : CHECKS) check.accept(sea);
             PirateCrew.LOGGER.info("PIRATECREW SMOKETEST OK");
         } catch (Throwable t) {
