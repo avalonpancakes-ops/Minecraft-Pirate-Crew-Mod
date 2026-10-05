@@ -1,5 +1,7 @@
 package com.piratecrew.registry;
 
+import com.piratecrew.entity.PirateTier;
+
 import com.piratecrew.PirateCrew;
 import com.piratecrew.item.ModTiers;
 import com.piratecrew.item.RubyArmorMaterial;
@@ -45,6 +47,18 @@ public class ModItems {
 
     public static final RegistryObject<Item> PIRATE_SPAWN_EGG = ITEMS.register("pirate_spawn_egg",
             () -> new ForgeSpawnEggItem(ModEntities.PIRATE, 0x3B2A1A, 0xC0392B, new Item.Properties()));
+
+    public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_F = collectorEgg(PirateTier.F, 0xAAAAAA);
+    public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_D = collectorEgg(PirateTier.D, 0x55FF55);
+    public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_C = collectorEgg(PirateTier.C, 0x55FFFF);
+    public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_B = collectorEgg(PirateTier.B, 0x5555FF);
+    public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_A = collectorEgg(PirateTier.A, 0xFF55FF);
+    public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_S = collectorEgg(PirateTier.S, 0xFFAA00);
+
+    private static RegistryObject<Item> collectorEgg(PirateTier tier, int color) {
+        return ITEMS.register("debt_collector_" + tier.label.toLowerCase() + "_spawn_egg",
+                () -> new com.piratecrew.item.DebtCollectorEggItem(tier, color, new Item.Properties()));
+    }
 
     private static RegistryObject<Item> blockItem(String name, RegistryObject<Block> block) {
         return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties()));

@@ -31,6 +31,12 @@ public class ModTabs {
                 out.accept(ModItems.RUBY_LEGGINGS.get());
                 out.accept(ModItems.RUBY_BOOTS.get());
                 out.accept(ModItems.PIRATE_SPAWN_EGG.get());
+                out.accept(ModItems.DEBT_COLLECTOR_EGG_F.get());
+                out.accept(ModItems.DEBT_COLLECTOR_EGG_D.get());
+                out.accept(ModItems.DEBT_COLLECTOR_EGG_C.get());
+                out.accept(ModItems.DEBT_COLLECTOR_EGG_B.get());
+                out.accept(ModItems.DEBT_COLLECTOR_EGG_A.get());
+                out.accept(ModItems.DEBT_COLLECTOR_EGG_S.get());
             })
             .build());
 }

@@ -25,5 +25,11 @@
   "death.attack.piratecrew.laser": "%1$s was vaporised by %2$s's laser eyes",
   "death.attack.piratecrew.laser.player": "%1$s was vaporised by %2$s's laser eyes",
   "death.attack.piratecrew.laser.item": "%1$s was vaporised by %2$s's laser eyes",
-  "entity.piratecrew.raider_pirate": "Enemy Pirate"
+  "entity.piratecrew.raider_pirate": "Enemy Pirate",
+  "item.piratecrew.debt_collector_f_spawn_egg": "F-Tier Debt Collector Spawn Egg",
+  "item.piratecrew.debt_collector_d_spawn_egg": "D-Tier Debt Collector Spawn Egg",
+  "item.piratecrew.debt_collector_c_spawn_egg": "C-Tier Debt Collector Spawn Egg",
+  "item.piratecrew.debt_collector_b_spawn_egg": "B-Tier Debt Collector Spawn Egg",
+  "item.piratecrew.debt_collector_a_spawn_egg": "A-Tier Debt Collector Spawn Egg",
+  "item.piratecrew.debt_collector_s_spawn_egg": "S-Tier Debt Collector Spawn Egg"
 }

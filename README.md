@@ -144,6 +144,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - `/piratecrew spawnbar` / `/piratecrew spawnbank` (op) — build a bar or bank in front of you
 - `/piratecrew spawnpirate <F|D|C|B|A|S>` (op) — spawn a pirate of a given tier
 - `/piratecrew spawncollector <F|D|C|B|A|S>` (op) — send a test debt collector after yourself (doesn't touch your loan)
+- **Debt collector spawn eggs** (creative tab, one per tier F to S): use one on a block to spawn a fully equipped test debt collector of that tier that hunts you. Like `spawncollector`, it never touches loans; fight it in survival.
 - `/piratecrew loandue` (op) — make your loan overdue now, to test the collectors
 
 ## Config
