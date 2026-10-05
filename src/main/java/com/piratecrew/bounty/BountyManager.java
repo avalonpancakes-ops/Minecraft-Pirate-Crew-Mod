@@ -64,9 +64,10 @@ public class BountyManager {
             if (counts) RECENT.put(pair, now);
             if (RECENT.size() > 5000) RECENT.entrySet().removeIf(e -> now - e.getValue() > 72000);
 
-            // 1. Claim the victim's bounty into a bank account.
+            // 1. Claim the victim's bounty into a bank account. Only a rival crew can claim it (plus the
+            //    bank's debt collectors, handled in LoanManager); mobs, raiders and crewless players can't.
             //    Player killer: the whole bounty. Crew pirate killer: its captain gets 25%.
-            if (victimEntry != null && victimEntry.amount > 0 && counts) {
+            if (victimEntry != null && victimEntry.amount > 0 && counts && killerCrew != null) {
                 if (killer instanceof ServerPlayer kp) {
                     claimed = victimEntry.amount;
                     BankManager.credit(server, kp.getUUID(), claimed);

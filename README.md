@@ -93,6 +93,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **Pirates have no bank account.** When a crew pirate kills a wanted player or pirate, that crew's **captain gets 25% of the bounty** in their bank.
 - The whole server is told who claimed what. Killing the same target again within 10 minutes doesn't count, so friends can't farm each other.
 - A dead pirate's poster comes down for good; a player's bounty resets to 0 once claimed.
+- **A player's bounty is only ever lost two ways:** killed by a member of a **rival crew** (a player, or a recruited pirate of another crew), or by the bank's **debt collectors**. Dying to zombies, other mobs, enemy raiders, free bar pirates, falling, lava or a player who isn't in a crew leaves your bounty untouched.
 - Every pirate bar has a **Bounty Board** on its front wall (bars built before this update get one the next time they're loaded). Right-click it to see WANTED posters for everyone with a bounty, biggest first, with their face, name and bounty. Hover a poster for crew, tier and kills.
 - Craft your own board: planks top and bottom, paper-ruby-paper in the middle.
 - The crew screen shows your crew's total bounty, and hovering a member shows theirs.
