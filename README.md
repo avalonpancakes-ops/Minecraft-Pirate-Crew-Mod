@@ -184,8 +184,8 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
   - wrecks and rafts appear in the shallows too.
 - **Sundered Sea crews**:
   - each crew is 2 pirates bigger;
-  - they wear the sea's own armor and blades: Tidesteel, Abyssal, Krakenbone and Stormforged;
-  - captains always have Abyssal gear or better, sometimes Leviathan, with enchanted blades and bows and a shield;
+  - their gear runs from Ruby at the lowest, through Tidesteel, Abyssal and Krakenbone, up to Stormforged at the most, so they aren't overpowered;
+  - captains are always the best equipped in their crew (never above Stormforged), with enchanted blades and bows and a shield;
   - 1 captain in 5 carries a Soul Pact, and its scroll drops when it dies.
 - `/piratecrew spawnraiders` (op) brings an enemy crew to you on land for testing.
 

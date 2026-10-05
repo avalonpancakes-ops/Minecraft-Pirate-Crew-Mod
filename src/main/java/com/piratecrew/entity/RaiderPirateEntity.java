@@ -153,15 +153,20 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
         };
     }
 
-    /** Sundered Sea crews wear the sea's own gear: tidesteel up to stormforged, captains up to leviathan. */
+    /**
+     * Sundered Sea crews: Ruby at the lowest up to Stormforged at the highest (never above, so they
+     * aren't overpowered). Gear level 0-1 ruby, 2-3 tidesteel, 4 abyssal, 5 krakenbone, 6 stormforged;
+     * the captain's level is already the crew's best or one better. Null means ruby.
+     */
+    @org.jetbrains.annotations.Nullable
     private com.piratecrew.item.GearTier seaTier() {
-        if (captain) {
-            if (gearLevel >= 6) return this.random.nextFloat() < 0.35F ? com.piratecrew.item.GearTier.LEVIATHAN : com.piratecrew.item.GearTier.STORMFORGED;
-            return gearLevel >= 4 ? com.piratecrew.item.GearTier.KRAKENBONE : com.piratecrew.item.GearTier.ABYSSAL;
-        }
-        if (gearLevel >= 6) return com.piratecrew.item.GearTier.STORMFORGED;
-        if (gearLevel == 5) return com.piratecrew.item.GearTier.KRAKENBONE;
-        return gearLevel >= 3 ? com.piratecrew.item.GearTier.ABYSSAL : com.piratecrew.item.GearTier.TIDESTEEL;
+        return switch (gearLevel) {
+            case 0, 1 -> null;
+            case 2, 3 -> com.piratecrew.item.GearTier.TIDESTEEL;
+            case 4 -> com.piratecrew.item.GearTier.ABYSSAL;
+            case 5 -> com.piratecrew.item.GearTier.KRAKENBONE;
+            default -> com.piratecrew.item.GearTier.STORMFORGED;
+        };
     }
 
     private boolean atSea() {
@@ -170,15 +175,16 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
 
     private void equip() {
         boolean sea = atSea();
-        var seaGear = sea ? ModItems.GEAR.get(seaTier()) : null;
-        Item[] armor = sea ? new Item[]{seaGear.helmet().get(), seaGear.chestplate().get(), seaGear.leggings().get(), seaGear.boots().get()}
-                : armorFor(gearLevel);
+        var seaTier = sea ? seaTier() : null;
+        var seaGear = seaTier != null ? ModItems.GEAR.get(seaTier) : null;
+        Item[] armor = seaGear != null ? new Item[]{seaGear.helmet().get(), seaGear.chestplate().get(), seaGear.leggings().get(), seaGear.boots().get()}
+                : sea ? armorFor(5) : armorFor(gearLevel);
         EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
         for (int i = 0; i < armor.length; i++) {
             if (captain || this.random.nextFloat() < 0.7F) setItemSlot(slots[i], new ItemStack(armor[i]));
         }
 
-        ItemStack sword = new ItemStack(sea ? seaGear.sword().get() : swordFor(gearLevel));
+        ItemStack sword = new ItemStack(seaGear != null ? seaGear.sword().get() : sea ? swordFor(5) : swordFor(gearLevel));
         ItemStack ranged = new ItemStack(this.random.nextInt(3) == 0 ? Items.CROSSBOW : Items.BOW);
         if (captain && (gearLevel >= 5 || sea)) sword.enchant(Enchantments.SHARPNESS, 1 + this.random.nextInt(3));
         if (captain && (gearLevel >= 5 || sea)) ranged.enchant(ranged.is(Items.BOW) ? Enchantments.POWER_ARROWS : Enchantments.QUICK_CHARGE, 1 + this.random.nextInt(2));
