@@ -52,7 +52,7 @@ import java.util.function.Consumer;
 public class ClientShots {
     private static final boolean ON = Boolean.getBoolean("piratecrew.clientshots");
 
-    private record Step(String name, int wait, Consumer<Minecraft> setup) {}
+    private record Step(String name, int delay, Consumer<Minecraft> setup) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
     private static final int WORLD_FROM = 9;   // steps from here on need the world loaded
@@ -109,7 +109,7 @@ public class ClientShots {
                 run(mc);
             }
         }
-        if (++frames < s.wait()) return;
+        if (++frames < s.delay()) return;
         if (!s.name().isEmpty()) {
             Screenshot.grab(mc.gameDirectory, s.name() + ".png", mc.getMainRenderTarget(), msg -> { });
             PirateCrew.LOGGER.info("PIRATECREW CLIENTSHOT {}", s.name());

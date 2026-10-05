@@ -145,7 +145,7 @@ def main():
         write(os.path.join(A, f"models/block/{name}.json"),
               {"parent": "minecraft:block/cube_all", "textures": {"all": f"piratecrew:block/{name}"}})
         write(os.path.join(A, f"models/item/{name}.json"), {"parent": f"piratecrew:block/{name}"})
-        recolour_red(src, f"block/{name}.png", PALETTES[pal])
+        # block texture: drawn by gen_ore_art.py
         lang[f"block.piratecrew.{name}"] = eng
         funcs = [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}, "add": False}]
         if fortune:
