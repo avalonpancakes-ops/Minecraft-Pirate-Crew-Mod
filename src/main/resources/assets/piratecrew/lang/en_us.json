@@ -95,5 +95,7 @@
   "block.piratecrew.abyssal_ore": "Abyssal Ore",
   "block.piratecrew.stormglass_ore": "Stormglass Ore",
   "item.piratecrew.siren_conch": "Siren Conch",
-  "block.piratecrew.siren_portal": "Siren Portal"
+  "block.piratecrew.siren_portal": "Siren Portal",
+  "entity.piratecrew.marine": "Marine",
+  "item.piratecrew.marine_spawn_egg": "Marine Spawn Egg"
 }

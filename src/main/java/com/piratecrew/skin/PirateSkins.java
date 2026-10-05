@@ -97,9 +97,22 @@ public class PirateSkins {
         return name.startsWith(HUNTER_PREFIX);
     }
 
+    /** Skins reserved for marines and bosses (marine_*, boss_*), never given to pirates or collectors. */
+    public static boolean isReserved(String name) {
+        return name.startsWith("marine_") || name.startsWith("boss_");
+    }
+
+    /** A random skin whose name starts with {@code prefix} (e.g. "marine_captain_"), or "" if none. */
+    public static String randomWithPrefix(RandomSource random, String prefix) {
+        load();
+        List<String> pool = new ArrayList<>();
+        for (String n : names) if (n.startsWith(prefix)) pool.add(n);
+        return pool.isEmpty() ? "" : pool.get(random.nextInt(pool.size()));
+    }
+
     private static String pick(RandomSource random, PirateTier tier, boolean hunter) {
         List<String> all = new ArrayList<>();
-        for (String n : names) if (isHunterSkin(n) == hunter) all.add(n);
+        for (String n : names) if (!isReserved(n) && isHunterSkin(n) == hunter) all.add(n);
         List<String> pool = new ArrayList<>();
         for (String n : all) if (tiers.get(n) == tier) pool.add(n);
         if (pool.isEmpty()) for (String n : all) if (!tiers.containsKey(n)) pool.add(n);

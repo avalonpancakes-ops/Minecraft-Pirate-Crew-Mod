@@ -134,6 +134,7 @@ public class CommonEvents {
         if (event.getLevel() instanceof ServerLevel level && event.getChunk() instanceof LevelChunk chunk) {
             VillageBarHandler.onChunkLoad(level, chunk);
             com.piratecrew.world.RaiderCampHandler.onChunkLoad(level, chunk, event.isNewChunk());
+            com.piratecrew.sundered.SunderedStructures.onChunkLoad(level, chunk, event.isNewChunk());
         }
     }
 
@@ -149,5 +150,7 @@ public class CommonEvents {
         com.piratecrew.compat.ValkyrienPiratesCompat.tick(ServerLifecycleHooks.getCurrentServer());
         com.piratecrew.world.RaiderCampHandler.tick(ServerLifecycleHooks.getCurrentServer());
         com.piratecrew.crew.EmperorManager.tick(ServerLifecycleHooks.getCurrentServer());
+        com.piratecrew.sundered.SunderedStructures.tick(ServerLifecycleHooks.getCurrentServer());
+        com.piratecrew.sundered.Marines.tick(ServerLifecycleHooks.getCurrentServer());
     }
 }

@@ -39,6 +39,7 @@ public class ModTabs {
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_S.get());
                 out.accept(ModItems.AGGRO_STICK.get());
                 out.accept(ModItems.SIREN_CONCH.get());
+                out.accept(ModItems.MARINE_SPAWN_EGG.get());
                 out.accept(ModItems.TIDESTEEL_ORE.get());
                 out.accept(ModItems.DEEPSLATE_TIDESTEEL_ORE.get());
                 out.accept(ModItems.ABYSSAL_ORE.get());

@@ -38,6 +38,7 @@ public class ClientSetup {
             event.registerEntityRenderer(ModEntities.BOUNTY_HUNTER.get(), PirateRenderer::new);
             event.registerEntityRenderer(ModEntities.CORPSE.get(), CorpseRenderer::new);
             event.registerEntityRenderer(ModEntities.RAIDER_PIRATE.get(), PirateRenderer::new);
+            event.registerEntityRenderer(ModEntities.MARINE.get(), PirateRenderer::new);
         }
 
         @SubscribeEvent

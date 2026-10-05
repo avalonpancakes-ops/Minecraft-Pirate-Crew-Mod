@@ -83,6 +83,7 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
                 e -> !((Player) e).isCreative() && !e.isSpectator()));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, PirateEntity.class, 10, true, false,
                 e -> e instanceof PirateEntity p && p.isRecruited()));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, MarineEntity.class, 10, true, false, e -> true));
     }
 
     @Override

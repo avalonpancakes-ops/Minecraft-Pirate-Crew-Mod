@@ -140,6 +140,9 @@ public class ModItems {
                 ITEMS.register(t.id + "_axe", () -> new AxeItem(t.tier, 5.0F, -3.0F, props.get())));
     }
 
+    public static final RegistryObject<Item> MARINE_SPAWN_EGG = ITEMS.register("marine_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.MARINE, 0x1F2A3A, 0x1FA39A, new Item.Properties()));
+
     public static final RegistryObject<Item> SIREN_CONCH = ITEMS.register("siren_conch",
             () -> new com.piratecrew.sundered.SirenConchItem(new Item.Properties()));
 

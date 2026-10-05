@@ -43,6 +43,8 @@ public class BountyManager {
         // Enemy NPC crews count as pirates when killed (same bounty as any free pirate of their tier),
         // but they have no crew, so their own kills earn them nothing.
         if (killerEntity instanceof com.piratecrew.entity.RaiderPirateEntity) return;
+        // The Order hangs pirates; it doesn't collect their bounties.
+        if (killerEntity instanceof com.piratecrew.entity.MarineEntity) return;
         MinecraftServer server = victim.getServer();
         if (server == null) return;
         BountyData data = BountyData.get(server);
@@ -95,6 +97,9 @@ public class BountyManager {
                 int gain;
                 if (victim instanceof ServerPlayer) {
                     gain = Config.BOUNTY_PER_PLAYER_KILL.get();
+                } else if (victim instanceof com.piratecrew.entity.MarineEntity m) {
+                    // Fighting the Order of the Tide makes a name for a pirate.
+                    gain = 5 + 4 * m.getRank().ordinal();
                 } else {
                     PirateEntity p = (PirateEntity) victim;
                     gain = Config.BOUNTY_PER_PIRATE_KILL.get() + p.getTier().ordinal() * Config.BOUNTY_PER_PIRATE_TIER.get();

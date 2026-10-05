@@ -108,6 +108,21 @@ public class CrewCommands {
                             c.getSource().sendSuccess(() -> Component.literal("A test debt collector is coming for you (switch to survival)."), true);
                             return 1;
                         })))
+                .then(Commands.literal("spawnoutpost").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    ServerLevel level = p.serverLevel();
+                    net.minecraft.core.BlockPos centre = p.blockPosition().relative(p.getDirection(), 14);
+                    int h = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre.getX(), centre.getZ());
+                    com.piratecrew.sundered.OutpostBuilder.build(level, new net.minecraft.core.BlockPos(centre.getX(), h - 1, centre.getZ()));
+                    c.getSource().sendSuccess(() -> Component.literal("Built a marine outpost."), true);
+                    return 1;
+                }))
+                .then(Commands.literal("spawnmarines").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    int n = com.piratecrew.sundered.Marines.spawnSquad(p.serverLevel(), p.blockPosition().relative(p.getDirection(), 10), 4, false).size();
+                    c.getSource().sendSuccess(() -> Component.literal("A marine squad of " + n + " has arrived (they hunt players in crews or with bounties)."), true);
+                    return 1;
+                }))
                 .then(Commands.literal("spawncamp").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     ServerLevel level = p.serverLevel();

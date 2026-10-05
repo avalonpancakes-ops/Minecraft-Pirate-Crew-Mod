@@ -81,6 +81,20 @@ public class SmokeTest {
             }
             PirateCrew.LOGGER.info("PIRATECREW SMOKETEST generated {} Sundered Sea chunks ({} with land above the sea)", chunks, land);
             renderMap(sea);
+            // Marines and an outpost on the first flat island ground found.
+            net.minecraft.core.BlockPos outpost = null;
+            for (int x = -180; x <= 180 && outpost == null; x += 12) {
+                for (int z = -180; z <= 180 && outpost == null; z += 12) {
+                    outpost = com.piratecrew.sundered.SunderedStructures.flatIslandGround(sea, x, z, 7);
+                }
+            }
+            if (outpost != null) {
+                com.piratecrew.sundered.OutpostBuilder.build(sea, outpost);
+                int marines = sea.getEntitiesOfClass(com.piratecrew.entity.MarineEntity.class, new net.minecraft.world.phys.AABB(outpost).inflate(16)).size();
+                PirateCrew.LOGGER.info("PIRATECREW SMOKETEST outpost built at {} with {} marines", outpost, marines);
+            } else {
+                PirateCrew.LOGGER.info("PIRATECREW SMOKETEST no flat island ground found for an outpost test");
+            }
             for (var check : CHECKS) check.accept(sea);
             PirateCrew.LOGGER.info("PIRATECREW SMOKETEST OK");
         } catch (Throwable t) {
