@@ -58,6 +58,7 @@ public class ClientSetup {
             event.registerSpriteSet(com.piratecrew.registry.ModParticles.WISP.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.WISP));
             event.registerSpriteSet(com.piratecrew.registry.ModParticles.BLOOD.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.BLOOD));
             event.registerSpriteSet(com.piratecrew.registry.ModParticles.GLYPH.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.GLYPH));
+            event.registerSpriteSet(com.piratecrew.registry.ModParticles.MOTE.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.MOTE));
         }
 
         @SubscribeEvent

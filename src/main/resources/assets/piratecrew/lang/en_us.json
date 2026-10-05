@@ -125,5 +125,13 @@
   "item.piratecrew.soul_pact_blood": "Blood Soul Pact",
   "key.piratecrew.pact_power": "Use Soul Pact Power",
   "item.piratecrew.captains_log": "Captain's Log",
-  "key.piratecrew.captains_log": "Open Captain's Log"
+  "key.piratecrew.captains_log": "Open Captain's Log",
+  "subtitles.piratecrew.goal_complete": "Voyage goal reached",
+  "subtitles.piratecrew.bounty_up": "Bounty bell tolls",
+  "subtitles.piratecrew.rank_up": "Bugle sounds",
+  "subtitles.piratecrew.boss_defeat": "Victory fanfare",
+  "subtitles.piratecrew.boss_horn": "War horn blares",
+  "subtitles.piratecrew.pact_bind": "Soul Pact binds",
+  "subtitles.piratecrew.coins": "Coins clink",
+  "subtitles.piratecrew.sea_additions": "Gulls and creaking timbers"
 }

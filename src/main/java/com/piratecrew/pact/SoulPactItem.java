@@ -56,7 +56,7 @@ public class SoulPactItem extends Item {
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.SOUL, who.getX(), who.getY() + 1, who.getZ(), 30, 0.5, 0.8, 0.5, 0.05);
         level.sendParticles(com.piratecrew.registry.ModParticles.GLYPH.get(), who.getX(), who.getY() + 1.2, who.getZ(), 16, 0.8, 0.8, 0.8, 0.02);
         level.playSound(null, who.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 2.0F, 0.7F);
-        level.playSound(null, who.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0F, 0.6F);
+        level.playSound(null, who.blockPosition(), com.piratecrew.registry.ModSounds.PACT_BIND.get(), SoundSource.PLAYERS, 1.2F, 1.0F);
     }
 
     @Override

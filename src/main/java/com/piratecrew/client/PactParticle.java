@@ -11,7 +11,7 @@ import net.minecraft.util.Mth;
 
 /** One class drives all the mod's particles; each kind has its own motion, life, size and glow. */
 public class PactParticle extends TextureSheetParticle {
-    public enum Kind { EMBER, FROST, SPARK, WISP, BLOOD, GLYPH }
+    public enum Kind { EMBER, FROST, SPARK, WISP, BLOOD, GLYPH, MOTE }
 
     private final SpriteSet sprites;
     private final Kind kind;
@@ -32,6 +32,7 @@ public class PactParticle extends TextureSheetParticle {
             case WISP -> { lifetime = 24 + random.nextInt(16); gravity = -0.015F; quadSize *= 1.6F; }
             case BLOOD -> { lifetime = 20 + random.nextInt(10); gravity = 0.9F; quadSize *= 0.7F; }
             case GLYPH -> { lifetime = 30; gravity = -0.01F; quadSize *= 1.5F; xd *= 0.2; zd *= 0.2; yd = 0.04; }
+            case MOTE -> { lifetime = 80 + random.nextInt(60); gravity = -0.002F; quadSize *= 0.6F; xd = (random.nextDouble() - 0.5) * 0.01; yd = 0.004; zd = (random.nextDouble() - 0.5) * 0.01; alpha = 0; }
         }
         this.startSize = quadSize;
         setSpriteFromAge(sprites);
@@ -50,6 +51,7 @@ public class PactParticle extends TextureSheetParticle {
             case WISP -> { quadSize = startSize * (1 + life); alpha = 0.8F * (1 - life); xd *= 0.9; zd *= 0.9; }
             case BLOOD -> alpha = 1 - life * 0.5F;
             case GLYPH -> { alpha = life < 0.2F ? life * 5 : 1 - (life - 0.2F) / 0.8F; quadSize = startSize * (1 + life * 0.3F); }
+            case MOTE -> { alpha = Mth.sin(life * Mth.PI) * (0.7F + 0.3F * Mth.sin(age * 0.3F)); xd += Mth.sin(age * 0.05F) * 0.0006; }
         }
     }
 

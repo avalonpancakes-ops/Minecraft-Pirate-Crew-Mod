@@ -81,7 +81,7 @@ public class BankManager {
         }
         int taken = takeRubies(player.getInventory(), (int) want);
         BankData.get(player.server).add(player.getUUID(), taken);
-        player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.2F);
+        player.level().playSound(null, player.blockPosition(), com.piratecrew.registry.ModSounds.COINS.get(), SoundSource.PLAYERS, 1.0F, 1.2F);
         sync(player, false);
     }
 
@@ -104,7 +104,7 @@ public class BankManager {
             ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(ModItems.RUBY.get(), n));
             left -= n;
         }
-        player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 0.9F);
+        player.level().playSound(null, player.blockPosition(), com.piratecrew.registry.ModSounds.COINS.get(), SoundSource.PLAYERS, 1.0F, 0.9F);
         sync(player, false);
     }
 

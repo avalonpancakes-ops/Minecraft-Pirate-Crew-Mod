@@ -17,9 +17,14 @@
     "foliage_color": 8153648,
     "particle": {
       "options": {
-        "type": "minecraft:white_ash"
+        "type": "piratecrew:ember"
       },
-      "probability": 0.006
+      "probability": 0.004
+    },
+    "ambient_sound": "piratecrew:sea_ambient",
+    "additions_sound": {
+      "sound": "piratecrew:sea_additions",
+      "tick_chance": 0.0022
     }
   },
   "spawners": {

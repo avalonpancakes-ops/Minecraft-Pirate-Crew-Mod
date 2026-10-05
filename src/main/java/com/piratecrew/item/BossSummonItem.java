@@ -78,7 +78,7 @@ public class BossSummonItem extends Item {
         mob.setTarget(player);
         server.addFreshEntity(mob);
 
-        server.playSound(null, BlockPos.containing(at), water ? SoundEvents.ELDER_GUARDIAN_CURSE : SoundEvents.RAID_HORN.value(), SoundSource.HOSTILE, 4.0F, 0.8F);
+        server.playSound(null, BlockPos.containing(at), water ? SoundEvents.ELDER_GUARDIAN_CURSE : com.piratecrew.registry.ModSounds.BOSS_HORN.get(), SoundSource.HOSTILE, 4.0F, 0.8F);
         Component msg = Component.literal("☠ " + summonLine).withStyle(ChatFormatting.DARK_RED, ChatFormatting.BOLD);
         for (Player p : server.players()) if (p.distanceToSqr(at) < 96 * 96) p.sendSystemMessage(msg);
         if (!player.getAbilities().instabuild) stack.shrink(1);

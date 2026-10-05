@@ -162,10 +162,22 @@ def glyph():
     return out
 
 
+def mote():
+    """Tiny glowing sea-motes that drift over the Sundered Sea: a soft teal glow with a bright core."""
+    out = []
+    for i, (core, halo) in enumerate([("#FFFFFF", "#7AF0E0"), ("#E8FFF8", "#5AD8D0"), ("#C8FFF0", "#3AB8C0"), ("#E8FFF8", "#5AD8D0")]):
+        im = blank()
+        disc(im, 4, 4, 2.6 - (i % 2) * 0.4, hexc(halo, 110))
+        disc(im, 4, 4, 1.5, hexc(halo, 230))
+        disc(im, 4, 4, 0.8, hexc(core), soft=False)
+        out.append(im)
+    return out
+
+
 def main():
     os.makedirs(TEX, exist_ok=True)
     os.makedirs(JSN, exist_ok=True)
-    for name, fn in [("ember", ember), ("frost", frost), ("spark", spark), ("wisp", wisp), ("blood", blood), ("glyph", glyph)]:
+    for name, fn in [("ember", ember), ("frost", frost), ("spark", spark), ("wisp", wisp), ("blood", blood), ("glyph", glyph), ("mote", mote)]:
         frames = fn()
         names = []
         for i, im in enumerate(frames):

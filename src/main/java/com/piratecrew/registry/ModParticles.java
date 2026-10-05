@@ -16,5 +16,6 @@ public class ModParticles {
     public static final RegistryObject<SimpleParticleType> SPARK = PARTICLES.register("spark", () -> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> WISP = PARTICLES.register("wisp", () -> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> BLOOD = PARTICLES.register("blood", () -> new SimpleParticleType(false));
+    public static final RegistryObject<SimpleParticleType> MOTE = PARTICLES.register("mote", () -> new SimpleParticleType(false));
     public static final RegistryObject<SimpleParticleType> GLYPH = PARTICLES.register("glyph", () -> new SimpleParticleType(false));
 }

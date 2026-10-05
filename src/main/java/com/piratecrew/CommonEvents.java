@@ -327,6 +327,7 @@ public class CommonEvents {
             for (ServerPlayer sp : sl.getPlayers(p -> p.distanceToSqr(victim) < 64 * 64)) {
                 com.piratecrew.network.ModNetwork.sendTo(sp, new com.piratecrew.network.ToastPacket(boss.icon.get(),
                         "Boss Defeated!", victim.getDisplayName().getString().replace("\u2620 ", ""), color));
+                sp.playNotifySound(com.piratecrew.registry.ModSounds.BOSS_DEFEAT.get(), net.minecraft.sounds.SoundSource.MASTER, 1.0F, 1.0F);
                 com.piratecrew.goals.Goals.grant(sp, boss);
             }
         }

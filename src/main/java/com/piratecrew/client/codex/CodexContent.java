@@ -127,7 +127,7 @@ public class CodexContent {
                         "The altar chest §dalways§r holds a Soul Pact, with treasure besides.")
         )));
 
-        out.add(new Section("THE ORDER OF THE TIDE", 0x5AC8FF, List.of(
+        out.add(new Section("ORDER OF THE TIDE", 0x5AC8FF, List.of(
                 e("Marines", "They hang pirates", icon(ModItems.MARINE_SPAWN_EGG),
                         "Navy longcoats, teal sashes, brass and black tricornes. Stronger than any Overworld mob.",
                         "",

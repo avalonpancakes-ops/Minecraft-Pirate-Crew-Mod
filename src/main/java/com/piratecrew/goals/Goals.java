@@ -45,7 +45,6 @@ public class Goals {
         m |= g.bit();
         data(p).putLong(KEY, m);
         ModNetwork.sendTo(p, new GoalSyncPacket(m, g.ordinal()));
-        p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.4F);
         p.sendSystemMessage(Component.literal("✦ Voyage goal: ").withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(g.title).withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
                 .append(Component.literal(" - " + g.description).withStyle(ChatFormatting.GRAY)));

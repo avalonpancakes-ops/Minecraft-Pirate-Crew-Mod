@@ -190,6 +190,7 @@ public class BountyManager {
         com.piratecrew.network.ModNetwork.sendTo(p, new com.piratecrew.network.ToastPacket(
                 new net.minecraft.world.item.ItemStack(com.piratecrew.registry.ModItems.BOUNTY_BOARD.get()),
                 "WANTED: " + String.format("%,d", amount), String.format("Your bounty rose by %,d rubies", gain), 0xD03030));
+        p.playNotifySound(com.piratecrew.registry.ModSounds.BOUNTY_UP.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 1.0F);
     }
 
     private static void announceClaim(MinecraftServer server, LivingEntity killer, LivingEntity victim, int amount, @Nullable String forCrew) {

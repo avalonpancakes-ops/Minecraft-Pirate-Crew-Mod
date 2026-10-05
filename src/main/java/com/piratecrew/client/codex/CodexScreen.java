@@ -222,8 +222,11 @@ public class CodexScreen extends Screen {
                 int color = r.kind == 1 ? 0xFFE8B84A : r.kind == 2 ? 0xFF7FE0C8 : (0xFF000000 | secs.get(r.section).color());
                 String label = r.kind == 1 ? "SHOWCASE" : r.kind == 2 ? "VOYAGE" : secs.get(r.section).title();
                 g.drawString(font, "◆", x0 + 1, y + 3, color, false);
-                g.drawString(font, Component.literal(label).withStyle(ChatFormatting.BOLD), x0 + 9, y + 3, color, false);
-                int lx = x0 + 12 + font.width(Component.literal(label).withStyle(ChatFormatting.BOLD));
+                int room = SIDEBAR_W - 18;
+                Component lab = Component.literal(label).withStyle(ChatFormatting.BOLD);
+                if (font.width(lab) > room) lab = Component.literal(fit(label, room, false));
+                g.drawString(font, lab, x0 + 9, y + 3, color, false);
+                int lx = x0 + 12 + font.width(lab);
                 if (lx < x0 + SIDEBAR_W - 8) g.fill(lx, y + 7, x0 + SIDEBAR_W - 8, y + 8, (color & 0x00FFFFFF) | 0x80000000);
                 continue;
             }

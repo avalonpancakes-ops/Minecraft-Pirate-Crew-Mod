@@ -14,7 +14,18 @@
     "water_color": 3037795,
     "water_fog_color": 663074,
     "grass_color": 4025932,
-    "foliage_color": 3104318
+    "foliage_color": 3104318,
+    "ambient_sound": "piratecrew:sea_ambient",
+    "additions_sound": {
+      "sound": "piratecrew:sea_additions",
+      "tick_chance": 0.0022
+    },
+    "particle": {
+      "options": {
+        "type": "piratecrew:mote"
+      },
+      "probability": 0.0015
+    }
   },
   "spawners": {
     "monster": [

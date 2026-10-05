@@ -72,7 +72,7 @@ public class LoanManager {
         l.deadline = now(player.server) + Config.LOAN_DAYS.get() * DAY;
         data.setDirty();
         BankData.get(player.server).add(player.getUUID(), amt);
-        player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 1.0F);
+        player.level().playSound(null, player.blockPosition(), com.piratecrew.registry.ModSounds.COINS.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         player.sendSystemMessage(Component.literal("Banker: ").withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(String.format("%,d rubies are in your account. You owe me %,d rubies within %d days. Don't make me send someone.",
                         amt, l.owed, Config.LOAN_DAYS.get())).withStyle(ChatFormatting.YELLOW)));
@@ -94,7 +94,7 @@ public class LoanManager {
         }
         l.owed -= paid;
         data.setDirty();
-        player.level().playSound(null, player.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0F, 0.8F);
+        player.level().playSound(null, player.blockPosition(), com.piratecrew.registry.ModSounds.COINS.get(), SoundSource.PLAYERS, 1.0F, 0.8F);
         if (l.owed <= 0) {
             boolean hunted = l.defaulted;
             data.remove(player.getUUID());

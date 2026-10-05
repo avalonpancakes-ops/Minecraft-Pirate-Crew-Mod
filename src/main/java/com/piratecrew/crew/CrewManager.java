@@ -381,6 +381,7 @@ public class CrewManager {
             sp.sendSystemMessage(msg);
             com.piratecrew.network.ModNetwork.sendTo(sp, new com.piratecrew.network.ToastPacket(new net.minecraft.world.item.ItemStack(com.piratecrew.registry.ModItems.PIRATE_SPAWN_EGG.get()),
                     pirate.getPirateName() + " ranks up!", from.label + " \u2192 " + to.label + " tier", to.color.getColor() == null ? 0xE8B84A : to.color.getColor()));
+            if (sp.distanceToSqr(pirate) > 24 * 24) sp.playNotifySound(com.piratecrew.registry.ModSounds.RANK_UP.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 1.0F);
             if (to == com.piratecrew.entity.PirateTier.SSS) com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.SSS);
         }
         syncCrew(server, crew);

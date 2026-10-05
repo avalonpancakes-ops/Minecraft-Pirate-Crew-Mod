@@ -111,7 +111,8 @@ def main():
             name = f"{t}_{piece}"
             handheld = piece in ("sword", "pickaxe", "axe")
             write(os.path.join(A, f"models/item/{name}.json"),
-                  {"parent": "minecraft:item/handheld" if handheld else "minecraft:item/generated",
+                  {"parent": ("piratecrew:item/boss_handheld" if t in ("krakenbone", "stormforged", "leviathan", "sovereign")
+                              and piece in ("sword", "axe") else "minecraft:item/handheld") if handheld else "minecraft:item/generated",
                    "textures": {"layer0": f"piratecrew:item/{name}"}})
             # item texture: drawn by gen_gear_art.py
             lang[f"item.piratecrew.{name}"] = f"{TIER_NAMES[t]} {pname}"

@@ -15,7 +15,7 @@ public class ClientGoals {
         Goal g = Goal.byId(p.reached);
         if (g != null) {
             PirateToast.show(g.icon.get(), "Goal Complete!", g.title, 0xE8B84A);
-            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(com.piratecrew.registry.ModSounds.GOAL_COMPLETE.get(), 1.0F, 0.9F));
         }
     }
 

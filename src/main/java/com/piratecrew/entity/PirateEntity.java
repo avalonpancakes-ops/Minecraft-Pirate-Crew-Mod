@@ -493,7 +493,7 @@ public class PirateEntity extends PathfinderMob {
         setHealth(Math.max(1.0F, getMaxHealth() - missing));
         updateDisplayName();
         sl.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, getX(), getY() + 1, getZ(), 40, 0.4, 0.8, 0.4, 0.3);
-        sl.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.NEUTRAL, 1.0F, 0.8F);
+        sl.playSound(null, blockPosition(), com.piratecrew.registry.ModSounds.RANK_UP.get(), net.minecraft.sounds.SoundSource.NEUTRAL, 1.0F, 1.0F);
         CrewManager.onPirateTierUp(sl.getServer(), getCrewId(), this, now, earned, bounty);
     }
 

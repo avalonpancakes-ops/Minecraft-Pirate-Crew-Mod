@@ -27,6 +27,7 @@ public class PirateCrew {
         ModMenus.MENUS.register(modBus);
         ModTabs.TABS.register(modBus);
         com.piratecrew.registry.ModParticles.PARTICLES.register(modBus);
+        com.piratecrew.registry.ModSounds.SOUNDS.register(modBus);
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(ModEntities::registerAttributes);

@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:item/handheld",
+  "parent": "piratecrew:item/boss_handheld",
   "textures": {
     "layer0": "piratecrew:item/sovereign_axe"
   }

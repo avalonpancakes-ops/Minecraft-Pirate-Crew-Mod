@@ -1,0 +1,94 @@
+{
+  "goal_complete": {
+    "sounds": [
+      {
+        "name": "piratecrew:goal_complete"
+      }
+    ],
+    "subtitle": "subtitles.piratecrew.goal_complete"
+  },
+  "bounty_up": {
+    "sounds": [
+      {
+        "name": "piratecrew:bounty_up"
+      }
+    ],
+    "subtitle": "subtitles.piratecrew.bounty_up"
+  },
+  "rank_up": {
+    "sounds": [
+      {
+        "name": "piratecrew:rank_up"
+      }
+    ],
+    "subtitle": "subtitles.piratecrew.rank_up"
+  },
+  "boss_defeat": {
+    "sounds": [
+      {
+        "name": "piratecrew:boss_defeat"
+      }
+    ],
+    "subtitle": "subtitles.piratecrew.boss_defeat"
+  },
+  "boss_horn": {
+    "sounds": [
+      {
+        "name": "piratecrew:boss_horn"
+      }
+    ],
+    "subtitle": "subtitles.piratecrew.boss_horn"
+  },
+  "pact_bind": {
+    "sounds": [
+      {
+        "name": "piratecrew:pact_bind"
+      }
+    ],
+    "subtitle": "subtitles.piratecrew.pact_bind"
+  },
+  "coins": {
+    "sounds": [
+      {
+        "name": "piratecrew:coins1"
+      },
+      {
+        "name": "piratecrew:coins2"
+      },
+      {
+        "name": "piratecrew:coins3"
+      }
+    ],
+    "subtitle": "subtitles.piratecrew.coins"
+  },
+  "sea_ambient": {
+    "sounds": [
+      {
+        "name": "piratecrew:sea_ambient",
+        "stream": true
+      }
+    ]
+  },
+  "sea_additions": {
+    "subtitle": "subtitles.piratecrew.sea_additions",
+    "sounds": [
+      {
+        "name": "piratecrew:gull1"
+      },
+      {
+        "name": "piratecrew:gull2"
+      },
+      {
+        "name": "piratecrew:gull3"
+      },
+      {
+        "name": "piratecrew:creak1",
+        "volume": 0.7
+      },
+      {
+        "name": "piratecrew:creak2",
+        "volume": 0.7
+      }
+    ]
+  }
+}

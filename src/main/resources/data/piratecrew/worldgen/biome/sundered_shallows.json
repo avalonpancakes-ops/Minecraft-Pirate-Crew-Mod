@@ -12,7 +12,18 @@
     "sky_color": 7907327,
     "fog_color": 12638463,
     "water_color": 3126704,
-    "water_fog_color": 671292
+    "water_fog_color": 671292,
+    "ambient_sound": "piratecrew:sea_ambient",
+    "additions_sound": {
+      "sound": "piratecrew:sea_additions",
+      "tick_chance": 0.0022
+    },
+    "particle": {
+      "options": {
+        "type": "piratecrew:mote"
+      },
+      "probability": 0.003
+    }
   },
   "spawners": {
     "monster": [],

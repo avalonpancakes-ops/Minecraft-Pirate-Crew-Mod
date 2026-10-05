@@ -80,7 +80,7 @@ public class EmperorManager {
                                 + String.format("%,d", totalBounty(server, c)) + " rubies in bounties)").withStyle(ChatFormatting.YELLOW)), false);
                 for (UUID p : c.players) {
                     ServerPlayer sp = server.getPlayerList().getPlayer(p);
-                    if (sp != null) sp.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0F, 1.0F);
+                    if (sp != null) sp.playNotifySound(com.piratecrew.registry.ModSounds.RANK_UP.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                 }
             }
             for (UUID id : before) {
