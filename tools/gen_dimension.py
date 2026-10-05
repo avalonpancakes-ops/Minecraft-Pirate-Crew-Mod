@@ -66,11 +66,17 @@ write(os.path.join(D, "worldgen/noise/sundered_detail.json"), {"firstOctave": -5
 
 islands = {"type": "minecraft:noise", "noise": "piratecrew:sundered_islands", "xz_scale": 1.0, "y_scale": 0.0}
 # Surface height = 128 + 192 * offset: sea floor near y 32, islands rising where the island noise is high.
-offset = {"type": "minecraft:add", "argument1": -0.5, "argument2": {
-    "type": "minecraft:mul", "argument1": 1.1, "argument2": {
-        "type": "minecraft:max", "argument1": 0.0, "argument2": {"type": "minecraft:add", "argument1": islands, "argument2": -0.10}}}}
+# b rises with the island noise; f(b) climbs steeply from the sea floor to just above sea level (the
+# coast), then gently (rolling island hills), so islands have flat-ish tops for villages and outposts.
+b = {"type": "minecraft:mul", "argument1": 1.1, "argument2": {
+    "type": "minecraft:max", "argument1": 0.0, "argument2": {"type": "minecraft:add", "argument1": islands, "argument2": -0.10}}}
+f = {"type": "minecraft:add",
+     "argument1": {"type": "minecraft:min", "argument1": b, "argument2": 0.18},
+     "argument2": {"type": "minecraft:mul", "argument1": 0.35,
+                   "argument2": {"type": "minecraft:max", "argument1": 0.0, "argument2": {"type": "minecraft:add", "argument1": b, "argument2": -0.18}}}}
+offset = {"type": "minecraft:add", "argument1": -0.5, "argument2": f}
 gradient = {"type": "minecraft:y_clamped_gradient", "from_y": -64, "to_y": 320, "from_value": 1.0, "to_value": -1.0}
-detail = {"type": "minecraft:mul", "argument1": 0.04,
+detail = {"type": "minecraft:mul", "argument1": 0.025,
           "argument2": {"type": "minecraft:noise", "noise": "piratecrew:sundered_detail", "xz_scale": 1.0, "y_scale": 1.0}}
 density = {"type": "minecraft:interpolated", "argument": {
     "type": "minecraft:add", "argument1": {"type": "minecraft:add", "argument1": gradient, "argument2": offset}, "argument2": detail}}
