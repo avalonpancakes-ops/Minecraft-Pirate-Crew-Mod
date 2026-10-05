@@ -272,9 +272,21 @@ public class PactPowers {
         Vec3 look = target.getLookAngle();
         Vec3 behind = target.position().subtract(look.x * 1.6, 0, look.z * 1.6);
         Vec3 from = caster.position();
-        boolean moved = caster.randomTeleport(behind.x, behind.y, behind.z, false)
-                || caster.randomTeleport(target.getX(), target.getY(), target.getZ(), false);
-        if (!moved) return false;
+        // Behind the target, else beside it, else just above it: anywhere the caster fits (water is fine).
+        Vec3 side = new Vec3(-look.z, 0, look.x).normalize().scale(1.6);
+        Vec3 spot = null;
+        for (Vec3 c : new Vec3[]{behind, target.position().add(side), target.position().subtract(side), target.position().add(0, target.getBbHeight(), 0)}) {
+            if (level.noCollision(caster, caster.getBoundingBox().move(c.subtract(caster.position())))) {
+                spot = c;
+                break;
+            }
+        }
+        if (spot == null) {
+            if (caster instanceof Player pl) pl.displayClientMessage(net.minecraft.network.chat.Component.literal("No room to step behind your target."), true);
+            return false;
+        }
+        caster.teleportTo(spot.x, spot.y, spot.z);
+        caster.resetFallDistance();
         level.sendParticles(ParticleTypes.LARGE_SMOKE, from.x, from.y + 1, from.z, 30, 0.3, 0.6, 0.3, 0.02);
         level.sendParticles(ParticleTypes.REVERSE_PORTAL, caster.getX(), caster.getY() + 1, caster.getZ(), 40, 0.3, 0.6, 0.3, 0.05);
         level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.6F);

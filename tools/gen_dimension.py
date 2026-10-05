@@ -142,7 +142,7 @@ write(os.path.join(D, "worldgen/noise_settings/sundered_sea.json"), {
     "noise": {"min_y": -64, "height": 384, "size_horizontal": 1, "size_vertical": 2},
     "noise_router": {
         "barrier": 0.0, "fluid_level_floodedness": 0.0, "fluid_level_spread": 0.0, "lava": 0.0,
-        "temperature": shifted("minecraft:temperature", 0.6),
+        "temperature": shifted("minecraft:temperature", 3.0),
         "vegetation": shifted("minecraft:vegetation", 0.25),
         "continents": islands, "erosion": 0.0, "depth": 0.0, "ridges": 0.0,
         "initial_density_without_jaggedness": density,

@@ -138,19 +138,119 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - With the `keepInventory` gamerule on there's no corpse (you keep your items, and a collector takes his share straight from your inventory).
 
 ### Raider camps
-- Now and then, out in the Overworld, you'll stumble on a **raider camp**: a clearing with a campfire ringed by log seats, three wool tents with bedrolls, barrels, a black flag on a pole, lanterns and a **loot chest** (rubies, food, arrows, iron, gold, the odd emerald, enchanted book, golden apple or diamond).
+- Now and then, out in the Overworld (and on Sundered Sea islands), you'll stumble on a **raider camp**: a clearing with a campfire ringed by log seats, three wool tents with bedrolls, barrels, a black flag on a pole, lanterns and a **loot chest** (rubies, food, arrows, iron, gold, the odd emerald, enchanted book, golden apple or diamond).
 - An enemy pirate crew is lounging around the fire: a **captain** and 3 to 5 crew, geared exactly like the ship crews (random gear up to diamond, captain always best equipped). They wander about their camp, attack players and recruited pirates who come close, and chase intruders up to about 14 blocks from camp (archers keep shooting further out).
 - Camps only appear in newly generated land, on flat dry ground (not oceans, rivers or beaches), well away from villages, bars, banks and each other. By default a camp is tried in 1 of every 250 new chunks and camps are at least 320 blocks apart; both are in the config (`generateCamps`, `campChance`, `campSpacing`). A camp's crew doesn't come back once it's been wiped out.
 - `/piratecrew spawncamp` (op) builds one in front of you.
 
 ### Enemy pirate crews at sea (with Valkyrien Pirates)
-- Optional: install **[Valkyrien Pirates](https://modrinth.com/mod/valkyrien-pirates)** (it needs **Valkyrien Skies** and **Eureka! Ships!**) and its pirate ships that sail the oceans get boarded by an **enemy NPC pirate crew** from this mod, in the Overworld only. Without those mods, Pirate Crew works exactly as before.
+- Optional: install **[Valkyrien Pirates](https://modrinth.com/mod/valkyrien-pirates)** (it needs **Valkyrien Skies** and **Eureka! Ships!**) and its pirate ships that sail the oceans get boarded by an **enemy NPC pirate crew** from this mod, in the Overworld and the Sundered Sea. Without those mods, Pirate Crew works exactly as before.
 - Each ship gets a **captain** plus 3 to 8 crew (bigger ships, bigger crews), alongside Valkyrien Pirates' own helmsman and cannoneers, who still sail the ship and fire its cannons.
 - **Gear is random per crew member**, from nothing up to **diamond** (leather, gold, chainmail, iron, ruby or diamond, with pieces missing here and there), swords to match, and bows or crossbows. The **captain is always the best equipped**: a full set at the crew's best level, or one level better (so a captain isn't always in diamond). Captains are B, A or S tier, carry a shield from iron gear up and a golden apple or two, and their blade and bow are enchanted at ruby/diamond level.
 - They attack **players and recruited pirates** (your crew fights back and helps you), and they look out for each other: hit one and its crewmates come for you. They can't be recruited.
 - On their ship they **hold the deck**: they shoot from where they stand and fight hand to hand with anyone who boards, instead of walking off into the sea.
 - They drop a few rubies (the captain drops 8 to 20) and sometimes a piece of their gear. Killing one raises your bounty just like killing any other pirate of its tier (if you're in a crew).
 - `/piratecrew spawnraiders` (op) brings an enemy crew to you on land for testing.
+
+### The Sundered Sea (new dimension)
+A lawless ocean world of scattered islands, ruled by pirates and hunted by the Order of the Tide.
+
+**Getting there**
+- Build a frame of **ruby blocks** exactly like a nether portal (inside 2–21 wide, 3–21 tall; corners optional).
+- Buy a **Siren Conch** from any banker's shop (*Misc*, **1,000 rubies**) and use it on the frame. The conch is used up and the portal fills with sea-green swirl. Stand in it for 4 seconds to cross.
+- Coordinates carry over 1:1. If there's no portal nearby on the other side, one is built for you on dry land, or on a small spruce raft out at sea. Walk back through it to return to the Overworld.
+
+**The world**
+- Open ocean (deep sea and warm shallows) dotted with islands: **Palm Isles** (grassy jungle islands), **Storm Isles** (bare rock, gravel and spruce) and **Ember Isles** (blackstone and basalt).
+- Normal **villages** spawn on the islands, and they get **bars and banks** like Overworld villages. You'll also find shipwrecks, warm ocean ruins and buried treasure.
+- **Raider camps** turn up on the islands (twice as often as in the Overworld). With Valkyrien Pirates installed, its ships carry enemy crews here too.
+- New ores:
+  - **Tidesteel Ore**, everywhere in stone and deepslate. Needs a diamond pickaxe or better.
+  - **Abyssal Ore**, deep in the deepslate (below y −8). Needs a tidesteel pickaxe or better.
+  - **Stormglass Ore**, on Storm Isles only. Needs an abyssal pickaxe or better.
+  - Ruby ore is common here too.
+- **Pact Shrines**: rare ruined rings of mossy pillars around an altar lit by soul lanterns. The altar chest always holds a **Soul Pact**, plus treasure.
+
+**The Order of the Tide (marines)**
+- Navy longcoats, teal sashes, brass buttons and black tricornes, with four ranks:
+
+  | Rank | Health | Damage | Armor | Fights with |
+  |---|---|---|---|---|
+  | Recruit | 40 | 7 | 8 | Iron or tidesteel swords, sometimes a shield |
+  | Rifleman | 40 | 6 | 8 | Crossbows from range |
+  | Sergeant | 60 | 10 | 14 + toughness | Tidesteel sword, shield, crossbow; builds cover |
+  | Captain | 120 | 14 | 20 + toughness | Abyssal sword, shield, crossbow, healing potions, golden apples |
+
+- Every marine is stronger than any vanilla Overworld mob.
+- **Who they hunt:** any player in a crew or with a bounty, every pirate NPC (crew pirates, raiders, bar pirates) and Valkyrien Pirates crews. Players with no crew and no bounty are left alone unless they attack.
+- **Patrols:** squads of 2–4 wander the islands near players. **Outposts** (stone-brick yards with walls, a watchtower and a loot chest) are guarded by a garrison.
+- **Drops:**
+  - Marine Badges, which summon the first boss.
+  - Rubies, and sometimes tidesteel.
+  - Captains have a small chance to drop a Soul Pact.
+- Killing marines raises your bounty: 5 for a recruit, up to 17 for a captain. Marines never claim bounties, they just hang pirates.
+
+**Gear progression**
+Ruby gear is the starting point. Each new tier is crafted from its ingot, in the usual shapes; the "cutlass" is the sword.
+
+| Tier | Armor (helmet/chest/legs/boots) | Toughness per piece | Cutlass damage | Durability | Where the material comes from |
+|---|---|---|---|---|---|
+| Tidesteel | 3 / 8 / 7 / 3 | 2.5 | 8 | 1800 | Tidesteel ore, smelted |
+| Abyssal | 4 / 9 / 7 / 4 | 3.5 | 10 | 2400 | 3 abyssal shards + 1 tidesteel ingot |
+| Krakenbone | 5 / 11 / 9 / 5 | 5 | 13 | 3000 | 2 kraken bones + 1 abyssal ingot → 2 |
+| Stormforged | 7 / 14 / 11 / 6 | 7 | 18 | 3800 | storm core + 2 stormglass + 1 krakenbone ingot → 2 |
+| Leviathan | 10 / 17 / 15 / 9 | 9 | 24 | 5000 | 2 leviathan scales + 1 stormforged ingot → 2 |
+| Sovereign | 14 / **20** / 18 / 13 | 12 | **31** | 8000 | 1 sovereign heart + 1 leviathan ingot → 2 |
+
+- A full Sovereign set is **65 armor**. The vanilla armor cap of 30 is lifted, and armor above 20 now keeps reducing damage. With 30 armor you take 80% of what you'd take at 20; full Leviathan takes about 56%, full Sovereign about 47%.
+- Abyssal and later gear is fireproof, and every piece adds a little knockback resistance (a full Sovereign set is immune to knockback).
+
+**Bosses**
+Each boss has a boss bar and telegraphed special attacks: flames, sparks or ink mark the ground a moment before a strike lands. Each one drops the item that summons the next.
+
+- Summon items only work in the Sundered Sea.
+- Use a land boss's item while looking at the ground. Use a sea boss's item while looking out over water at least 5 blocks deep.
+- Only one of each boss can be around at a time.
+- Bosses never despawn and slowly heal if left alone.
+- Whoever lands the killing blow gets the boss's value added to their **bounty** (crew members only).
+
+| # | Boss | Health | Summoned with (recipe) | Fights with | Drops |
+|---|---|---|---|---|---|
+| 1 | **Commodore Graves** | 600 | Signal Flare (7 marine badges + gunpowder + tidesteel ingot) | Abyssal Sharpness III cutlass and shield. Calls cannon broadsides on you. Leaps in with a crushing landing. Calls marines at 2/3 and 1/3 health, and enrages. | Kraken Lure, Commodore's Insignia, abyssal shards, tidesteel, badges, rubies, 25% Soul Pact. Bounty +150 |
+| 2 | **The Kraken** | 1000 | Kraken Lure (insignia + 4 abyssal shards + 2 tropical fish + ink sac) | A ship-sized squid that hunts from below. Tentacle slams, a blinding ink cloud, a tentacle that drags you off boats and shores, geysers. Below half health: a whirlpool. | Storm Sigil, 8–14 kraken bones, abyssal ingots, ink, rubies, 30% Soul Pact. Bounty +250 |
+| 3 | **Tempest Admiral Sorel** | 1600 | Storm Sigil (4 kraken bones + 4 stormglass + eye of ender) | Krakenbone Sharpness IV cutlass and multishot crossbow. Marked lightning strikes, a wind gust that throws you into the air, blinks behind archers. Below half health: a thunderstorm where lightning keeps falling on everyone, plus riflemen and sergeants. | Leviathan Horn, 4–7 storm cores, stormglass, krakenbone ingots, rubies, 35% Soul Pact. Bounty +400 |
+| 4 | **The Leviathan** | 2800 | Leviathan Horn (4 storm cores + 4 prismarine crystals + nautilus shell) | A ship-sized elder guardian. Its beam charges faster as it weakens. Tail slam up close, whirlpool pull, geysers, and guardian broods at 75/50/25%. | Admiral's Warrant, 8–14 leviathan scales, stormforged ingots, heart of the sea, prismarine, rubies, 40% Soul Pact. Bounty +800 |
+| 5 | **Fleet Admiral Vane, the Iron Tide** | 4500 | Admiral's Warrant (4 leviathan scales + 4 badges + insignia) | Sovereign Sharpness V / Fire Aspect II cutlass. Phase 1: dash strikes that cut through everything in a line, plus cannon fire. Phase 2 (below 2/3): two marine captains join and the whole fleet opens fire. Phase 3 (below 1/3): the Iron Tide, with resistance, speed, strength, ground-shaking shockwaves and lightning. | 3–5 sovereign hearts, leviathan ingots, netherite, 100+ rubies, a **guaranteed** Soul Pact. Bounty +1500 |
+
+Bosses are built for crews. Bring your pirates (and their pacts).
+
+**Soul Pacts**
+Soul Pacts are found in Pact Shrines (always), sometimes in outpost chests, from boss kills and, rarely, from marine captains. There are ten:
+
+| Pact | Gift (always on) | Power (R key) | Cooldown |
+|---|---|---|---|
+| Ember | Fire immunity; your hits set foes on fire | **Flame Burst**: a fan of five fireballs and a gout of flame | 8s |
+| Tempest | Speed | **Thunderstrike**: lightning where you aim, arcing to 3 more foes | 10s |
+| Frost | Your hits slow and chill; attackers are slowed | **Frost Nova**: freezes everything around you and ices over the sea | 12s |
+| Iron | Resistance | **Iron Skin**: Resistance III and Strength for 8s | 25s |
+| Gale | High jumps, no fall damage | **Gale Dash**: dash 10 blocks on the wind, knocking aside anyone in the way | 6s |
+| Shadow | Night vision; invisible while sneaking | **Shadow Step**: teleport behind your target; your next hit deals double | 10s |
+| Quake | Haste II | **Quake**: shatter the ground, launching everyone around you | 10s |
+| Venom | Poison immunity; your hits poison | **Venom Cloud**: a lingering cloud of poison where you aim | 12s |
+| Gravity | Slow fall while sneaking | **Gravity Well**: drag everything near a point together, lift it and slam it down | 14s |
+| Blood | Your hits heal you for 15% of the damage | **Crimson Drain**: drain life from everyone around you to heal | 12s |
+
+- **Binding:** use a pact to bind it to your soul, one per soul. To swap, sneak and use a different pact; the old one is lost. Your pact stays with you through death. The power key is **R** by default (Controls → Pirate Crew).
+- **The price:** the sea drains every pact. In water you're weakened and slowed, your gift fades, and your power won't work.
+- **Damage scaling:** power damage grows with your weapon, so a pact hits harder with a Sovereign cutlass than a ruby sword. Powers never hurt your crewmates, your crew's pirates, villagers or bankers.
+- **Crew pirates:**
+  - Use a pact on one of your crew's pirates to give it to them. Their whole fighting style changes:
+    - Ember, Tempest, Venom and Gravity pirates fight from range.
+    - The rest charge in.
+  - They use the power on their own when it fits the fight. For example, an Iron pirate hardens when hurt and a Shadow pirate steps behind its target.
+  - Their name shows their pact.
+  - If a pact pirate dies, its pact scroll drops so it isn't lost.
+- `/piratecrew clearpact` (op) frees your soul for testing.
 
 ### Commands
 - `/crew` — open the crew screen
@@ -162,6 +262,8 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **Debt collector spawn eggs** (creative tab, one per tier F to S): use one on a block to spawn a fully equipped test debt collector of that tier that hunts you. Like `spawncollector`, it never touches loans; fight it in survival.
 - **Aggro Stick** (creative tab, works in creative mode only): right-click a mob to pick it (it glows), then right-click another mob and the two fight. Sneak + right-click a mob to set every mob within 16 blocks on it; sneak + right-click the air to clear your pick. Works on any mob, including pirates, debt collectors, villagers and vanilla monsters (mobs with no way to attack, like cows, just get chased).
 - `/piratecrew loandue` (op) — make your loan overdue now, to test the collectors
+- `/piratecrew spawnoutpost`, `/piratecrew spawnmarines`, `/piratecrew spawnshrine` (op) — build a marine outpost, call a marine squad, or build a Pact Shrine in front of you
+- **Boss and marine spawn eggs** (creative tab) for testing; boss summon items also work anywhere in creative mode
 
 ## Config
 
