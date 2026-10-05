@@ -38,15 +38,42 @@ public class CommonEvents {
         }
     }
 
-    /** Crewmates (players and pirates) can't hurt each other unless friendly fire is on. */
+    /**
+     * No friendly fire, ever: crewmates (players and pirates) can't hurt each other by any weapon,
+     * arrow, trident, thrown potion, TNT they lit, thorns...
+     */
     @SubscribeEvent
     public static void friendlyFire(LivingAttackEvent event) {
-        if (Config.FRIENDLY_FIRE.get()) return;
         if (event.getEntity().level().isClientSide) return;
         Entity attacker = event.getSource().getEntity();
         if (attacker != null && attacker != event.getEntity() && CrewManager.areCrewmates(attacker, event.getEntity())) {
             event.setCanceled(true);
         }
+    }
+
+    /** Arrows, tridents and other projectiles fly straight through crewmates (so flame arrows can't set them alight either). */
+    @SuppressWarnings({"deprecation", "removal"})
+    @SubscribeEvent
+    public static void friendlyProjectiles(net.minecraftforge.event.entity.ProjectileImpactEvent event) {
+        if (event.getProjectile().level().isClientSide) return;
+        if (!(event.getRayTraceResult() instanceof net.minecraft.world.phys.EntityHitResult hit)) return;
+        Entity owner = event.getProjectile().getOwner();
+        if (owner != null && owner != hit.getEntity() && CrewManager.areCrewmates(owner, hit.getEntity())) {
+            event.setCanceled(true);
+        }
+    }
+
+    /** Harmful effects from a crewmate's splash or lingering potion are stripped right away. */
+    private static final java.util.List<java.util.Map.Entry<net.minecraft.world.entity.LivingEntity, net.minecraft.world.effect.MobEffect>> STRIP = new java.util.ArrayList<>();
+
+    @SubscribeEvent
+    public static void friendlyPotions(net.minecraftforge.event.entity.living.MobEffectEvent.Added event) {
+        net.minecraft.world.entity.LivingEntity target = event.getEntity();
+        Entity source = event.getEffectSource();
+        var effect = event.getEffectInstance().getEffect();
+        if (target.level().isClientSide || source == null || source == target) return;
+        if (effect.getCategory() != net.minecraft.world.effect.MobEffectCategory.HARMFUL) return;
+        if (CrewManager.areCrewmates(source, target)) STRIP.add(java.util.Map.entry(target, effect));
     }
 
     @SubscribeEvent
@@ -113,6 +140,10 @@ public class CommonEvents {
     @SubscribeEvent
     public static void serverTick(TickEvent.ServerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
+        if (!STRIP.isEmpty()) {
+            for (var e : STRIP) if (e.getKey().isAlive()) e.getKey().removeEffect(e.getValue());
+            STRIP.clear();
+        }
         VillageBarHandler.tick(ServerLifecycleHooks.getCurrentServer());
         LoanManager.tick(ServerLifecycleHooks.getCurrentServer());
         com.piratecrew.compat.ValkyrienPiratesCompat.tick(ServerLifecycleHooks.getCurrentServer());

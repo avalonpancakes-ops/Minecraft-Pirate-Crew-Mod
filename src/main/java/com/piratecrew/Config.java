@@ -16,7 +16,6 @@ public class Config {
     // Crew
     public static final ForgeConfigSpec.IntValue MAX_CREW_SIZE;
     public static final ForgeConfigSpec.IntValue MAX_REAL_PLAYERS;
-    public static final ForgeConfigSpec.BooleanValue FRIENDLY_FIRE;
 
     // Bars
     public static final ForgeConfigSpec.BooleanValue GENERATE_BARS;
@@ -60,7 +59,6 @@ public class Config {
         b.push("crew");
         MAX_CREW_SIZE = b.comment("Maximum members in a crew (players + NPCs)").defineInRange("maxCrewSize", 20, 1, 200);
         MAX_REAL_PLAYERS = b.comment("Maximum real players in a crew").defineInRange("maxRealPlayers", 7, 1, 200);
-        FRIENDLY_FIRE = b.comment("Allow crew members (players and pirates) to hurt each other").define("friendlyFire", false);
         b.pop();
 
         b.push("bars");

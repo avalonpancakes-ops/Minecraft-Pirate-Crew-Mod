@@ -85,7 +85,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **Max 20 members**, of which at most **7 can be real players** — the rest have to be pirates.
 - Captain and vice captains can invite players, recruit and dismiss pirates, and set the crew icon. Vice captains can kick deckhands; the captain can kick anyone, promote/demote, hand over the captaincy, rename and disband.
 - **Crew icon:** hold any item and press **Set Icon**.
-- Crewmates can't hurt each other (toggle in the config).
+- **No friendly fire, ever:** crewmates (players and pirates) can't hurt or kill each other. Swords, axes and fists do nothing, arrows and tridents fly straight through crewmates (flame arrows don't light them up), a crewmate's splash or lingering potions can't harm or poison you, and TNT a crewmate lit can't hurt you.
 
 ### Bounties
 - Crew members (players **and** recruited pirates) earn a ruby bounty by killing players and pirates outside their crew: **10 rubies per player**, **2 rubies per F-tier pirate +1 per tier above F** (doubled if the pirate belonged to a crew).
@@ -165,4 +165,4 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ## Config
 
-`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, friendly fire, bar restocking, bounty values, and loan size, interest, days and collector strength.
+`config/piratecrew-common.toml` (created on first launch): recruit cost per tier, crew size limits, bar restocking, bounty values, and loan size, interest, days and collector strength.
