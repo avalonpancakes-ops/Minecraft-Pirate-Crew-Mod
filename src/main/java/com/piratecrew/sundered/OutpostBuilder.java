@@ -31,7 +31,7 @@ public class OutpostBuilder {
         for (int dx = -RADIUS; dx <= RADIUS; dx++) {
             for (int dz = -RADIUS; dz <= RADIUS; dz++) {
                 int x = cx + dx, z = cz + dz;
-                for (int y = fy + 1; y <= fy + 12; y++) level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), flags);
+                for (int y = fy + 1; y <= fy + 14; y++) level.setBlock(new BlockPos(x, y, z), Blocks.AIR.defaultBlockState(), flags);
                 boolean yard = Math.abs(dx) <= 6 && Math.abs(dz) <= 6;
                 BlockState top = yard ? (r.nextFloat() < 0.2F ? Blocks.MOSSY_STONE_BRICKS : r.nextFloat() < 0.1F ? Blocks.CRACKED_STONE_BRICKS : Blocks.STONE_BRICKS).defaultBlockState()
                         : Blocks.GRASS_BLOCK.defaultBlockState();
@@ -85,10 +85,19 @@ public class OutpostBuilder {
             level.setBlock(c.offset(o[0], 8, o[1]), Blocks.SPRUCE_FENCE.defaultBlockState(), nb);
             level.setBlock(c.offset(o[0], 9, o[1]), Blocks.SPRUCE_FENCE.defaultBlockState(), nb);
         }
+        // hipped roof: a ring of stairs stepping down outward, planks inside, a slab cap with the banner
         for (int dx = -8; dx <= -4; dx++) for (int dz = -8; dz <= -4; dz++) {
-            level.setBlock(c.offset(dx, 10, dz), Blocks.DARK_OAK_SLAB.defaultBlockState(), flags);
+            boolean ring = dx == -8 || dx == -4 || dz == -8 || dz == -4;
+            BlockState roof;
+            if (!ring) roof = Blocks.DARK_OAK_PLANKS.defaultBlockState();
+            else {
+                Direction inward = dz == -8 ? Direction.SOUTH : dz == -4 ? Direction.NORTH : dx == -8 ? Direction.EAST : Direction.WEST;
+                roof = Blocks.DARK_OAK_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.StairBlock.FACING, inward);
+            }
+            level.setBlock(c.offset(dx, 10, dz), roof, flags);
         }
-        level.setBlock(c.offset(-6, 11, -6), Blocks.CYAN_BANNER.defaultBlockState(), flags);
+        level.setBlock(c.offset(-6, 11, -6), Blocks.DARK_OAK_SLAB.defaultBlockState(), flags);
+        level.setBlock(c.offset(-6, 12, -6), Blocks.CYAN_BANNER.defaultBlockState(), flags);
         level.setBlock(c.offset(-6, 9, -6), Blocks.LANTERN.defaultBlockState().setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true), flags);
 
         // Barracks along the north wall: stone walls with log corners, windows, a parapet roof.

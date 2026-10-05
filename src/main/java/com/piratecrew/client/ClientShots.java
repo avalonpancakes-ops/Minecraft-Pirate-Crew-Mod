@@ -106,6 +106,8 @@ public class ClientShots {
         STEPS.add(new Step("outpost", 120, mc -> structure(mc, 0)));
         STEPS.add(new Step("shrine", 100, mc -> structure(mc, 1)));
         STEPS.add(new Step("camp", 100, mc -> structure(mc, 2)));
+        STEPS.add(new Step("bar", 120, mc -> structure(mc, 3)));
+        STEPS.add(new Step("bank_building", 100, mc -> structure(mc, 4)));
         STEPS.add(new Step("", 60, ClientShots::sea));
         STEPS.add(new Step("sundered_sea", 400, ClientShots::hover));
     }
@@ -355,7 +357,9 @@ public class ClientShots {
             switch (which) {
                 case 0 -> com.piratecrew.sundered.OutpostBuilder.build(level, floor);
                 case 1 -> com.piratecrew.sundered.ShrineBuilder.build(level, floor);
-                default -> com.piratecrew.world.CampBuilder.build(level, floor);
+                case 2 -> com.piratecrew.world.CampBuilder.build(level, floor);
+                case 3 -> com.piratecrew.world.BarBuilder.buildAt(level, floor.above(), net.minecraft.core.Direction.NORTH, true);
+                default -> com.piratecrew.world.BankBuilder.buildAt(level, floor.above(), net.minecraft.core.Direction.NORTH, true);
             }
             for (var e : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(floor).inflate(24))) e.setNoAi(true);
             double d = which == 0 ? 17 : 12;
