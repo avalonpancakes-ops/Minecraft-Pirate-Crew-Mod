@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:storm_core"
+    },
+    {
+      "item": "piratecrew:storm_core"
+    },
+    {
+      "item": "piratecrew:storm_core"
+    },
+    {
+      "item": "piratecrew:storm_core"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:prismarine_crystals"
+    },
+    {
+      "item": "minecraft:nautilus_shell"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:leviathan_horn"
+  }
+}

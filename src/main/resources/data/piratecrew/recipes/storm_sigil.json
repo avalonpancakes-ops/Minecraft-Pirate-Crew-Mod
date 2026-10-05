@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:kraken_bone"
+    },
+    {
+      "item": "piratecrew:kraken_bone"
+    },
+    {
+      "item": "piratecrew:kraken_bone"
+    },
+    {
+      "item": "piratecrew:kraken_bone"
+    },
+    {
+      "item": "piratecrew:stormglass_shard"
+    },
+    {
+      "item": "piratecrew:stormglass_shard"
+    },
+    {
+      "item": "piratecrew:stormglass_shard"
+    },
+    {
+      "item": "piratecrew:stormglass_shard"
+    },
+    {
+      "item": "minecraft:ender_eye"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:storm_sigil"
+  }
+}

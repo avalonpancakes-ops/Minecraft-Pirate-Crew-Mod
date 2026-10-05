@@ -17,6 +17,7 @@ public class AttributeCaps {
     public static void raise() {
         raise(Attributes.ARMOR, 30.0, 1024.0);
         raise(Attributes.ARMOR_TOUGHNESS, 20.0, 1024.0);
+        raise(Attributes.MAX_HEALTH, 1024.0, 100000.0);
     }
 
     private static void raise(Attribute attribute, double oldMax, double newMax) {

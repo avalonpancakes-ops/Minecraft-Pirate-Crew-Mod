@@ -102,6 +102,23 @@ public class SmokeTest {
             } else {
                 PirateCrew.LOGGER.info("PIRATECREW SMOKETEST no flat island ground found for an outpost test");
             }
+            // Every boss spawns, sets itself up and survives a few ticks of AI.
+            net.minecraft.core.BlockPos bossAt = outpost != null ? outpost.above(2) : new net.minecraft.core.BlockPos(0, sea.getSeaLevel() - 6, 0);
+            for (var type : java.util.List.<net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.Mob>>of(
+                    com.piratecrew.registry.ModEntities.COMMODORE.get(), com.piratecrew.registry.ModEntities.KRAKEN.get(),
+                    com.piratecrew.registry.ModEntities.TEMPEST_ADMIRAL.get(), com.piratecrew.registry.ModEntities.LEVIATHAN.get(),
+                    com.piratecrew.registry.ModEntities.FLEET_ADMIRAL.get())) {
+                net.minecraft.world.entity.Mob boss = type.create(sea);
+                if (boss == null) throw new IllegalStateException("couldn't create " + type);
+                boss.moveTo(bossAt.getX() + 0.5, bossAt.getY(), bossAt.getZ() + 0.5, 0, 0);
+                boss.finalizeSpawn(sea, sea.getCurrentDifficultyAt(bossAt), net.minecraft.world.entity.MobSpawnType.EVENT, null, null);
+                sea.addFreshEntity(boss);
+                for (int i = 0; i < 40; i++) boss.tick();
+                PirateCrew.LOGGER.info("PIRATECREW SMOKETEST boss {} health {}/{} armor {} name {}", type.getDescriptionId(), boss.getHealth(),
+                        boss.getMaxHealth(), boss.getArmorValue(), boss.getDisplayName().getString());
+                if (boss.getMaxHealth() < 500) throw new IllegalStateException("boss health cap not raised: " + boss.getMaxHealth());
+                boss.discard();
+            }
             for (var check : CHECKS) check.accept(sea);
             PirateCrew.LOGGER.info("PIRATECREW SMOKETEST OK");
         } catch (Throwable t) {

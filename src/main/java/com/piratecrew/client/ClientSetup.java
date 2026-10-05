@@ -39,6 +39,11 @@ public class ClientSetup {
             event.registerEntityRenderer(ModEntities.CORPSE.get(), CorpseRenderer::new);
             event.registerEntityRenderer(ModEntities.RAIDER_PIRATE.get(), PirateRenderer::new);
             event.registerEntityRenderer(ModEntities.MARINE.get(), PirateRenderer::new);
+            event.registerEntityRenderer(ModEntities.COMMODORE.get(), PirateRenderer::new);
+            event.registerEntityRenderer(ModEntities.TEMPEST_ADMIRAL.get(), PirateRenderer::new);
+            event.registerEntityRenderer(ModEntities.FLEET_ADMIRAL.get(), PirateRenderer::new);
+            event.registerEntityRenderer(ModEntities.KRAKEN.get(), KrakenRenderer::new);
+            event.registerEntityRenderer(ModEntities.LEVIATHAN.get(), LeviathanRenderer::new);
         }
 
         @SubscribeEvent

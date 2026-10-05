@@ -7,19 +7,10 @@
     },
     {
       "item": "piratecrew:leviathan_ingot"
-    },
-    {
-      "item": "piratecrew:leviathan_ingot"
-    },
-    {
-      "item": "piratecrew:leviathan_ingot"
-    },
-    {
-      "item": "piratecrew:leviathan_ingot"
     }
   ],
   "result": {
     "item": "piratecrew:sovereign_ingot",
-    "count": 1
+    "count": 2
   }
 }

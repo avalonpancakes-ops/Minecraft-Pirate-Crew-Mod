@@ -10,13 +10,10 @@
     },
     {
       "item": "piratecrew:abyssal_ingot"
-    },
-    {
-      "item": "piratecrew:abyssal_ingot"
     }
   ],
   "result": {
     "item": "piratecrew:krakenbone_ingot",
-    "count": 1
+    "count": 2
   }
 }

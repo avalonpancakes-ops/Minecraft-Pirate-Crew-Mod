@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "minecraft:gunpowder"
+    },
+    {
+      "item": "piratecrew:tidesteel_ingot"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:signal_flare"
+  }
+}

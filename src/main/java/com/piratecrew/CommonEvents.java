@@ -84,6 +84,19 @@ public class CommonEvents {
         }
     }
 
+    /**
+     * Vanilla armor stops helping past 20 points (80% reduction). Sundered Sea sets go far beyond that,
+     * so armor above 20 cuts the remaining damage further: 30 armor takes 80% of what 20 would,
+     * 51 (full Leviathan) about 56%, 65 (full Sovereign) about 47%.
+     */
+    @SubscribeEvent
+    public static void heavyArmor(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
+        if (event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_ARMOR)) return;
+        double armor = event.getEntity().getArmorValue();
+        if (armor <= 20) return;
+        event.setAmount((float) (event.getAmount() / (1.0 + (armor - 20) / 40.0)));
+    }
+
     /** Players leave a corpse holding their items instead of scattering them. */
     @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOW)
     public static void playerDrops(net.minecraftforge.event.entity.living.LivingDropsEvent event) {

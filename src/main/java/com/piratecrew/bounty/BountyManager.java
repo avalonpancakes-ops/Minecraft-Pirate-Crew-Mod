@@ -37,6 +37,10 @@ public class BountyManager {
 
     public static void onDeath(LivingEntity victim, @Nullable Entity killerEntity) {
         if (victim.level().isClientSide) return;
+        if (victim instanceof com.piratecrew.entity.boss.BountyBoss boss) {
+            onBossKill(victim, killerEntity, boss.bountyValue());
+            return;
+        }
         if (!(victim instanceof ServerPlayer) && !(victim instanceof PirateEntity)) return;
         // Bank business, not piracy: bounty hunters neither earn nor carry bounties.
         if (victim instanceof com.piratecrew.entity.BountyHunterEntity || killerEntity instanceof com.piratecrew.entity.BountyHunterEntity) return;
@@ -127,6 +131,35 @@ public class BountyManager {
         CrewData crews = CrewData.get(server);
         if (killerCrew != null && crews.byId(killerCrew) != null) CrewManager.syncCrew(server, crews.byId(killerCrew));
         if (victimCrew != null && !victimCrew.equals(killerCrew) && crews.byId(victimCrew) != null) CrewManager.syncCrew(server, crews.byId(victimCrew));
+    }
+
+    /**
+     * Felling a Sundered Sea boss makes a pirate famous: the crew member who lands the killing blow
+     * (player or crew pirate) gets the boss's bounty value added to their own bounty.
+     */
+    private static void onBossKill(LivingEntity boss, @Nullable Entity killerEntity, int value) {
+        MinecraftServer server = boss.getServer();
+        if (server == null || value <= 0) return;
+        if (!(killerEntity instanceof ServerPlayer) && !(killerEntity instanceof PirateEntity)) return;
+        LivingEntity killer = (LivingEntity) killerEntity;
+        UUID crewId = CrewManager.crewIdOf(killer);
+        if (crewId == null) {
+            if (killer instanceof ServerPlayer sp) sp.displayClientMessage(Component.literal("Join a crew to earn a bounty for kills like that.").withStyle(ChatFormatting.GRAY), true);
+            return;
+        }
+        BountyData data = BountyData.get(server);
+        BountyData.Entry k = data.getOrCreate(killer.getUUID());
+        refresh(k, killer, crewId);
+        k.amount += value;
+        k.pirateKills++;
+        data.setDirty();
+        server.getPlayerList().broadcastSystemMessage(Component.literal("☠ The bounty on ").withStyle(ChatFormatting.YELLOW)
+                .append(Component.literal(displayName(killer)).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal(" rose by " + String.format("%,d", value) + " rubies for slaying ").withStyle(ChatFormatting.YELLOW))
+                .append(boss.getDisplayName().copy().withStyle(ChatFormatting.RED))
+                .append(Component.literal("!").withStyle(ChatFormatting.YELLOW)), false);
+        Crew crew = CrewData.get(server).byId(crewId);
+        if (crew != null) CrewManager.syncCrew(server, crew);
     }
 
     private static void announceClaim(MinecraftServer server, LivingEntity killer, LivingEntity victim, int amount, @Nullable String forCrew) {

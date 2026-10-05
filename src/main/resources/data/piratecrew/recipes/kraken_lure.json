@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:commodore_insignia"
+    },
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "minecraft:tropical_fish"
+    },
+    {
+      "item": "minecraft:tropical_fish"
+    },
+    {
+      "item": "minecraft:ink_sac"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:kraken_lure"
+  }
+}

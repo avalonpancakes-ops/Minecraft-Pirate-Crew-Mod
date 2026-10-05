@@ -7,6 +7,7 @@ import com.piratecrew.entity.CorpseEntity;
 import com.piratecrew.entity.RaiderPirateEntity;
 import com.piratecrew.entity.MarineEntity;
 import com.piratecrew.entity.PirateEntity;
+import com.piratecrew.entity.boss.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -47,6 +48,30 @@ public class ModEntities {
                     .clientTrackingRange(10)
                     .build(PirateCrew.id("marine").toString()));
 
+    public static final RegistryObject<EntityType<CommodoreEntity>> COMMODORE = boss("commodore", CommodoreEntity::new);
+    public static final RegistryObject<EntityType<TempestAdmiralEntity>> TEMPEST_ADMIRAL = boss("tempest_admiral", TempestAdmiralEntity::new);
+    public static final RegistryObject<EntityType<FleetAdmiralEntity>> FLEET_ADMIRAL = boss("fleet_admiral", FleetAdmiralEntity::new);
+
+    public static final RegistryObject<EntityType<KrakenEntity>> KRAKEN = ENTITIES.register("kraken",
+            () -> EntityType.Builder.<KrakenEntity>of(KrakenEntity::new, MobCategory.MONSTER)
+                    .sized(3.0F, 6.0F)
+                    .clientTrackingRange(16)
+                    .build(PirateCrew.id("kraken").toString()));
+
+    public static final RegistryObject<EntityType<LeviathanEntity>> LEVIATHAN = ENTITIES.register("leviathan",
+            () -> EntityType.Builder.<LeviathanEntity>of(LeviathanEntity::new, MobCategory.MONSTER)
+                    .sized(5.0F, 5.0F)
+                    .clientTrackingRange(16)
+                    .build(PirateCrew.id("leviathan").toString()));
+
+    private static <T extends MarineBossEntity> RegistryObject<EntityType<T>> boss(String name, EntityType.EntityFactory<T> factory) {
+        return ENTITIES.register(name, () -> EntityType.Builder.of(factory, MobCategory.MONSTER)
+                .sized(0.6F, 1.8F)
+                .fireImmune()
+                .clientTrackingRange(12)
+                .build(PirateCrew.id(name).toString()));
+    }
+
     public static final RegistryObject<EntityType<CorpseEntity>> CORPSE = ENTITIES.register("corpse",
             () -> EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)
                     .sized(1.2F, 0.5F)
@@ -60,5 +85,10 @@ public class ModEntities {
         event.put(BOUNTY_HUNTER.get(), PirateEntity.createAttributes().build());
         event.put(RAIDER_PIRATE.get(), PirateEntity.createAttributes().build());
         event.put(MARINE.get(), PirateEntity.createAttributes().build());
+        event.put(COMMODORE.get(), PirateEntity.createAttributes().build());
+        event.put(TEMPEST_ADMIRAL.get(), PirateEntity.createAttributes().build());
+        event.put(FLEET_ADMIRAL.get(), PirateEntity.createAttributes().build());
+        event.put(KRAKEN.get(), KrakenEntity.createAttributes().build());
+        event.put(LEVIATHAN.get(), LeviathanEntity.createAttributes().build());
     }
 }

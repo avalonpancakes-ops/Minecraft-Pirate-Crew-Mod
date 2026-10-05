@@ -183,11 +183,13 @@ def main():
               {"type": "minecraft:crafting_shapeless", "category": "misc",
                "ingredients": [{"item": i} for i in ingredients], "result": {"item": f"piratecrew:{out}", "count": count}})
     P = "piratecrew:"
-    shapeless("abyssal_ingot", [P + "abyssal_shard"] * 4 + [P + "tidesteel_ingot"] * 4)
-    shapeless("krakenbone_ingot", [P + "kraken_bone"] * 2 + [P + "abyssal_ingot"] * 2)
-    shapeless("stormforged_ingot", [P + "storm_core"] + [P + "stormglass_shard"] * 4 + [P + "krakenbone_ingot"] * 2)
-    shapeless("leviathan_ingot", [P + "leviathan_scale"] * 2 + [P + "stormforged_ingot"] * 2)
-    shapeless("sovereign_ingot", [P + "sovereign_heart"] + [P + "leviathan_ingot"] * 4)
+    # Each tier's alloy uses one ingot of the tier below, and the boss tiers make two at a time, so a
+    # full set takes a handful of boss kills rather than dozens.
+    shapeless("abyssal_ingot", [P + "abyssal_shard"] * 3 + [P + "tidesteel_ingot"])
+    shapeless("krakenbone_ingot", [P + "kraken_bone"] * 2 + [P + "abyssal_ingot"], 2)
+    shapeless("stormforged_ingot", [P + "storm_core"] + [P + "stormglass_shard"] * 2 + [P + "krakenbone_ingot"], 2)
+    shapeless("leviathan_ingot", [P + "leviathan_scale"] * 2 + [P + "stormforged_ingot"], 2)
+    shapeless("sovereign_ingot", [P + "sovereign_heart"] + [P + "leviathan_ingot"], 2)
 
     json.dump(lang, open(lang_path, "w"), indent=2, ensure_ascii=False)
     print("generated", len(TIERS) * len(PIECES), "gear items,", len(MATERIALS), "materials,", len(ORES), "ores")

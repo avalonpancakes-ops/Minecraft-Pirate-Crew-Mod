@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:leviathan_scale"
+    },
+    {
+      "item": "piratecrew:leviathan_scale"
+    },
+    {
+      "item": "piratecrew:leviathan_scale"
+    },
+    {
+      "item": "piratecrew:leviathan_scale"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:marine_badge"
+    },
+    {
+      "item": "piratecrew:commodore_insignia"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:admirals_warrant"
+  }
+}

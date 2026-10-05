@@ -12,20 +12,11 @@
       "item": "piratecrew:stormglass_shard"
     },
     {
-      "item": "piratecrew:stormglass_shard"
-    },
-    {
-      "item": "piratecrew:stormglass_shard"
-    },
-    {
-      "item": "piratecrew:krakenbone_ingot"
-    },
-    {
       "item": "piratecrew:krakenbone_ingot"
     }
   ],
   "result": {
     "item": "piratecrew:stormforged_ingot",
-    "count": 1
+    "count": 2
   }
 }

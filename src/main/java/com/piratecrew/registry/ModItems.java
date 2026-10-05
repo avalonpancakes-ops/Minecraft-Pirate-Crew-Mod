@@ -146,6 +146,35 @@ public class ModItems {
     public static final RegistryObject<Item> SIREN_CONCH = ITEMS.register("siren_conch",
             () -> new com.piratecrew.sundered.SirenConchItem(new Item.Properties()));
 
+    // ------------------------------------------------------------------ boss summons
+
+    public static final RegistryObject<Item> SIGNAL_FLARE = ITEMS.register("signal_flare",
+            () -> new com.piratecrew.item.BossSummonItem(ModEntities.COMMODORE, false, "Commodore Graves",
+                    "A flare bursts over the island. Commodore Graves has come to hang a pirate!", new Item.Properties()));
+    public static final RegistryObject<Item> KRAKEN_LURE = ITEMS.register("kraken_lure",
+            () -> new com.piratecrew.item.BossSummonItem(ModEntities.KRAKEN, true, "the Kraken",
+                    "The water darkens with ink... the Kraken rises!", new Item.Properties()));
+    public static final RegistryObject<Item> STORM_SIGIL = ITEMS.register("storm_sigil",
+            () -> new com.piratecrew.item.BossSummonItem(ModEntities.TEMPEST_ADMIRAL, false, "Tempest Admiral Sorel",
+                    "Thunder rolls across the sea. Tempest Admiral Sorel descends!", new Item.Properties()));
+    public static final RegistryObject<Item> LEVIATHAN_HORN = ITEMS.register("leviathan_horn",
+            () -> new com.piratecrew.item.BossSummonItem(ModEntities.LEVIATHAN, true, "the Leviathan",
+                    "The horn's call echoes into the deep. The Leviathan answers!", new Item.Properties()));
+    public static final RegistryObject<Item> ADMIRALS_WARRANT = ITEMS.register("admirals_warrant",
+            () -> new com.piratecrew.item.BossSummonItem(ModEntities.FLEET_ADMIRAL, false, "Fleet Admiral Vane",
+                    "The warrant is served. Fleet Admiral Vane, the Iron Tide, has come for you!", new Item.Properties()));
+
+    public static final RegistryObject<Item> COMMODORE_SPAWN_EGG = ITEMS.register("commodore_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.COMMODORE, 0x18224A, 0xC9A227, new Item.Properties()));
+    public static final RegistryObject<Item> KRAKEN_SPAWN_EGG = ITEMS.register("kraken_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.KRAKEN, 0x5A143C, 0xAA3C6E, new Item.Properties()));
+    public static final RegistryObject<Item> TEMPEST_ADMIRAL_SPAWN_EGG = ITEMS.register("tempest_admiral_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.TEMPEST_ADMIRAL, 0x2C2646, 0x5AC8FF, new Item.Properties()));
+    public static final RegistryObject<Item> LEVIATHAN_SPAWN_EGG = ITEMS.register("leviathan_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.LEVIATHAN, 0x105848, 0x82E6BE, new Item.Properties()));
+    public static final RegistryObject<Item> FLEET_ADMIRAL_SPAWN_EGG = ITEMS.register("fleet_admiral_spawn_egg",
+            () -> new ForgeSpawnEggItem(ModEntities.FLEET_ADMIRAL, 0x0E0E10, 0xAA141E, new Item.Properties()));
+
     public static final RegistryObject<Item> AGGRO_STICK = ITEMS.register("aggro_stick",
             () -> new com.piratecrew.item.AggroStickItem(new Item.Properties()));
 

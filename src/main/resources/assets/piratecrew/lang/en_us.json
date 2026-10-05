@@ -97,5 +97,20 @@
   "item.piratecrew.siren_conch": "Siren Conch",
   "block.piratecrew.siren_portal": "Siren Portal",
   "entity.piratecrew.marine": "Marine",
-  "item.piratecrew.marine_spawn_egg": "Marine Spawn Egg"
+  "item.piratecrew.marine_spawn_egg": "Marine Spawn Egg",
+  "item.piratecrew.signal_flare": "Signal Flare",
+  "item.piratecrew.kraken_lure": "Kraken Lure",
+  "item.piratecrew.storm_sigil": "Storm Sigil",
+  "item.piratecrew.leviathan_horn": "Leviathan Horn",
+  "item.piratecrew.admirals_warrant": "Admiral's Warrant",
+  "entity.piratecrew.commodore": "Commodore Graves",
+  "item.piratecrew.commodore_spawn_egg": "Commodore Graves Spawn Egg",
+  "entity.piratecrew.kraken": "The Kraken",
+  "item.piratecrew.kraken_spawn_egg": "Kraken Spawn Egg",
+  "entity.piratecrew.tempest_admiral": "Tempest Admiral Sorel",
+  "item.piratecrew.tempest_admiral_spawn_egg": "Tempest Admiral Sorel Spawn Egg",
+  "entity.piratecrew.leviathan": "The Leviathan",
+  "item.piratecrew.leviathan_spawn_egg": "Leviathan Spawn Egg",
+  "entity.piratecrew.fleet_admiral": "Fleet Admiral Vane",
+  "item.piratecrew.fleet_admiral_spawn_egg": "Fleet Admiral Vane Spawn Egg"
 }

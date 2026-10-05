@@ -49,6 +49,9 @@ public class ModTabs {
                         ModItems.LEVIATHAN_SCALE, ModItems.LEVIATHAN_INGOT, ModItems.SOVEREIGN_HEART, ModItems.SOVEREIGN_INGOT,
                         ModItems.MARINE_BADGE, ModItems.COMMODORE_INSIGNIA)) out.accept(m.get());
                 for (var set : ModItems.GEAR.values()) for (var item : set.all()) out.accept(item.get());
+                for (var m : java.util.List.of(ModItems.SIGNAL_FLARE, ModItems.KRAKEN_LURE, ModItems.STORM_SIGIL, ModItems.LEVIATHAN_HORN,
+                        ModItems.ADMIRALS_WARRANT, ModItems.COMMODORE_SPAWN_EGG, ModItems.KRAKEN_SPAWN_EGG, ModItems.TEMPEST_ADMIRAL_SPAWN_EGG,
+                        ModItems.LEVIATHAN_SPAWN_EGG, ModItems.FLEET_ADMIRAL_SPAWN_EGG)) out.accept(m.get());
             })
             .build());
 }
