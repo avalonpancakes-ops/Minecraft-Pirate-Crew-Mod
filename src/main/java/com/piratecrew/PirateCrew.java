@@ -35,6 +35,7 @@ public class PirateCrew {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(ModNetwork::register);
+        event.enqueueWork(com.piratecrew.util.AttributeCaps::raise);
     }
 
     public static ResourceLocation id(String path) {

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:leviathan_scale"
+    },
+    {
+      "item": "piratecrew:leviathan_scale"
+    },
+    {
+      "item": "piratecrew:stormforged_ingot"
+    },
+    {
+      "item": "piratecrew:stormforged_ingot"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:leviathan_ingot",
+    "count": 1
+  }
+}

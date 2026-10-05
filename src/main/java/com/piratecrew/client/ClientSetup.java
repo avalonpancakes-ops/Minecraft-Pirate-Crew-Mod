@@ -48,6 +48,7 @@ public class ClientSetup {
         @SubscribeEvent
         public static void packs(AddPackFindersEvent event) {
             RubyToolsPack.register(event);
+            SunderedTexturesPack.register(event);
         }
     }
 

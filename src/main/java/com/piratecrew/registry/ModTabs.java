@@ -38,6 +38,15 @@ public class ModTabs {
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_A.get());
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_S.get());
                 out.accept(ModItems.AGGRO_STICK.get());
+                out.accept(ModItems.TIDESTEEL_ORE.get());
+                out.accept(ModItems.DEEPSLATE_TIDESTEEL_ORE.get());
+                out.accept(ModItems.ABYSSAL_ORE.get());
+                out.accept(ModItems.STORMGLASS_ORE.get());
+                for (var m : java.util.List.of(ModItems.RAW_TIDESTEEL, ModItems.TIDESTEEL_INGOT, ModItems.ABYSSAL_SHARD, ModItems.ABYSSAL_INGOT,
+                        ModItems.KRAKEN_BONE, ModItems.KRAKENBONE_INGOT, ModItems.STORMGLASS_SHARD, ModItems.STORM_CORE, ModItems.STORMFORGED_INGOT,
+                        ModItems.LEVIATHAN_SCALE, ModItems.LEVIATHAN_INGOT, ModItems.SOVEREIGN_HEART, ModItems.SOVEREIGN_INGOT,
+                        ModItems.MARINE_BADGE, ModItems.COMMODORE_INSIGNIA)) out.accept(m.get());
+                for (var set : ModItems.GEAR.values()) for (var item : set.all()) out.accept(item.get());
             })
             .build());
 }

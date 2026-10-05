@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:sovereign_heart"
+    },
+    {
+      "item": "piratecrew:leviathan_ingot"
+    },
+    {
+      "item": "piratecrew:leviathan_ingot"
+    },
+    {
+      "item": "piratecrew:leviathan_ingot"
+    },
+    {
+      "item": "piratecrew:leviathan_ingot"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:sovereign_ingot",
+    "count": 1
+  }
+}

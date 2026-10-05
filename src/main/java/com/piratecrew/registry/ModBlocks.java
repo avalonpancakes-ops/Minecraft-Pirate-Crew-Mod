@@ -60,4 +60,23 @@ public class ModBlocks {
                     .requiresCorrectToolForDrops()
                     .strength(50.0F, 1200.0F)
                     .sound(SoundType.WOOD)));
+
+    // ------------------------------------------------------------------ Sundered Sea ores
+
+    private static RegistryObject<Block> ore(String name, MapColor color, float hardness, SoundType sound, int minXp, int maxXp) {
+        return BLOCKS.register(name, () -> new DropExperienceBlock(BlockBehaviour.Properties.of()
+                .mapColor(color)
+                .instrument(NoteBlockInstrument.BASEDRUM)
+                .requiresCorrectToolForDrops()
+                .strength(hardness, hardness + 3.0F)
+                .sound(sound), UniformInt.of(minXp, maxXp)));
+    }
+
+    /** Tidesteel: diamond pickaxe or better. */
+    public static final RegistryObject<Block> TIDESTEEL_ORE = ore("tidesteel_ore", MapColor.STONE, 4.0F, SoundType.STONE, 3, 7);
+    public static final RegistryObject<Block> DEEPSLATE_TIDESTEEL_ORE = ore("deepslate_tidesteel_ore", MapColor.DEEPSLATE, 5.5F, SoundType.DEEPSLATE, 3, 7);
+    /** Abyssal: deep down, tidesteel pickaxe or better. */
+    public static final RegistryObject<Block> ABYSSAL_ORE = ore("abyssal_ore", MapColor.DEEPSLATE, 7.0F, SoundType.DEEPSLATE, 5, 10);
+    /** Stormglass: Storm Isles only, abyssal pickaxe or better. */
+    public static final RegistryObject<Block> STORMGLASS_ORE = ore("stormglass_ore", MapColor.STONE, 8.0F, SoundType.AMETHYST, 6, 12);
 }

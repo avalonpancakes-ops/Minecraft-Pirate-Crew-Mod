@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:kraken_bone"
+    },
+    {
+      "item": "piratecrew:kraken_bone"
+    },
+    {
+      "item": "piratecrew:abyssal_ingot"
+    },
+    {
+      "item": "piratecrew:abyssal_ingot"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:krakenbone_ingot",
+    "count": 1
+  }
+}

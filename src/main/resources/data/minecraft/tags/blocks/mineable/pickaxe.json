@@ -3,6 +3,10 @@
   "values": [
     "piratecrew:ruby_ore",
     "piratecrew:deepslate_ruby_ore",
-    "piratecrew:ruby_block"
+    "piratecrew:ruby_block",
+    "piratecrew:tidesteel_ore",
+    "piratecrew:deepslate_tidesteel_ore",
+    "piratecrew:abyssal_ore",
+    "piratecrew:stormglass_ore"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "XXX",
+    "X X",
+    "X X"
+  ],
+  "key": {
+    "X": {
+      "item": "piratecrew:tidesteel_ingot"
+    }
+  },
+  "result": {
+    "item": "piratecrew:tidesteel_leggings"
+  }
+}

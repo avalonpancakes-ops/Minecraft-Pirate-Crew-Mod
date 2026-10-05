@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "piratecrew:abyssal_shard"
+    },
+    {
+      "item": "piratecrew:tidesteel_ingot"
+    },
+    {
+      "item": "piratecrew:tidesteel_ingot"
+    },
+    {
+      "item": "piratecrew:tidesteel_ingot"
+    },
+    {
+      "item": "piratecrew:tidesteel_ingot"
+    }
+  ],
+  "result": {
+    "item": "piratecrew:abyssal_ingot",
+    "count": 1
+  }
+}
