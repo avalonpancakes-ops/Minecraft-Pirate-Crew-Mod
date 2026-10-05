@@ -111,6 +111,7 @@ public class PirateSkins {
     }
 
     private static String pick(RandomSource random, PirateTier tier, boolean hunter) {
+        if (tier.isAboveS()) tier = PirateTier.S; // SS and SSS wear S skins
         List<String> all = new ArrayList<>();
         for (String n : names) if (!isReserved(n) && isHunterSkin(n) == hunter) all.add(n);
         List<String> pool = new ArrayList<>();

@@ -14,7 +14,10 @@ public enum PirateTier {
     C("C", 30.0, 3.0, 18, ChatFormatting.AQUA),
     B("B", 36.0, 4.0, 12, ChatFormatting.BLUE),
     A("A", 44.0, 5.5, 7, ChatFormatting.LIGHT_PURPLE),
-    S("S", 56.0, 7.0, 3, ChatFormatting.GOLD);
+    S("S", 56.0, 7.0, 3, ChatFormatting.GOLD),
+    // Never rolled: crew pirates reach these by their bounty (see promotionFor).
+    SS("SS", 70.0, 8.5, 0, ChatFormatting.RED),
+    SSS("SSS", 90.0, 10.0, 0, ChatFormatting.DARK_RED);
 
     public final String label;
     public final double maxHealth;
@@ -38,7 +41,39 @@ public enum PirateTier {
             case B -> Config.COST_B.get();
             case A -> Config.COST_A.get();
             case S -> Config.COST_S.get();
+            case SS -> Config.COST_S.get() * 2;
+            case SSS -> Config.COST_S.get() * 4;
         };
+    }
+
+    /** The bounty (in rubies) a crew pirate needs to reach this tier. */
+    public int bountyNeeded() {
+        return switch (this) {
+            case F -> 0;
+            case D -> 100;
+            case C -> 250;
+            case B -> 500;
+            case A -> 1000;
+            case S -> 2500;
+            case SS -> 5000;
+            case SSS -> 10000;
+        };
+    }
+
+    /** The highest tier a bounty this size earns. */
+    public static PirateTier promotionFor(int bounty) {
+        PirateTier best = F;
+        for (PirateTier t : values()) if (bounty >= t.bountyNeeded()) best = t;
+        return best;
+    }
+
+    /** The tiers that can spawn, be recruited and be sent as debt collectors (F to S). */
+    public static PirateTier[] rolled() {
+        return new PirateTier[]{F, D, C, B, A, S};
+    }
+
+    public boolean isAboveS() {
+        return ordinal() > S.ordinal();
     }
 
     public static PirateTier byId(int id) {

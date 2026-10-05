@@ -290,8 +290,9 @@ public class CrewScreen extends Screen {
             int nameX;
             if (m.npc()) {
                 PirateTier t = PirateTier.byId(m.tier());
-                g.drawString(font, Component.literal("[" + t.label + "]").withStyle(t.color, ChatFormatting.BOLD), left + 12, rowY + 4, 0xFFFFFFFF, true);
-                nameX = left + 32;
+                Component tag = Component.literal("[" + t.label + "]").withStyle(t.color, ChatFormatting.BOLD);
+                g.drawString(font, tag, left + 12, rowY + 4, 0xFFFFFFFF, true);
+                nameX = Math.max(left + 32, left + 12 + font.width(tag) + 3);
             } else {
                 Component star = Component.literal(r == CrewRole.CAPTAIN ? "\u2605" : r == CrewRole.VICE_CAPTAIN ? "\u2606" : "\u2022")
                         .withStyle(r == CrewRole.MEMBER ? ChatFormatting.DARK_GRAY : ChatFormatting.GOLD);

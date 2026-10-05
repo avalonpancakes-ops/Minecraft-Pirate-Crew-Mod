@@ -27,9 +27,11 @@ import java.util.UUID;
  * Bounties, paid in rubies.
  *
  * Crew members (players and recruited pirates) earn a bounty by killing players and pirates from
- * outside their crew. A player who kills a wanted target (from another crew) claims the whole bounty
- * into their bank account and takes a share of it onto their own head. Pirates have no bank account:
- * when a crew pirate kills a wanted target, its crew's captain gets 25% of the bounty in their bank.
+ * outside their crew. Killing a wanted rival player takes 25% of their bounty: they lose it, and the
+ * killer gets it in rubies and adds it to their own bounty. Killing a wanted rival crew pirate pays its
+ * whole bounty in rubies (it's dead for good) and adds 25% to the killer's bounty. Pirates have no
+ * bank account, so a crew pirate's rubies go to its captain. Crew pirates climb tiers as their
+ * bounty grows (see PirateEntity.checkBountyPromotion).
  */
 public class BountyManager {
     /** killer+victim -> game time of the last counted kill, to stop two friends farming each other. */
@@ -60,7 +62,7 @@ public class BountyManager {
         boolean sameCrew = victimCrew != null && victimCrew.equals(killerCrew);
 
         BountyData.Entry victimEntry = data.get(victim.getUUID());
-        int claimed = 0;
+        int bonus = 0;
 
         if (killer != null && killer != victim && !sameCrew) {
             long now = server.overworld().getGameTime();
@@ -70,28 +72,38 @@ public class BountyManager {
             if (counts) RECENT.put(pair, now);
             if (RECENT.size() > 5000) RECENT.entrySet().removeIf(e -> now - e.getValue() > 72000);
 
-            // 1. Claim the victim's bounty into a bank account. Only a rival crew can claim it (plus the
-            //    bank's debt collectors, handled in LoanManager); mobs, raiders and crewless players can't.
-            //    Player killer: the whole bounty. Crew pirate killer: its captain gets 25%.
+            // 1. Claim from the victim's bounty. Only a rival crew can (plus the bank's debt collectors,
+            //    handled in LoanManager); mobs, raiders and crewless players can't.
+            //    - A player victim loses 25% of their bounty; the killer gets that 25% in rubies and adds it to their bounty.
+            //    - A pirate victim is dead for good: its whole bounty is paid in rubies, and the killer adds 25% to their bounty.
+            //    Pirates have no bank, so a crew pirate's rubies go to its captain's bank.
             if (victimEntry != null && victimEntry.amount > 0 && counts && killerCrew != null) {
+                int full = victimEntry.amount;
+                int share = Math.max(1, (int) Math.round(full * Config.BOUNTY_SHARE.get()));
+                boolean pirateVictim = victim instanceof PirateEntity;
+                int paid = pirateVictim ? full : share;
+                bonus = share;
                 if (killer instanceof ServerPlayer kp) {
-                    claimed = victimEntry.amount;
-                    BankManager.credit(server, kp.getUUID(), claimed);
-                    kp.sendSystemMessage(Component.literal(String.format("%,d", claimed) + " rubies were deposited in your bank.").withStyle(ChatFormatting.GREEN));
-                    announceClaim(server, killer, victim, claimed, null);
-                    victimEntry.amount = 0;
-                } else if (killer instanceof PirateEntity && killerCrew != null) {
+                    BankManager.credit(server, kp.getUUID(), paid);
+                    kp.sendSystemMessage(Component.literal(String.format("%,d", paid) + " rubies were deposited in your bank.").withStyle(ChatFormatting.GREEN));
+                    announceClaim(server, killer, victim, paid, null);
+                } else {
                     Crew crew = CrewData.get(server).byId(killerCrew);
                     if (crew != null && crew.captain != null) {
-                        int cut = (int) Math.round(victimEntry.amount * Config.BOUNTY_CAPTAIN_CUT.get());
-                        if (cut > 0) {
-                            BankManager.credit(server, crew.captain, cut);
-                            ServerPlayer cap = server.getPlayerList().getPlayer(crew.captain);
-                            if (cap != null) cap.sendSystemMessage(Component.literal("Your pirate " + displayName(killer) + " sank "
-                                    + displayName(victim) + ": " + String.format("%,d", cut) + " rubies were deposited in your bank.").withStyle(ChatFormatting.GREEN));
-                            announceClaim(server, killer, victim, cut, crew.name);
-                        }
-                        victimEntry.amount = 0;
+                        BankManager.credit(server, crew.captain, paid);
+                        ServerPlayer cap = server.getPlayerList().getPlayer(crew.captain);
+                        if (cap != null) cap.sendSystemMessage(Component.literal("Your pirate " + displayName(killer) + " sank "
+                                + displayName(victim) + ": " + String.format("%,d", paid) + " rubies were deposited in your bank.").withStyle(ChatFormatting.GREEN));
+                        announceClaim(server, killer, victim, paid, crew.name);
+                    }
+                }
+                if (pirateVictim) {
+                    victimEntry.amount = 0;
+                } else {
+                    victimEntry.amount = Math.max(0, full - share);
+                    if (victim instanceof ServerPlayer vp) {
+                        vp.sendSystemMessage(Component.literal(String.format("\u2620 %s took %,d rubies (25%%) of your bounty. It's now %,d.",
+                                displayName(killer), share, victimEntry.amount)).withStyle(ChatFormatting.RED));
                     }
                 }
             }
@@ -109,7 +121,7 @@ public class BountyManager {
                     gain = Config.BOUNTY_PER_PIRATE_KILL.get() + p.getTier().ordinal() * Config.BOUNTY_PER_PIRATE_TIER.get();
                     if (p.isRecruited()) gain *= 2;
                 }
-                gain += (int) Math.round(claimed * Config.BOUNTY_SHARE.get());
+                gain += bonus;
                 if (gain > 0) {
                     BountyData.Entry k = data.getOrCreate(killer.getUUID());
                     refresh(k, killer, killerCrew);
@@ -118,6 +130,10 @@ public class BountyManager {
                     else k.pirateKills++;
                     if (killer instanceof ServerPlayer kp) {
                         kp.displayClientMessage(Component.literal("Your bounty rose to " + k.amount + " rubies!").withStyle(ChatFormatting.GOLD), true);
+                    } else if (killer instanceof PirateEntity kp) {
+                        data.setDirty();
+                        kp.checkBountyPromotion();
+                        k.tier = kp.getTier().ordinal();
                     }
                 }
             }
@@ -153,6 +169,10 @@ public class BountyManager {
         k.amount += value;
         k.pirateKills++;
         data.setDirty();
+        if (killer instanceof PirateEntity kp) {
+            kp.checkBountyPromotion();
+            k.tier = kp.getTier().ordinal();
+        }
         server.getPlayerList().broadcastSystemMessage(Component.literal("☠ The bounty on ").withStyle(ChatFormatting.YELLOW)
                 .append(Component.literal(displayName(killer)).withStyle(ChatFormatting.GOLD))
                 .append(Component.literal(" rose by " + String.format("%,d", value) + " rubies for slaying ").withStyle(ChatFormatting.YELLOW))

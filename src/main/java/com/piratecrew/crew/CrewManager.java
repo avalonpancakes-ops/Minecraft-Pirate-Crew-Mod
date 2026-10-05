@@ -359,6 +359,29 @@ public class CrewManager {
         syncCrew(server, crew);
     }
 
+    /** A crew pirate's bounty pushed it up a tier: update the roster and tell the crew. */
+    public static void onPirateTierUp(MinecraftServer server, UUID crewId, PirateEntity pirate, com.piratecrew.entity.PirateTier from,
+                                      com.piratecrew.entity.PirateTier to, int bounty) {
+        Crew crew = crewId == null ? null : data(server).byId(crewId);
+        if (crew == null) return;
+        if (crew.npcs.containsKey(pirate.getUUID())) {
+            crew.npcs.put(pirate.getUUID(), new Crew.NpcInfo(pirate.getPirateName(), to.ordinal()));
+            data(server).setDirty();
+        }
+        net.minecraft.network.chat.Component msg = net.minecraft.network.chat.Component.literal("\u2B06 ").withStyle(net.minecraft.ChatFormatting.GOLD)
+                .append(net.minecraft.network.chat.Component.literal(pirate.getPirateName()).withStyle(net.minecraft.ChatFormatting.WHITE))
+                .append(net.minecraft.network.chat.Component.literal(" rose from ").withStyle(net.minecraft.ChatFormatting.YELLOW))
+                .append(net.minecraft.network.chat.Component.literal(from.label).withStyle(from.color, net.minecraft.ChatFormatting.BOLD))
+                .append(net.minecraft.network.chat.Component.literal(" to ").withStyle(net.minecraft.ChatFormatting.YELLOW))
+                .append(net.minecraft.network.chat.Component.literal(to.label + " tier").withStyle(to.color, net.minecraft.ChatFormatting.BOLD))
+                .append(net.minecraft.network.chat.Component.literal(String.format(" (bounty %,d rubies)!", bounty)).withStyle(net.minecraft.ChatFormatting.YELLOW));
+        for (UUID u : crew.players) {
+            ServerPlayer sp = server.getPlayerList().getPlayer(u);
+            if (sp != null) sp.sendSystemMessage(msg);
+        }
+        syncCrew(server, crew);
+    }
+
     /** The pirate died or otherwise left for good. */
     public static void onPirateGone(MinecraftServer server, UUID crewId, UUID pirateId, String deathNote) {
         CrewData d = data(server);

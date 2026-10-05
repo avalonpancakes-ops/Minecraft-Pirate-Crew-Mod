@@ -146,6 +146,9 @@ public class SmokeTest {
                 com.piratecrew.sundered.ShrineBuilder.build(sea, new net.minecraft.core.BlockPos(sx, sh - 1, sz));
                 PirateCrew.LOGGER.info("PIRATECREW SMOKETEST pact shrine built at {} {} {}", sx, sh - 1, sz);
             }
+            StringBuilder ranks = new StringBuilder();
+            for (int b : new int[]{0, 99, 100, 250, 500, 1000, 2499, 2500, 5000, 10000, 50000}) ranks.append(b).append('=').append(com.piratecrew.entity.PirateTier.promotionFor(b).label).append(' ');
+            PirateCrew.LOGGER.info("PIRATECREW SMOKETEST bounty tiers: {}", ranks.toString().trim());
             for (var check : CHECKS) check.accept(sea);
             PirateCrew.LOGGER.info("PIRATECREW SMOKETEST OK");
         } catch (Throwable t) {

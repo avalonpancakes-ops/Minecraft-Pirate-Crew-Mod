@@ -47,6 +47,10 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 | B | 36 | 4 | 12% | 30 |
 | A | 44 | 5.5 | 7% | 48 |
 | S | 56 | 7 | 3% | 72 |
+| SS | 70 | 8.5 | never spawns | earned |
+| SSS | 90 | 10 | never spawns | earned |
+
+- **Crew pirates rank up with their bounty.** When a recruited pirate's bounty reaches **100** rubies it becomes **D** tier, then **C at 250, B at 500, A at 1,000, S at 2,500, SS at 5,000 and SSS at 10,000**. It keeps its name and skin and gets the new tier's health and damage, and your crew is told. Tiers only go up: a pirate recruited at A stays A until its bounty passes 2,500. SS and SSS can only be reached this way.
 
 - **Right-click** a pirate to see its tier and price. **Hold rubies and right-click** to recruit (rubies are taken from anywhere in your inventory). If you're not in a crew yet, one is created for you.
 - **Hit a pirate you didn't recruit and it fights back.** It won't join you afterwards while it's angry at you.
@@ -89,10 +93,11 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ### Bounties
 - Crew members (players **and** recruited pirates) earn a ruby bounty by killing players and pirates outside their crew: **10 rubies per player**, **2 rubies per F-tier pirate +1 per tier above F** (doubled if the pirate belonged to a crew).
-- **A player** who kills a wanted target from another crew claims the **whole bounty, paid into their bank account**, and adds 25% of it to their own bounty.
-- **Pirates have no bank account.** When a crew pirate kills a wanted player or pirate, that crew's **captain gets 25% of the bounty** in their bank.
+- **Killing a wanted rival player** takes **25%** of their bounty. They lose that 25% and keep the rest, and the killer gets that 25% **in rubies in their bank** and **added to their own bounty**.
+- **Killing a wanted rival crew pirate** pays its **whole bounty in rubies** into the killer's bank, since that pirate is dead for good, and adds **25%** of it to the killer's bounty.
+- **Pirates have no bank account.** When a crew pirate makes one of these kills, the 25% is added to the pirate's own bounty and the rubies go to its crew **captain's** bank.
 - The whole server is told who claimed what. Killing the same target again within 10 minutes doesn't count, so friends can't farm each other.
-- A dead pirate's poster comes down for good; a player's bounty resets to 0 once claimed.
+- A dead pirate's poster comes down for good.
 - **A player's bounty is only ever lost two ways:** killed by a member of a **rival crew** (a player, or a recruited pirate of another crew), or by the bank's **debt collectors**. Dying to zombies, other mobs, enemy raiders, free bar pirates, falling, lava or a player who isn't in a crew leaves your bounty untouched.
 - Every pirate bar has a **Bounty Board** on its front wall (bars built before this update get one the next time they're loaded). Right-click it to see WANTED posters for everyone with a bounty, biggest first, with their face, name and bounty. Hover a poster for crew, tier and kills.
 - Craft your own board: planks top and bottom, paper-ruby-paper in the middle.
@@ -122,7 +127,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **Debt collectors are 5 times stronger than a pirate of the same tier** (an F collector has 100 HP, an S collector 280 HP and 35 base damage) They wear no armor, so you can see their skins, but they get the armor of a full set built into their stats: leather at F, then chainmail, iron, ruby, diamond and netherite at S. An F collector carries a wooden sword, a bow and a shield; a D collector a stone sword, a bow and a shield; a C collector a ruby cutlass, a bow, a shield, poison splash potions to throw at you and a milk bucket to wash off anything you throw at him; a B collector the same with a Sharpness II ruby cutlass. An **A collector** is a marksman who prefers to keep his distance: a bow with Power V, Punch II, Flame and Infinity (fire arrows), and a Sharpness II diamond sword he only draws when you get close. He has **permanent Strength**, plus a shield, poison splash potions, milk, and fire resistance potions for when he's burning. Every 5 minutes he **summons a crew of 4 pirates** in full diamond gear to help him (never more than 8 at once). They have normal pirate stats, can't be recruited, drop nothing, and leave along with him. An **S collector** charges straight at you with a netherite sword (Sharpness V, Fire Aspect II, Knockback II, Sweeping Edge III) and a shield, with permanent **Strength II, Speed II, Resistance II, Regeneration II, Fire Resistance and Water Breathing**. He doesn't summon a crew. Instead he **shoots laser beams from his eyes**: his eyes glow red for a second and a half while he aims, he locks on just before firing, and the beam does 16 damage (8 hearts) that **ignores armor** and sets you on fire. Get behind a wall or raise a shield to stop it, or sidestep at the last moment. He can fire every 8 seconds, from 4 to 32 blocks away. He also has poison splash potions and milk like the tiers below. Their weapons never break and their potions and milk never run out. Their weapons never break. They fight with the same styles as pirates, track you down if you run, and appear 20 to 30 blocks away so you see them coming.
 - They can't be recruited, only hunt the player who owes the debt (and anyone who attacks them, so your crew can help), and **drop nothing**: no gear, no XP. They're a punishment, not something to farm.
 - **If a collector kills you**, the bank collects, in this order:
-  1. **Your bounty:** the bank claims the whole bounty on your head (announced to the server) and takes it off your debt.
+  1. **Your bounty:** the bank takes **only what you owe** out of the bounty on your head (announced to the server). Any bounty left over stays on your head.
   2. **Your bank account:** as much as is still owed.
   3. **Your items:** if you still owe more, the collector walks over to your corpse, crouches over it and goes through your things for a few seconds. He takes items worth what you still owe, and they're **destroyed for good**. Rubies go first, then your most valuable things (diamonds, netherite, enchanted gear, elytra, totems...) until the debt is covered. Items are valued at the banker's shop prices; everyday blocks are worthless to him. While he searches, the corpse is locked (you can't grab your stuff), but if you or your crew **kill him before he finishes, your items are safe**. When he's done he vanishes, and whatever he didn't take is still on your corpse (and the 2-minute timer keeps running, so get back fast).
   - If that still doesn't cover it, more collectors come the next day, at the same strength.

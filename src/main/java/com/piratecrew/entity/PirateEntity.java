@@ -470,6 +470,28 @@ public class PirateEntity extends PathfinderMob {
         return null;
     }
 
+    // ------------------------------------------------------------------ tier from bounty
+
+    /**
+     * Crew pirates climb tiers as their bounty grows: D at 100 rubies, C 250, B 500, A 1,000, S 2,500,
+     * SS 5,000 and SSS 10,000. Never down: a pirate recruited at a high tier keeps it. Name and skin stay.
+     */
+    public void checkBountyPromotion() {
+        if (!isRecruited() || !(this.level() instanceof ServerLevel sl)) return;
+        int bounty = com.piratecrew.bounty.BountyManager.bountyOf(sl.getServer(), getUUID());
+        PirateTier earned = PirateTier.promotionFor(bounty);
+        PirateTier now = getTier();
+        if (earned.ordinal() <= now.ordinal()) return;
+        float missing = getMaxHealth() - getHealth();
+        this.entityData.set(DATA_TIER, earned.ordinal());
+        applyTierStats();
+        setHealth(Math.max(1.0F, getMaxHealth() - missing));
+        updateDisplayName();
+        sl.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, getX(), getY() + 1, getZ(), 40, 0.4, 0.8, 0.4, 0.3);
+        sl.playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.NEUTRAL, 1.0F, 0.8F);
+        CrewManager.onPirateTierUp(sl.getServer(), getCrewId(), this, now, earned, bounty);
+    }
+
     // ------------------------------------------------------------------ soul pacts
 
     @Nullable
@@ -1261,6 +1283,8 @@ public class PirateEntity extends PathfinderMob {
         if (this.level().isClientSide) return;
 
         if (!initialized) initPirate(PirateTier.random(this.random));
+
+        if (this.tickCount % 100 == 37 && isRecruited()) checkBountyPromotion();
 
         if (this.tickCount % 40 == 0) {
             UUID crewId = getCrewId();

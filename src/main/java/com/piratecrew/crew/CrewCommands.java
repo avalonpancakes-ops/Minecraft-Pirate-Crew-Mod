@@ -85,12 +85,12 @@ public class CrewCommands {
                 }))
                 .then(Commands.literal("spawncollector").then(Commands.argument("tier", StringArgumentType.word())
                         .suggests((c, b) -> {
-                            for (PirateTier t : PirateTier.values()) b.suggest(t.label);
+                            for (PirateTier t : PirateTier.rolled()) b.suggest(t.label);
                             return b.buildFuture();
                         })
                         .executes(c -> {
                             PirateTier tier = PirateTier.byLabel(StringArgumentType.getString(c, "tier"));
-                            if (tier == null) {
+                            if (tier == null || tier.isAboveS()) {
                                 c.getSource().sendFailure(Component.literal("Tier must be F, D, C, B, A or S"));
                                 return 0;
                             }
@@ -173,7 +173,7 @@ public class CrewCommands {
                         .executes(c -> {
                             PirateTier tier = PirateTier.byLabel(StringArgumentType.getString(c, "tier"));
                             if (tier == null) {
-                                c.getSource().sendFailure(Component.literal("Tier must be F, D, C, B, A or S"));
+                                c.getSource().sendFailure(Component.literal("Tier must be F, D, C, B, A, S, SS or SSS"));
                                 return 0;
                             }
                             ServerPlayer p = c.getSource().getPlayerOrException();

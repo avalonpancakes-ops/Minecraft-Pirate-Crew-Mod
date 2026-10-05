@@ -32,7 +32,6 @@ public class Config {
     public static final ForgeConfigSpec.IntValue BOUNTY_PER_PIRATE_KILL;
     public static final ForgeConfigSpec.IntValue BOUNTY_PER_PIRATE_TIER;
     public static final ForgeConfigSpec.DoubleValue BOUNTY_SHARE;
-    public static final ForgeConfigSpec.DoubleValue BOUNTY_CAPTAIN_CUT;
     public static final ForgeConfigSpec.IntValue BOUNTY_REPEAT_COOLDOWN;
     public static final ForgeConfigSpec.IntValue EMPEROR_MIN_BOUNTY;
     public static final ForgeConfigSpec.IntValue EMPEROR_COUNT;
@@ -76,8 +75,7 @@ public class Config {
         BOUNTY_PER_PLAYER_KILL = b.comment("Rubies added to a crew member's bounty for killing a player").defineInRange("perPlayerKill", 10, 0, 10000);
         BOUNTY_PER_PIRATE_KILL = b.comment("Rubies added for killing an F-tier pirate (doubled if the pirate belonged to a crew)").defineInRange("perPirateKill", 2, 0, 10000);
         BOUNTY_PER_PIRATE_TIER = b.comment("Extra rubies per tier above F for pirate kills (D +1x, C +2x ... S +5x)").defineInRange("perPirateTier", 1, 0, 10000);
-        BOUNTY_SHARE = b.comment("Share of a claimed bounty that's added to the killer's own bounty (0.25 = 25%)").defineInRange("claimShare", 0.25, 0.0, 10.0);
-        BOUNTY_CAPTAIN_CUT = b.comment("When a crew pirate kills a wanted target, its captain gets this share of the bounty in their bank (0.25 = 25%)").defineInRange("captainCut", 0.25, 0.0, 1.0);
+        BOUNTY_SHARE = b.comment("Share of the bounty a rival-crew kill takes (0.25 = 25%). A player victim loses this share; the killer gets it in rubies and adds it to their own bounty. Killing a crew pirate pays its whole bounty in rubies and adds this share to the killer's bounty.").defineInRange("claimShare", 0.25, 0.0, 1.0);
         EMPEROR_MIN_BOUNTY = b.comment("Combined crew bounty needed to be an Emperor of the Sea").defineInRange("emperorMinimumBounty", 10000, 1, 100000000);
         EMPEROR_COUNT = b.comment("How many crews can be Emperors of the Sea at once").defineInRange("emperorCount", 4, 1, 100);
         BOUNTY_REPEAT_COOLDOWN = b.comment("Seconds before killing the same target again counts toward bounties (stops kill farming)").defineInRange("repeatKillCooldown", 600, 0, 86400);

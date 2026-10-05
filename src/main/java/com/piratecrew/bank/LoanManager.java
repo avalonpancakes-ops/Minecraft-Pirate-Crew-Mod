@@ -123,7 +123,7 @@ public class LoanManager {
     /** Tiers in wave n: one more S hunter for every six waves, plus F, D, C, B, A or S. */
     public static List<PirateTier> waveTiers(int wave) {
         List<PirateTier> tiers = new ArrayList<>();
-        PirateTier[] all = PirateTier.values();
+        PirateTier[] all = PirateTier.rolled();
         for (int i = 0; i < wave / all.length; i++) tiers.add(PirateTier.S);
         tiers.add(all[wave % all.length]);
         int max = Config.HUNTER_MAX_PER_WAVE.get();
@@ -275,21 +275,20 @@ public class LoanManager {
         if (l == null) return;
         l.waveDone = true;
 
-        // 1. The bounty on the player's head goes to the bank.
+        // 1. The bank takes what's owed out of the bounty on the player's head; any bounty left over stays.
         long fromBounty = 0;
         BountyData bounties = BountyData.get(server);
         BountyData.Entry be = bounties.get(victim.getUUID());
         if (be != null && be.amount > 0) {
             fromBounty = Math.min(be.amount, l.owed);
-            int claimed = be.amount;
-            be.amount = 0;
+            be.amount -= (int) fromBounty;
             bounties.setDirty();
             l.owed -= fromBounty;
             server.getPlayerList().broadcastSystemMessage(Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
                     .append(Component.literal("The bank").withStyle(ChatFormatting.GOLD))
-                    .append(Component.literal(" claimed the ").withStyle(ChatFormatting.YELLOW))
-                    .append(Component.literal(String.format("%,d ruby", claimed)).withStyle(ChatFormatting.RED))
-                    .append(Component.literal(" bounty on ").withStyle(ChatFormatting.YELLOW))
+                    .append(Component.literal(" claimed ").withStyle(ChatFormatting.YELLOW))
+                    .append(Component.literal(String.format("%,d rubies", fromBounty)).withStyle(ChatFormatting.RED))
+                    .append(Component.literal(" of the bounty on ").withStyle(ChatFormatting.YELLOW))
                     .append(Component.literal(victim.getGameProfile().getName()).withStyle(ChatFormatting.GOLD))
                     .append(Component.literal("!").withStyle(ChatFormatting.YELLOW)), false);
             UUID crewId = CrewManager.crewIdOf(victim);
@@ -305,7 +304,7 @@ public class LoanManager {
         victim.sendSystemMessage(Component.literal("\u2620 ").withStyle(ChatFormatting.DARK_RED)
                 .append(Component.literal(hunter.getPirateName()).withStyle(ChatFormatting.RED))
                 .append(Component.literal(" collected for the bank:").withStyle(ChatFormatting.YELLOW)));
-        if (fromBounty > 0) victim.sendSystemMessage(line(String.format("%,d rubies from the bounty on your head", fromBounty)));
+        if (fromBounty > 0) victim.sendSystemMessage(line(String.format("%,d rubies from the bounty on your head (%,d left on it)", fromBounty, be.amount)));
         if (fromBank > 0) victim.sendSystemMessage(line(String.format("%,d rubies from your bank account", fromBank)));
 
         if (l.owed <= 0) {
