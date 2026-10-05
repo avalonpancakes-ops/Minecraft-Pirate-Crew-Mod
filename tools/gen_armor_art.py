@@ -39,23 +39,21 @@ class Layer:
         return self.im.getpixel((x, y))
 
     def plate(self, x0, y0, w, h, rows=None, light=True):
-        """A bevelled metal plate filling a face (optionally only some rows)."""
-        rows = rows if rows is not None else range(h)
+        """A clean bevelled plate: light top edge, gentle top-to-bottom gradient, dark lower/right rim."""
+        rows = list(rows if rows is not None else range(h))
+        top, bot = min(rows), max(rows)
+        span = max(1, bot - top)
         for yy in rows:
+            k = (yy - top) / span
             for xx in range(w):
-                c = self.m[2]
-                n = self.rnd.random()
-                if n < 0.04:
+                c = self.m[3] if k < 0.25 else self.m[2] if k < 0.75 else self.m[1]
+                if xx == 0:
                     c = self.m[3]
-                elif n < 0.07:
-                    c = self.m[1]
-                if xx == 0 or yy == min(rows):
-                    c = self.m[3] if light else self.m[2]
-                if xx == w - 1 or yy == max(rows):
-                    c = self.m[1]
+                if yy == top:
+                    c = self.m[4] if light else self.m[3]
+                if xx == w - 1 or yy == bot:
+                    c = self.m[1] if yy != bot else self.m[0]
                 self.px(x0 + xx, y0 + yy, c)
-        # bevel corner highlight
-        self.px(x0, y0 + min(rows), self.m[4])
 
     def band(self, x0, y, w, rivets=True):
         for xx in range(w):
@@ -76,16 +74,14 @@ class Layer:
                 if self.get(x, y)[3] == 0:
                     continue
                 t = self.tier
-                if t == "leviathan" and (2 * xx + yy) % 4 == 0:
-                    self.px(x, y, self.m[1])
-                elif t == "leviathan" and (2 * xx + yy) % 4 == 1:
-                    self.px(x, y, self.m[3])
-                elif t == "krakenbone" and (xx + 3 * yy) % 9 == 0:
-                    self.px(x, y, self.glow[0])
-                elif t == "abyssal" and (xx * 5 + yy * 3) % 17 == 0:
-                    self.px(x, y, self.glow[0])
-                elif t == "sovereign" and (xx + yy) % 8 == 0:
-                    self.px(x, y, self.m[3])
+                if xx in (0, w - 1) or yy in (rows[0], rows[-1]):
+                    continue
+                if t == "leviathan" and yy % 2 == 0 and (xx + yy // 2) % 2 == 0:
+                    self.px(x, y, self.m[1])                       # overlapping scale rows
+                elif t == "krakenbone" and (xx * 3 + yy * 5) % 11 == 0:
+                    self.px(x, y, self.glow[0])                    # suckers
+                elif t == "abyssal" and (xx - yy) % 7 == 0 and yy % 3 != 0:
+                    self.px(x, y, self.glow[0])                    # glowing seams
 
 
 def faces(x, y, w, h, d):
@@ -101,7 +97,7 @@ def helmet(L):
     f = faces(0, 0, 8, 8, 8)
     for name in ("top", "right", "left", "back"):
         L.plate(*f[name])
-        L.motif(*f[name])
+    L.motif(*f["top"])
     x0, y0, w, h = f["front"]
     # brow and cheek guards, open face
     L.plate(x0, y0, w, h, rows=range(0, 3))
@@ -129,7 +125,8 @@ def chest(L):
     f = faces(16, 16, 8, 12, 4)
     for name in ("top", "bottom", "right", "left", "back", "front"):
         L.plate(*f[name])
-        L.motif(*f[name])
+    L.motif(*f["front"])
+    L.motif(*f["back"])
     x0, y0, w, h = f["front"]
     L.band(x0, y0, w)                     # collar
     L.band(x0, y0 + 10, w)                # belt
@@ -157,7 +154,6 @@ def chest(L):
     a = faces(40, 16, 4, 12, 4)
     for name in ("top", "bottom", "right", "front", "left", "back"):
         L.plate(*a[name])
-        L.motif(*a[name])
     for name in ("right", "front", "left", "back"):
         ax, ay, aw, ah = a[name]
         L.band(ax, ay + 4, aw)            # pauldron edge
@@ -171,7 +167,6 @@ def boots(L):
     for name in ("right", "front", "left", "back"):
         x0, y0, w, h = f[name]
         L.plate(x0, y0, w, h, rows=range(6, 12))
-        L.motif(x0, y0, w, h, rows=range(6, 12))
         L.band(x0, y0 + 6, w)
     x0, y0, w, h = f["bottom"]
     L.plate(x0, y0, w, h)
@@ -191,7 +186,8 @@ def leggings(L):
     for name in ("right", "front", "left", "back"):
         x0, y0, w, h = g[name]
         L.plate(x0, y0, w, h, rows=range(0, 10))
-        L.motif(x0, y0, w, h, rows=range(0, 10))
+        if name in ("front", "back"):
+            L.motif(x0, y0, w, h, rows=range(0, 5))
         L.band(x0, y0 + 5, w)             # knee guard
     for name in ("top",):
         L.plate(*g[name])

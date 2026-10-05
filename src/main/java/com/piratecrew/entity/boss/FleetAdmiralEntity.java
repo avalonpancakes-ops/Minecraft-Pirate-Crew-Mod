@@ -56,6 +56,8 @@ public class FleetAdmiralEntity extends MarineBossEntity {
     @Override protected double bossArmor() { return 12; }
     @Override protected double bossToughness() { return 6; }
     @Override protected float bossScale() { return 1.35F; }
+    @Override public String epithet() { return "The Iron Tide"; }
+    @Override public int ribbonColor() { return 0xE04040; }
     @Override public int bountyValue() { return 1500; }
 
     @Override

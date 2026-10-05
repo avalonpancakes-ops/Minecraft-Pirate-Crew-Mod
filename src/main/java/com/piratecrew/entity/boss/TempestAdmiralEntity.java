@@ -49,6 +49,8 @@ public class TempestAdmiralEntity extends MarineBossEntity {
     @Override protected double bossArmor() { return 8; }
     @Override protected double bossToughness() { return 2; }
     @Override protected float bossScale() { return 1.2F; }
+    @Override public String epithet() { return "Mistress of Storms"; }
+    @Override public int ribbonColor() { return 0xD070FF; }
     @Override public int bountyValue() { return 400; }
 
     @Override

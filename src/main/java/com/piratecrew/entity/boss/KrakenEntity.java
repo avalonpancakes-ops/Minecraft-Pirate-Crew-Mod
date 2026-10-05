@@ -73,6 +73,8 @@ public class KrakenEntity extends Monster implements BountyBoss {
                 .add(Attributes.FOLLOW_RANGE, 48);
     }
 
+    @Override public String epithet() { return "Terror of the Deep"; }
+    @Override public int ribbonColor() { return 0xC04A8A; }
     @Override
     public int bountyValue() {
         return 250;

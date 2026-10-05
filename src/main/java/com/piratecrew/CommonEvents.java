@@ -153,6 +153,20 @@ public class CommonEvents {
     @SubscribeEvent
     public static void entityJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
         com.piratecrew.compat.ValkyrienPiratesCompat.onJoin(event);
+        // A boss arriving (not one reloaded with its chunk) is announced with a title to everyone near.
+        if (!event.loadedFromDisk() && event.getLevel() instanceof ServerLevel level
+                && event.getEntity() instanceof com.piratecrew.entity.boss.BountyBoss boss
+                && event.getEntity() instanceof net.minecraft.world.entity.LivingEntity living) {
+            level.getServer().execute(() -> {
+                var name = living.getDisplayName().copy().withStyle(s -> s.withColor(boss.ribbonColor()).withBold(true));
+                var sub = net.minecraft.network.chat.Component.literal(boss.epithet()).withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC);
+                for (ServerPlayer sp : level.getPlayers(p -> p.distanceToSqr(living) < 80 * 80)) {
+                    sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(10, 60, 20));
+                    sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(sub));
+                    sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(name));
+                }
+            });
+        }
     }
 
     @SubscribeEvent
@@ -303,8 +317,15 @@ public class CommonEvents {
                 : victim instanceof com.piratecrew.entity.boss.LeviathanEntity ? com.piratecrew.goals.Goal.LEVIATHAN
                 : victim instanceof com.piratecrew.entity.boss.FleetAdmiralEntity ? com.piratecrew.goals.Goal.VANE : null;
         if (boss != null) {
+            ServerLevel sl = (ServerLevel) victim.level();
+            sl.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, victim.getX(), victim.getY() + victim.getBbHeight() / 2, victim.getZ(),
+                    120, victim.getBbWidth(), victim.getBbHeight() / 2, victim.getBbWidth(), 0.6);
+            sl.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER, victim.getX(), victim.getY() + 1, victim.getZ(), 1, 0, 0, 0, 0);
+            int color = ((com.piratecrew.entity.boss.BountyBoss) victim).ribbonColor();
             // everyone who fought nearby shares the victory
-            for (ServerPlayer sp : ((ServerLevel) victim.level()).getPlayers(p -> p.distanceToSqr(victim) < 64 * 64)) {
+            for (ServerPlayer sp : sl.getPlayers(p -> p.distanceToSqr(victim) < 64 * 64)) {
+                com.piratecrew.network.ModNetwork.sendTo(sp, new com.piratecrew.network.ToastPacket(boss.icon.get(),
+                        "Boss Defeated!", victim.getDisplayName().getString().replace("\u2620 ", ""), color));
                 com.piratecrew.goals.Goals.grant(sp, boss);
             }
         }

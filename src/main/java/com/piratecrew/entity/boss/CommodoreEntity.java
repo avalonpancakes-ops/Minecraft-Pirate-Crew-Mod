@@ -44,6 +44,8 @@ public class CommodoreEntity extends MarineBossEntity {
     @Override protected double bossArmor() { return 6; }
     @Override protected double bossToughness() { return 0; }
     @Override protected float bossScale() { return 1.15F; }
+    @Override public String epithet() { return "Hound of the Order"; }
+    @Override public int ribbonColor() { return 0x5AC8FF; }
     @Override public int bountyValue() { return 150; }
 
     @Override

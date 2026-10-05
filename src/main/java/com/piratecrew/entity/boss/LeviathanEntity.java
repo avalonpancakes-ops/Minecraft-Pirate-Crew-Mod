@@ -60,6 +60,8 @@ public class LeviathanEntity extends Guardian implements BountyBoss {
                 .add(Attributes.FOLLOW_RANGE, 48);
     }
 
+    @Override public String epithet() { return "The Ancient Deep"; }
+    @Override public int ribbonColor() { return 0x3FD6A0; }
     @Override
     public int bountyValue() {
         return 800;
