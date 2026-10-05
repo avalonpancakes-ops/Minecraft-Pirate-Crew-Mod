@@ -1,0 +1,406 @@
+package com.piratecrew.client.codex;
+
+import com.piratecrew.client.GuiDraw;
+import com.piratecrew.client.PirateButton;
+import com.piratecrew.codex.ShowcaseTools;
+import com.piratecrew.network.CodexActionPacket;
+import com.piratecrew.network.ModNetwork;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The Captain's Log: a night-chart guidebook to everything in Pirate Crew. Sections down the left
+ * (gear, places, foes, bosses, pacts), the chosen page on the right, and for operators a Showcase
+ * page of one-click tools. Animated: rolling waves on the header, a shimmering title, bobbing icons
+ * and pulsing brass highlights.
+ */
+public class CodexScreen extends Screen {
+    private static final int SIDEBAR_W = 124;
+    private static final int ROW_H = 13;
+    private static final int HEADER_H = 24;
+
+    // remembered between openings
+    private static int lastSection = 0, lastEntry = 0;
+    private static boolean lastShowcase = false;
+
+    private int left, top, w, h;
+    private int section = lastSection, entry = lastEntry;
+    private boolean showcase = lastShowcase;
+    private double sideScroll, pageScroll;
+    private int pageContentH;
+
+    private record Row(int section, int entry, boolean header, boolean showcaseRow) {}
+
+    private final List<Row> rows = new ArrayList<>();
+
+    public CodexScreen() {
+        super(Component.literal("Captain's Log"));
+    }
+
+    public static void open() {
+        Minecraft.getInstance().setScreen(new CodexScreen());
+    }
+
+    private boolean isOp() {
+        return minecraft != null && minecraft.player != null && minecraft.player.hasPermissions(2);
+    }
+
+    @Override
+    protected void init() {
+        w = Math.min(width - 12, 430);
+        h = Math.min(height - 12, 256);
+        left = (width - w) / 2;
+        top = (height - h) / 2;
+        rows.clear();
+        var secs = CodexContent.sections();
+        for (int s = 0; s < secs.size(); s++) {
+            rows.add(new Row(s, -1, true, false));
+            for (int e = 0; e < secs.get(s).entries().size(); e++) rows.add(new Row(s, e, false, false));
+        }
+        if (isOp()) {
+            rows.add(new Row(-1, -1, true, true));
+            rows.add(new Row(-1, 0, false, true));
+        } else if (showcase) {
+            showcase = false;
+        }
+        if (section >= secs.size()) section = 0;
+        if (entry >= secs.get(section).entries().size()) entry = 0;
+        addRenderableWidget(Button.builder(Component.literal("✕"), b -> onClose())
+                .bounds(left + w - 20, top + 5, 14, 14).build(PirateButton::new));
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
+    @Override
+    public void onClose() {
+        lastSection = section;
+        lastEntry = entry;
+        lastShowcase = showcase;
+        super.onClose();
+    }
+
+    private float time(float partial) {
+        return (minecraft != null && minecraft.level != null ? minecraft.level.getGameTime() : 0) + partial;
+    }
+
+    // ------------------------------------------------------------------ drawing
+
+    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partial) {
+        renderBackground(g);
+        float t = time(partial);
+        drawFrame(g, t);
+        drawSidebar(g, mouseX, mouseY, t);
+        if (showcase) drawShowcase(g, mouseX, mouseY, t);
+        else drawEntry(g, t);
+        super.render(g, mouseX, mouseY, partial);
+        if (showcase) drawToolTooltip(g, mouseX, mouseY);
+    }
+
+    private void drawFrame(GuiGraphics g, float t) {
+        GuiDraw.tile(g, GuiDraw.WOOD, left, top, w, h, 64);
+        g.fill(left, top, left + w, top + 1, 0xFF1A0F08);
+        g.fill(left, top + h - 1, left + w, top + h, 0xFF1A0F08);
+        g.fill(left, top, left + 1, top + h, 0xFF1A0F08);
+        g.fill(left + w - 1, top, left + w, top + h, 0xFF1A0F08);
+        // header: waves rolling along the bottom of the plank
+        for (int x = left + 4; x < left + w - 4; x += 2) {
+            int y = top + HEADER_H - 6 + Math.round(Mth.sin((x - left + t * 1.6F) / 7F) * 1.5F);
+            g.fill(x, y, x + 2, y + 2, 0xFF2FB3B5);
+            g.fill(x, y + 2, x + 2, top + HEADER_H - 2, 0xFF125A66);
+            if (((x - left) / 2 + (int) (t / 3)) % 23 == 0) g.fill(x, y - 1, x + 2, y, 0xFFE8FFFA);
+        }
+        // shimmering title
+        String title = "⚓ CAPTAIN'S LOG ⚓";
+        int tw = font.width(title) * 3 / 2;
+        int tx = left + (w - tw) / 2, ty = top + 4;
+        g.pose().pushPose();
+        g.pose().translate(tx, ty, 0);
+        g.pose().scale(1.5F, 1.5F, 1F);
+        int cx = 0;
+        for (int i = 0; i < title.length(); i++) {
+            String ch = String.valueOf(title.charAt(i));
+            float k = 0.5F + 0.5F * Mth.sin(t * 0.15F - i * 0.45F);
+            int col = lerp(0xFFC8901E, 0xFFFFF0B0, k);
+            g.drawString(font, Component.literal(ch).withStyle(ChatFormatting.BOLD), cx, 0, col, true);
+            cx += font.width(Component.literal(ch).withStyle(ChatFormatting.BOLD));
+        }
+        g.pose().popPose();
+        // the night-chart page
+        int px = left + 4, py = top + HEADER_H, pw = w - 8, ph = h - HEADER_H - 4;
+        g.fill(px, py, px + pw, py + ph, 0xFF0E1C28);
+        for (int gx = px + 8; gx < px + pw; gx += 16) g.fill(gx, py, gx + 1, py + ph, 0x1830C0D0);
+        for (int gy = py + 8; gy < py + ph; gy += 16) g.fill(px, gy, px + pw, gy + 1, 0x1830C0D0);
+        g.fill(px, py, px + pw, py + 1, 0xFF2A1A0C);
+        compassRose(g, left + w - 40, top + h - 40, t);
+        // divider between sidebar and page
+        g.fill(left + 4 + SIDEBAR_W, py, left + 5 + SIDEBAR_W, py + ph, 0xFF6A4A2A);
+    }
+
+    private void compassRose(GuiGraphics g, int cx, int cy, float t) {
+        int col = 0x2030C0D0;
+        for (int r = -26; r <= 26; r++) {
+            int k = 26 - Math.abs(r);
+            g.fill(cx + r, cy - Math.max(1, k / 8), cx + r + 1, cy + Math.max(1, k / 8), col);
+            g.fill(cx - Math.max(1, k / 8), cy + r, cx + Math.max(1, k / 8), cy + r + 1, col);
+        }
+        g.fill(cx - 1, cy - 30, cx + 1, cy - 26, 0x40E8B84A);
+    }
+
+    private void drawSidebar(GuiGraphics g, int mouseX, int mouseY, float t) {
+        int x0 = left + 6, y0 = top + HEADER_H + 3, sh = h - HEADER_H - 10;
+        int contentH = rows.size() * ROW_H;
+        sideScroll = Mth.clamp(sideScroll, 0, Math.max(0, contentH - sh));
+        g.enableScissor(x0, y0, x0 + SIDEBAR_W - 4, y0 + sh);
+        var secs = CodexContent.sections();
+        for (int i = 0; i < rows.size(); i++) {
+            Row r = rows.get(i);
+            int y = y0 + i * ROW_H - (int) sideScroll;
+            if (y < y0 - ROW_H || y > y0 + sh) continue;
+            if (r.header) {
+                int color = r.showcaseRow ? 0xFFE8B84A : (0xFF000000 | secs.get(r.section).color());
+                String label = r.showcaseRow ? "SHOWCASE" : secs.get(r.section).title();
+                g.drawString(font, "◆", x0 + 1, y + 3, color, false);
+                g.drawString(font, Component.literal(label).withStyle(ChatFormatting.BOLD), x0 + 9, y + 3, color, false);
+                int lx = x0 + 12 + font.width(Component.literal(label).withStyle(ChatFormatting.BOLD));
+                if (lx < x0 + SIDEBAR_W - 8) g.fill(lx, y + 7, x0 + SIDEBAR_W - 8, y + 8, (color & 0x00FFFFFF) | 0x80000000);
+                continue;
+            }
+            boolean selected = r.showcaseRow ? showcase : (!showcase && r.section == section && r.entry == entry);
+            boolean hovered = mouseX >= x0 && mouseX < x0 + SIDEBAR_W - 6 && mouseY >= y && mouseY < y + ROW_H && mouseY >= y0 && mouseY < y0 + sh;
+            if (selected) {
+                float k = 0.5F + 0.5F * Mth.sin(t * 0.2F);
+                g.fill(x0, y, x0 + SIDEBAR_W - 6, y + ROW_H, 0x60E8B84A);
+                g.fill(x0, y, x0 + 2, y + ROW_H, lerp(0xFFC8901E, 0xFFFFE890, k));
+            } else if (hovered) {
+                g.fill(x0, y, x0 + SIDEBAR_W - 6, y + ROW_H, 0x30FFFFFF);
+            }
+            ItemStack icon = r.showcaseRow ? new ItemStack(net.minecraft.world.item.Items.SPYGLASS)
+                    : secs.get(r.section).entries().get(r.entry).icon().get();
+            g.pose().pushPose();
+            g.pose().translate(x0 + 4, y + 1, 0);
+            g.pose().scale(0.6875F, 0.6875F, 1F);
+            g.renderItem(icon, 0, 0);
+            g.pose().popPose();
+            String name = r.showcaseRow ? "Showcase" : secs.get(r.section).entries().get(r.entry).title();
+            g.drawString(font, font.plainSubstrByWidth(name, SIDEBAR_W - 26), x0 + 18, y + 3, selected ? 0xFFFFF0C0 : 0xFFE0D2B4, false);
+        }
+        g.disableScissor();
+        if (contentH > sh) scrollbar(g, x0 + SIDEBAR_W - 4, y0, sh, sideScroll, contentH);
+    }
+
+    private void scrollbar(GuiGraphics g, int x, int y, int h, double scroll, int contentH) {
+        g.fill(x, y, x + 2, y + h, 0x40000000);
+        int bar = Math.max(12, h * h / contentH);
+        int by = y + (int) ((h - bar) * (scroll / Math.max(1, contentH - h)));
+        g.fill(x, by, x + 2, by + bar, 0xFFC8901E);
+    }
+
+    private int pageX() {
+        return left + SIDEBAR_W + 12;
+    }
+
+    private int pageW() {
+        return w - SIDEBAR_W - 22;
+    }
+
+    private void drawEntry(GuiGraphics g, float t) {
+        var sec = CodexContent.sections().get(section);
+        var e = sec.entries().get(entry);
+        int x = pageX(), y0 = top + HEADER_H + 6, pw = pageW(), ph = h - HEADER_H - 14;
+        // big bobbing icon in a brass ring
+        int ix = x, iy = y0 + 2 + Math.round(Mth.sin(t * 0.12F) * 1.5F);
+        ring(g, x - 2, y0, 38, t, 0xFF000000 | sec.color());
+        g.pose().pushPose();
+        g.pose().translate(ix + 1, iy + 1, 0);
+        g.pose().scale(2F, 2F, 1F);
+        g.renderItem(e.icon().get(), 0, 0);
+        g.pose().popPose();
+        // title and subtitle
+        g.pose().pushPose();
+        g.pose().translate(x + 44, y0 + 4, 0);
+        g.pose().scale(1.5F, 1.5F, 1F);
+        g.drawString(font, Component.literal(e.title()).withStyle(ChatFormatting.BOLD), 0, 0, 0xFFFFF0C8, true);
+        g.pose().popPose();
+        g.drawString(font, e.subtitle(), x + 44, y0 + 22, 0xFF000000 | sec.color(), false);
+        GuiDraw.rope(g, x, y0 + 38, pw);
+        // body, scrollable
+        int by = y0 + 50, bh = ph - 50;
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        for (String para : e.body()) {
+            if (para.isEmpty()) lines.add(FormattedCharSequence.EMPTY);
+            else lines.addAll(font.split(Component.literal(para), pw - 6));
+        }
+        pageContentH = lines.size() * 10;
+        pageScroll = Mth.clamp(pageScroll, 0, Math.max(0, pageContentH - bh));
+        g.enableScissor(x, by, x + pw, by + bh);
+        for (int i = 0; i < lines.size(); i++) {
+            int ly = by + i * 10 - (int) pageScroll;
+            if (ly < by - 10 || ly > by + bh) continue;
+            g.drawString(font, lines.get(i), x + 2, ly, 0xFFE8DCC0, false);
+        }
+        g.disableScissor();
+        if (pageContentH > bh) scrollbar(g, x + pw - 2, by, bh, pageScroll, pageContentH);
+    }
+
+    /** A pulsing brass ring around the page icon. */
+    private void ring(GuiGraphics g, int x, int y, int size, float t, int accent) {
+        float k = 0.5F + 0.5F * Mth.sin(t * 0.18F);
+        int col = lerp(0xFF8A6420, 0xFFFFD870, k);
+        g.fill(x, y, x + size, y + size, 0xFF1A2A38);
+        g.fill(x, y, x + size, y + 1, col);
+        g.fill(x, y + size - 1, x + size, y + size, col);
+        g.fill(x, y, x + 1, y + size, col);
+        g.fill(x + size - 1, y, x + size, y + size, col);
+        g.fill(x + 2, y + 2, x + size - 2, y + 3, (accent & 0x00FFFFFF) | 0x60000000);
+        // little sparkle orbiting the ring
+        double a = t * 0.08;
+        int sx = x + size / 2 + (int) Math.round(Math.cos(a) * (size / 2 - 1));
+        int sy = y + size / 2 + (int) Math.round(Math.sin(a) * (size / 2 - 1));
+        g.fill(sx - 1, sy, sx + 2, sy + 1, 0xFFFFFFFF);
+        g.fill(sx, sy - 1, sx + 1, sy + 2, 0xFFFFFFFF);
+    }
+
+    // ------------------------------------------------------------------ showcase
+
+    private int cols() {
+        return pageW() >= 250 ? 3 : 2;
+    }
+
+    private int cardW() {
+        return (pageW() - (cols() - 1) * 4) / cols();
+    }
+
+    private static final int CARD_H = 30;
+
+    private int cardsTop() {
+        return top + HEADER_H + 44;
+    }
+
+    private void drawShowcase(GuiGraphics g, int mouseX, int mouseY, float t) {
+        int x = pageX(), y0 = top + HEADER_H + 6, pw = pageW();
+        g.pose().pushPose();
+        g.pose().translate(x, y0 + 2, 0);
+        g.pose().scale(1.5F, 1.5F, 1F);
+        g.drawString(font, Component.literal("Showcase").withStyle(ChatFormatting.BOLD), 0, 0, 0xFFFFF0C8, true);
+        g.pose().popPose();
+        g.drawString(font, "One-click tools for operators", x, y0 + 18, 0xFFE8B84A, false);
+        GuiDraw.rope(g, x, y0 + 28, pw);
+        var tools = CodexContent.tools();
+        int cy0 = cardsTop(), bh = top + h - 8 - cy0;
+        int rowsN = (tools.size() + cols() - 1) / cols();
+        pageContentH = rowsN * (CARD_H + 4);
+        pageScroll = Mth.clamp(pageScroll, 0, Math.max(0, pageContentH - bh));
+        g.enableScissor(x, cy0, x + pw, cy0 + bh);
+        for (int i = 0; i < tools.size(); i++) {
+            var tool = tools.get(i);
+            int cx = x + (i % cols()) * (cardW() + 4);
+            int cy = cy0 + (i / cols()) * (CARD_H + 4) - (int) pageScroll;
+            boolean hov = mouseX >= cx && mouseX < cx + cardW() && mouseY >= cy && mouseY < cy + CARD_H && mouseY >= cy0 && mouseY < cy0 + bh;
+            card(g, cx, cy - (hov ? 1 : 0), cardW(), CARD_H, hov, t, i);
+            g.renderItem(tool.icon().get(), cx + 5, cy + 7 - (hov ? 1 : 0));
+            g.drawString(font, Component.literal(font.plainSubstrByWidth(tool.title(), cardW() - 28)).withStyle(ChatFormatting.BOLD),
+                    cx + 25, cy + 6 - (hov ? 1 : 0), 0xFFFFF0C8, false);
+            g.drawString(font, font.plainSubstrByWidth(tool.subtitle(), cardW() - 28), cx + 25, cy + 17 - (hov ? 1 : 0), 0xFFB8A888, false);
+        }
+        g.disableScissor();
+        if (pageContentH > bh) scrollbar(g, x + pw - 2, cy0, bh, pageScroll, pageContentH);
+    }
+
+    private void card(GuiGraphics g, int x, int y, int w, int h, boolean hovered, float t, int i) {
+        int[] accents = {0xFF2FB3B5, 0xFFE8B84A, 0xFFD070FF, 0xFFE04040, 0xFF9AE0A0};
+        int accent = accents[i % accents.length];
+        g.fill(x, y, x + w, y + h, 0xFF1A0F08);
+        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, hovered ? 0xFF2A3E50 : 0xFF1C2C3A);
+        g.fill(x + 1, y + 1, x + w - 1, y + 2, 0x30FFFFFF);
+        int border = accent;
+        if (hovered) border = lerp(accent, 0xFFFFFFFF, 0.35F + 0.35F * Mth.sin(t * 0.3F));
+        g.fill(x, y, x + w, y + 1, border);
+        g.fill(x, y + h - 1, x + w, y + h, (border & 0x00FFFFFF) | 0x90000000);
+        g.fill(x, y, x + 1, y + h, border);
+        g.fill(x + w - 1, y, x + w, y + h, (border & 0x00FFFFFF) | 0x90000000);
+    }
+
+    private int toolAt(double mx, double my) {
+        if (!showcase) return -1;
+        int x = pageX(), cy0 = cardsTop(), bh = top + h - 8 - cy0;
+        if (my < cy0 || my >= cy0 + bh || mx < x || mx >= x + pageW()) return -1;
+        int col = (int) ((mx - x) / (cardW() + 4));
+        int row = (int) ((my - cy0 + pageScroll) / (CARD_H + 4));
+        if (col >= cols()) return -1;
+        double inX = (mx - x) - col * (cardW() + 4), inY = (my - cy0 + pageScroll) - row * (CARD_H + 4);
+        if (inX >= cardW() || inY >= CARD_H) return -1;
+        int i = row * cols() + col;
+        return i < CodexContent.tools().size() ? i : -1;
+    }
+
+    private void drawToolTooltip(GuiGraphics g, int mouseX, int mouseY) {
+        int i = toolAt(mouseX, mouseY);
+        if (i >= 0) g.renderTooltip(font, Component.literal(CodexContent.tools().get(i).tooltip()), mouseX, mouseY);
+    }
+
+    // ------------------------------------------------------------------ input
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        if (super.mouseClicked(mx, my, button)) return true;
+        int x0 = left + 6, y0 = top + HEADER_H + 3, sh = h - HEADER_H - 10;
+        if (mx >= x0 && mx < x0 + SIDEBAR_W - 6 && my >= y0 && my < y0 + sh) {
+            int i = (int) ((my - y0 + sideScroll) / ROW_H);
+            if (i >= 0 && i < rows.size() && !rows.get(i).header) {
+                Row r = rows.get(i);
+                if (r.showcaseRow) showcase = true;
+                else {
+                    showcase = false;
+                    section = r.section;
+                    entry = r.entry;
+                }
+                pageScroll = 0;
+                click();
+                return true;
+            }
+        }
+        int tool = toolAt(mx, my);
+        if (tool >= 0) {
+            ShowcaseTools.Action a = CodexContent.tools().get(tool).action();
+            ModNetwork.sendToServer(new CodexActionPacket(a));
+            click();
+            if (a == ShowcaseTools.Action.TO_SEA) onClose();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double delta) {
+        if (mx < left + SIDEBAR_W + 6) sideScroll -= delta * ROW_H * 2;
+        else pageScroll -= delta * 20;
+        return true;
+    }
+
+    private void click() {
+        if (minecraft != null) minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0F));
+    }
+
+    private static int lerp(int a, int b, float t) {
+        t = Mth.clamp(t, 0, 1);
+        int aa = a >>> 24, ar = a >> 16 & 255, ag = a >> 8 & 255, ab = a & 255;
+        int ba = b >>> 24, br = b >> 16 & 255, bg = b >> 8 & 255, bb = b & 255;
+        return (int) (aa + (ba - aa) * t) << 24 | (int) (ar + (br - ar) * t) << 16 | (int) (ag + (bg - ag) * t) << 8 | (int) (ab + (bb - ab) * t);
+    }
+}

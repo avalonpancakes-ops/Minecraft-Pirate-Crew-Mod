@@ -37,6 +37,7 @@ public class ModTabs {
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_B.get());
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_A.get());
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_S.get());
+                out.accept(ModItems.CAPTAINS_LOG.get());
                 out.accept(ModItems.AGGRO_STICK.get());
                 out.accept(ModItems.SIREN_CONCH.get());
                 out.accept(ModItems.MARINE_SPAWN_EGG.get());

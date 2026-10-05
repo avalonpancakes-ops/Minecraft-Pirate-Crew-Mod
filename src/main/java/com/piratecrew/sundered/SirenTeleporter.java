@@ -87,7 +87,7 @@ public class SirenTeleporter {
     }
 
     /** Build a ruby-framed portal (2x3 inside) on land near the target, or on a platform at sea level. */
-    private static BlockPos build(ServerLevel level, BlockPos target) {
+    public static BlockPos build(ServerLevel level, BlockPos target) {
         BlockPos base = null;
         // Look for dry ground nearby, closest first.
         outer:

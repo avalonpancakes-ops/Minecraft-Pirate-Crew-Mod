@@ -185,6 +185,9 @@ public class ModItems {
         }
     }
 
+    public static final RegistryObject<Item> CAPTAINS_LOG = ITEMS.register("captains_log",
+            () -> new com.piratecrew.item.CaptainsLogItem(new Item.Properties()));
+
     public static final RegistryObject<Item> AGGRO_STICK = ITEMS.register("aggro_stick",
             () -> new com.piratecrew.item.AggroStickItem(new Item.Properties()));
 

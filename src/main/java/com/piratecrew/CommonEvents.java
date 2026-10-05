@@ -34,6 +34,17 @@ public class CommonEvents {
         if (event.getEntity() instanceof ServerPlayer sp) {
             BountyManager.onLogin(sp);
             LoanManager.onLogin(sp);
+            // First time aboard: a Captain's Log to learn the ropes.
+            var tag = sp.getPersistentData();
+            if (!tag.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) tag.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new net.minecraft.nbt.CompoundTag());
+            var keep = tag.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);
+            if (!keep.getBoolean("piratecrew_got_log")) {
+                keep.putBoolean("piratecrew_got_log", true);
+                net.minecraft.world.item.ItemStack log = new net.minecraft.world.item.ItemStack(com.piratecrew.registry.ModItems.CAPTAINS_LOG.get());
+                if (!sp.getInventory().add(log)) sp.drop(log, false);
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u2693 You've been given a Captain's Log. Open it (or press J) to learn the ways of the sea.")
+                        .withStyle(net.minecraft.ChatFormatting.GOLD));
+            }
             CrewManager.sync(sp, false);
         }
     }

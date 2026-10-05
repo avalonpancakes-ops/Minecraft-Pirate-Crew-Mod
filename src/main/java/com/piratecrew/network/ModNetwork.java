@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ModNetwork {
-    private static final String VERSION = "8";
+    private static final String VERSION = "9";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             PirateCrew.id("main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -52,6 +52,11 @@ public class ModNetwork {
                 .encoder(PactAbilityPacket::encode)
                 .decoder(PactAbilityPacket::decode)
                 .consumerMainThread(PactAbilityPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(CodexActionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(CodexActionPacket::encode)
+                .decoder(CodexActionPacket::decode)
+                .consumerMainThread(CodexActionPacket::handle)
                 .add();
         CHANNEL.messageBuilder(ShopBuyPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ShopBuyPacket::encode)

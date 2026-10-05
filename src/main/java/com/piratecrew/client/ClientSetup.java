@@ -23,6 +23,8 @@ import org.lwjgl.glfw.GLFW;
 public class ClientSetup {
     public static final KeyMapping OPEN_CREW = new KeyMapping("key.piratecrew.crew_menu", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.categories.piratecrew");
+    public static final KeyMapping OPEN_LOG = new KeyMapping("key.piratecrew.captains_log", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.categories.piratecrew");
     public static final KeyMapping PACT_POWER = new KeyMapping("key.piratecrew.pact_power", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.piratecrew");
 
@@ -52,6 +54,7 @@ public class ClientSetup {
         public static void keys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_CREW);
             event.register(PACT_POWER);
+            event.register(OPEN_LOG);
         }
 
         @SubscribeEvent
@@ -71,6 +74,9 @@ public class ClientSetup {
                 if (mc.player != null && mc.screen == null) {
                     ModNetwork.sendToServer(CrewActionPacket.simple(CrewActionPacket.Action.REQUEST_SYNC));
                 }
+            }
+            while (OPEN_LOG.consumeClick()) {
+                if (mc.player != null && mc.screen == null) com.piratecrew.client.codex.CodexScreen.open();
             }
             while (PACT_POWER.consumeClick()) {
                 if (mc.player != null && mc.screen == null) ModNetwork.sendToServer(new com.piratecrew.network.PactAbilityPacket());
