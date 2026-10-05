@@ -78,7 +78,7 @@ public class Config {
         BOUNTY_PER_PIRATE_TIER = b.comment("Extra rubies per tier above F for pirate kills (D +1x, C +2x ... S +5x)").defineInRange("perPirateTier", 1, 0, 10000);
         BOUNTY_SHARE = b.comment("Share of a claimed bounty that's added to the killer's own bounty (0.25 = 25%)").defineInRange("claimShare", 0.25, 0.0, 10.0);
         BOUNTY_CAPTAIN_CUT = b.comment("When a crew pirate kills a wanted target, its captain gets this share of the bounty in their bank (0.25 = 25%)").defineInRange("captainCut", 0.25, 0.0, 1.0);
-        EMPEROR_MIN_BOUNTY = b.comment("Combined crew bounty needed to be an Emperor of the Sea").defineInRange("emperorMinBounty", 1000, 1, 100000000);
+        EMPEROR_MIN_BOUNTY = b.comment("Combined crew bounty needed to be an Emperor of the Sea").defineInRange("emperorMinimumBounty", 10000, 1, 100000000);
         EMPEROR_COUNT = b.comment("How many crews can be Emperors of the Sea at once").defineInRange("emperorCount", 4, 1, 100);
         BOUNTY_REPEAT_COOLDOWN = b.comment("Seconds before killing the same target again counts toward bounties (stops kill farming)").defineInRange("repeatKillCooldown", 600, 0, 86400);
         b.pop();

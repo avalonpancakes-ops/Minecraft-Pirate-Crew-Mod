@@ -19,7 +19,7 @@ import java.util.UUID;
 
 /**
  * The Four Emperors of the Sea: the crews with the highest combined bounty (every player and pirate
- * in the crew added up), as long as it's at least 1,000 rubies. Every player in an Emperor crew has
+ * in the crew added up), as long as it's at least 10,000 rubies. Every player in an Emperor crew has
  * permanent Strength and Resistance; its captain and vice captains get Strength III and Resistance II.
  * Leave the crew, get kicked, or have the crew knocked out of the top four and the buffs go.
  */

@@ -100,11 +100,11 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ### The Four Emperors of the Sea
 - A crew's **total bounty** is every member's bounty added up, players and pirates alike (shown at the top right of the crew screen).
-- The **4 crews with the highest total bounty** become the **Emperors of the Sea**, as long as they have at least **1,000 rubies** of combined bounty. The whole server is told when a crew claims a seat or is toppled from one. `/crew emperors` lists the current Emperors.
+- The **4 crews with the highest total bounty** become the **Emperors of the Sea**, as long as they have at least **10,000 rubies** of combined bounty. The whole server is told when a crew claims a seat or is toppled from one. `/crew emperors` lists the current Emperors.
 - Every **player** in an Emperor crew has permanent **Strength I and Resistance I**. The **captain and vice captains** get **Strength III and Resistance II**.
 - The buffs go as soon as a player **leaves or is kicked** from the crew, or the crew is **overtaken** and drops out of the top four. They come back after death or drinking milk. A stronger potion still works, and the Emperor buff returns when it wears off.
 - Emperor crews get a **♛ Emperor #1-4** title next to their name in the crew screen (hover it for the perks).
-- The bounty needed and the number of Emperors are in the config (`emperorMinBounty`, `emperorCount`).
+- The bounty needed and the number of Emperors are in the config (`emperorMinimumBounty`, `emperorCount`).
 
 ### Banks
 - Every village also gets **one bank**, a stone hall with a teller counter, built on its own spot at least 20 blocks from the bar so they never overlap. Villages you've already visited get theirs the next time you go there.
