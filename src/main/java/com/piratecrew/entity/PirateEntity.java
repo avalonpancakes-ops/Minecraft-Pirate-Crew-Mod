@@ -788,7 +788,7 @@ public class PirateEntity extends PathfinderMob {
         return InteractionResult.CONSUME;
     }
 
-    private void openEquipment(ServerPlayer player) {
+    public void openEquipment(ServerPlayer player) {
         if (consuming != null) stopUsingItem();
         NetworkHooks.openScreen(player,
                 new SimpleMenuProvider((id, inv, p) -> new PirateMenu(id, inv, this), this.getDisplayName()),

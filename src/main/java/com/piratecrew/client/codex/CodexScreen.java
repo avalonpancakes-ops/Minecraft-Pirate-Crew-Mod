@@ -379,7 +379,7 @@ public class CodexScreen extends Screen {
             g.drawString(font, Component.literal(fit(goal.title, cw - 30, true)).withStyle(ChatFormatting.BOLD), cx + 25, cy + 6,
                     got ? 0xFFFFF0C8 : 0xFF8A96A2, false);
             g.drawString(font, fit(goal.description, cw - 30, false), cx + 25, cy + 17, got ? 0xFFB8D8B0 : 0xFF6A7682, false);
-            if (got) g.drawString(font, "\u2714", cx + cw - 10, cy + 3, 0xFF7FE07F, false);
+            if (got) g.drawString(font, "\u2714", cx + cw - 9, cy + CARD_H - 11, 0xFF7FE07F, false);
             if (mouseX >= cx && mouseX < cx + cw && mouseY >= cy && mouseY < cy + CARD_H && mouseY >= cy0 && mouseY < cy0 + bh) {
                 g.fill(cx + 1, cy + 1, cx + cw - 1, cy + CARD_H - 1, 0x18FFFFFF);
             }

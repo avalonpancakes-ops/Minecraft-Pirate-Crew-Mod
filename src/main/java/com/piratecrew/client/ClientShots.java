@@ -55,7 +55,7 @@ public class ClientShots {
     private record Step(String name, int delay, Consumer<Minecraft> setup) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
-    private static final int WORLD_FROM = 11;   // steps from here on need the world loaded
+    private static final int WORLD_FROM = 11;   // index of the 'settle' step   // steps from here on need the world loaded
     private static int index = -1, frames, idle;
     private static boolean started, setupDone;
 
@@ -84,6 +84,9 @@ public class ClientShots {
         STEPS.add(new Step("bank", 40, mc -> mc.setScreen(new BankScreen())));
         STEPS.add(new Step("shop", 30, mc -> mc.setScreen(new ShopScreen())));
         STEPS.add(new Step("crew", 30, mc -> mc.setScreen(new CrewScreen())));
+        STEPS.add(new Step("", 40, ClientShots::makeCrew));
+        STEPS.add(new Step("crew_full", 40, mc -> mc.setScreen(new CrewScreen())));
+        STEPS.add(new Step("pirate_gear", 40, ClientShots::openGear));
         STEPS.add(new Step("armor_lineup", 120, mc -> lineup(mc, true)));
         STEPS.add(new Step("boss_lineup", 120, mc -> lineup(mc, false)));
         STEPS.add(new Step("sea_beasts", 120, ClientShots::beasts));
@@ -246,6 +249,46 @@ public class ClientShots {
         });
     }
 
+    private static PirateEntity gearPirate;
+
+    /** A crew with pirates of every tier, some ranked up to SS and SSS by bounty, one with a Soul Pact. */
+    private static void makeCrew(Minecraft mc) {
+        mc.setScreen(null);
+        onServer(mc, sp -> {
+            ServerLevel level = sp.serverLevel();
+            var crew = com.piratecrew.crew.CrewManager.create(sp, "The Salty Dogs");
+            if (crew == null) return;
+            com.piratecrew.entity.PirateTier[] tiers = com.piratecrew.entity.PirateTier.values();
+            int ground = ground(level, 10, -10);
+            for (int i = 0; i < tiers.length; i++) {
+                PirateEntity p = ModEntities.PIRATE.get().create(level);
+                if (p == null) continue;
+                p.moveTo(8 + i, ground, -10, 0, 0);
+                p.initPirate(tiers[i]);
+                p.setNoAi(true);
+                level.addFreshEntity(p);
+                p.joinCrew(crew, sp);
+                com.piratecrew.crew.CrewManager.addPirate(sp.server, crew, p);
+                if (i == 5) {
+                    p.bindPact(com.piratecrew.pact.SoulPact.TEMPEST);
+                    var set = ModItems.GEAR.get(GearTier.STORMFORGED);
+                    p.setItemSlot(EquipmentSlot.HEAD, new ItemStack(set.helmet().get()));
+                    p.setItemSlot(EquipmentSlot.CHEST, new ItemStack(set.chestplate().get()));
+                    p.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(set.sword().get()));
+                    gearPirate = p;
+                }
+            }
+            com.piratecrew.crew.CrewManager.syncCrew(sp.server, crew);
+        });
+    }
+
+    private static void openGear(Minecraft mc) {
+        mc.setScreen(null);
+        onServer(mc, sp -> {
+            if (gearPirate != null) gearPirate.openEquipment(sp);
+        });
+    }
+
     private static void beasts(Minecraft mc) {
         onServer(mc, sp -> {
             ServerLevel level = sp.serverLevel();
@@ -281,9 +324,10 @@ public class ClientShots {
         mc.options.hideGui = true;
         onServer(mc, sp -> {
             ServerLevel level = sp.serverLevel();
-            int ground = ground(level, 0, -80);
-            SirenTeleporter.build(level, new BlockPos(0, ground - 1, -74));
-            look(sp, level, 0.5, ground + 1.5, -82, 0F, -5F);
+            int ground = ground(level, 0, -74);
+            BlockPos at = SirenTeleporter.build(level, new BlockPos(0, ground - 1, -74));
+            PirateCrew.LOGGER.info("PIRATECREW CLIENTSHOT portal built at {} (ground {}), block there: {}", at, ground, level.getBlockState(at));
+            look(sp, level, 0.5, ground + 3.5, -83, 0F, 12F);
         });
     }
 
