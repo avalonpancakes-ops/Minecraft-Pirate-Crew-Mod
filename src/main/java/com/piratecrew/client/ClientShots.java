@@ -141,7 +141,7 @@ public class ClientShots {
                 stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(ModItems.TRICORN.get()));
                 level.addFreshEntity(stand);
             }
-            var cap = place(level, ModEntities.PIRATE.get(), 24.5, g, -37.5, 0F);
+            var cap = place(level, ModEntities.PIRATE.get(), 23.0, g, -36.5, 0F);
             if (cap != null) {
                 cap.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(ModItems.TRICORN.get()));
                 cap.setNoAi(true);

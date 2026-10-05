@@ -31,7 +31,7 @@ import java.util.List;
 /** The Captain's Log showcase page: one-click tools for operators (permission level 2). */
 public class ShowcaseTools {
     public enum Action {
-        SOVEREIGN_KIT, ALL_TIERS, BOSS_SUMMONS, ALL_PACTS,
+        SOVEREIGN_KIT, ALL_TIERS, BOSS_SUMMONS, ALL_PACTS, LEGENDS, PIRATE_KIT,
         BOSS_COMMODORE, BOSS_KRAKEN, BOSS_TEMPEST, BOSS_LEVIATHAN, BOSS_VANE,
         BUILD_PORTAL, TO_SEA, OUTPOST, SHRINE, CAMP, MARINES, RAIDERS,
         HEAL, CLEAR, DAY, NIGHT, RUBIES;
@@ -63,6 +63,21 @@ public class ShowcaseTools {
                 }
                 give(p, new ItemStack(ModItems.SIREN_CONCH.get(), 4));
                 yield "Boss summons and Siren Conches.";
+            }
+            case LEGENDS -> {
+                for (var l : com.piratecrew.item.LegendaryWeaponItem.Legend.values()) give(p, ModItems.legend(l));
+                yield "All five legendary weapons.";
+            }
+            case PIRATE_KIT -> {
+                give(p, new ItemStack(ModItems.TRICORN.get()));
+                give(p, new ItemStack(ModItems.CANNON.get(), 4));
+                give(p, new ItemStack(ModItems.CANNONBALL.get(), 32));
+                give(p, new ItemStack(ModItems.TREASURE_MAP.get(), 3));
+                give(p, new ItemStack(ModItems.DISC_SAILOR.get()));
+                give(p, new ItemStack(ModItems.DISC_JIG.get()));
+                give(p, new ItemStack(ModItems.DISC_KRAKEN.get()));
+                give(p, new ItemStack(net.minecraft.world.item.Items.JUKEBOX));
+                yield "Tricorn, cannons, cannonballs, treasure maps, the three discs and a jukebox.";
             }
             case ALL_PACTS -> {
                 for (SoulPact pact : SoulPact.values()) give(p, new ItemStack(ModItems.SOUL_PACTS.get(pact).get()));

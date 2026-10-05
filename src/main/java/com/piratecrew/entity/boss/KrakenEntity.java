@@ -266,6 +266,7 @@ public class KrakenEntity extends Monster implements BountyBoss {
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean hitByPlayer) {
         spawnAtLocation(new ItemStack(ModItems.STORM_SIGIL.get()));
+        if (random.nextFloat() < 0.2F + looting * 0.05F) spawnAtLocation(ModItems.legend(com.piratecrew.item.LegendaryWeaponItem.Legend.GRASP));
         if (random.nextFloat() < 0.5F + looting * 0.1F) spawnAtLocation(new ItemStack(ModItems.DISC_KRAKEN.get()));
         spawnAtLocation(new ItemStack(ModItems.KRAKEN_BONE.get(), 8 + random.nextInt(7 + looting)));
         spawnAtLocation(new ItemStack(ModItems.ABYSSAL_INGOT.get(), 1 + random.nextInt(3)));

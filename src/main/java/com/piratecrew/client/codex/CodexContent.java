@@ -199,7 +199,20 @@ public class CodexContent {
                         "§6Summon:§r Admiral's Warrant (4 leviathan scales + 4 badges + insignia) on land.",
                         "",
                         "§6Drops:§r 3-5 sovereign hearts and a §dguaranteed Soul Pact§r. Bounty +1,500."),
-                        ModItems.SOVEREIGN_HEART, ModItems.LEVIATHAN_INGOT, () -> Items.NETHERITE_INGOT, () -> ModItems.SOUL_PACTS.get(SoulPact.BLOOD).get())
+                        ModItems.SOVEREIGN_HEART, ModItems.LEVIATHAN_INGOT, () -> Items.NETHERITE_INGOT, () -> ModItems.SOUL_PACTS.get(SoulPact.BLOOD).get()),
+                with(e("Legendary Weapons", "One blade per boss", icon(() -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.IRON_TIDE).get()),
+                        "Each boss sometimes drops its own §6legendary§r weapon (20%, more with Looting; Vane 25%):",
+                        "",
+                        "§6Broadside Cutlass§r (Graves): every third hit fires a burst around the target.",
+                        "§dKraken's Grasp§r (Kraken): hits drag foes in and slow them; ink blinds.",
+                        "§eStormcaller§r (Sorel): 1 in 4 hits calls arcing lightning.",
+                        "§bLeviathan's Fang§r (Leviathan): withering wounds; heals you and grants Conduit Power in water.",
+                        "§cThe Iron Tide§r (Vane): use it for a shockwave that hurls every foe back (8 s)."),
+                        () -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.BROADSIDE).get(),
+                        () -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.GRASP).get(),
+                        () -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.STORMCALLER).get(),
+                        () -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.FANG).get(),
+                        () -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.IRON_TIDE).get())
         )));
 
         List<Entry> pacts = new ArrayList<>();
@@ -250,6 +263,8 @@ public class CodexContent {
                 new Tool(Action.ALL_TIERS, "Every Set", "All six tiers", icon(() -> ModItems.GEAR.get(GearTier.LEVIATHAN).sword().get()), "One of every Sundered Sea gear set"),
                 new Tool(Action.BOSS_SUMMONS, "Summon Items", "Flares to warrants", icon(ModItems.ADMIRALS_WARRANT), "4 of each boss summon item and 4 Siren Conches"),
                 new Tool(Action.ALL_PACTS, "All Pacts", "Ten Soul Pacts", icon(() -> ModItems.SOUL_PACTS.get(SoulPact.EMBER).get()), "One of each Soul Pact"),
+                new Tool(Action.LEGENDS, "Legendaries", "Five boss blades", icon(() -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.STORMCALLER).get()), "One of each legendary boss weapon"),
+                new Tool(Action.PIRATE_KIT, "Pirate Kit", "Hat, guns, maps", icon(ModItems.TRICORN), "Tricorn, cannons, cannonballs, treasure maps, discs and a jukebox"),
                 new Tool(Action.BOSS_COMMODORE, "Commodore", "Summon here", icon(ModItems.SIGNAL_FLARE), "Commodore Graves appears in front of you"),
                 new Tool(Action.BOSS_KRAKEN, "Kraken", "Summon here", icon(ModItems.KRAKEN_LURE), "The Kraken rises in front of you (best over water)"),
                 new Tool(Action.BOSS_TEMPEST, "Sorel", "Summon here", icon(ModItems.STORM_SIGIL), "Tempest Admiral Sorel appears in front of you"),

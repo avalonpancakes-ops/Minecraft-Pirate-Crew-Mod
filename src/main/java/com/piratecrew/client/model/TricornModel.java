@@ -36,7 +36,7 @@ public class TricornModel extends HumanoidModel<LivingEntity> {
             float yaw = (float) (i * Math.PI * 2 / 3);
             head.addOrReplaceChild("wall" + i, CubeListBuilder.create().texOffs(0, 14 + i * 6)
                             .addBox(-8.5F, -4.5F, -apothem - 0.5F, 17, 4, 1),
-                    PartPose.offsetAndRotation(0.0F, -7.6F, 0.0F, 0.42F, yaw, 0.0F));
+                    PartPose.offsetAndRotation(0.0F, -7.6F, 0.0F, 0.22F, yaw, 0.0F));
         }
         root.addOrReplaceChild("hat", CubeListBuilder.create(), PartPose.ZERO);
         return LayerDefinition.create(mesh, 64, 32);

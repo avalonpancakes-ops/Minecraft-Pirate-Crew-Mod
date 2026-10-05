@@ -145,5 +145,10 @@
   "item.piratecrew.cannonball": "Cannonball",
   "entity.piratecrew.cannonball": "Cannonball",
   "subtitles.piratecrew.cannon_fire": "Cannon fires",
-  "item.piratecrew.tricorn": "Captain's Tricorn"
+  "item.piratecrew.tricorn": "Captain's Tricorn",
+  "item.piratecrew.broadside_cutlass": "Broadside Cutlass",
+  "item.piratecrew.krakens_grasp": "Kraken's Grasp",
+  "item.piratecrew.stormcaller": "Stormcaller",
+  "item.piratecrew.leviathans_fang": "Leviathan's Fang",
+  "item.piratecrew.iron_tide": "The Iron Tide"
 }

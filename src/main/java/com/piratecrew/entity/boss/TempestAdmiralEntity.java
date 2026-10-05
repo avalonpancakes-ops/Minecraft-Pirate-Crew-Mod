@@ -151,6 +151,7 @@ public class TempestAdmiralEntity extends MarineBossEntity {
     @Override
     protected void dropBossLoot(DamageSource source, int looting) {
         spawnAtLocation(new ItemStack(ModItems.LEVIATHAN_HORN.get()));
+        if (random.nextFloat() < 0.2F + looting * 0.05F) spawnAtLocation(ModItems.legend(com.piratecrew.item.LegendaryWeaponItem.Legend.STORMCALLER));
         spawnAtLocation(new ItemStack(ModItems.STORM_CORE.get(), 4 + random.nextInt(4 + looting)));
         spawnAtLocation(new ItemStack(ModItems.STORMGLASS_SHARD.get(), 6 + random.nextInt(7)));
         spawnAtLocation(new ItemStack(ModItems.KRAKENBONE_INGOT.get(), 1 + random.nextInt(3)));

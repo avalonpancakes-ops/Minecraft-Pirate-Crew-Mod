@@ -194,6 +194,7 @@ public class LeviathanEntity extends Guardian implements BountyBoss {
     @Override
     protected void dropCustomDeathLoot(DamageSource source, int looting, boolean hitByPlayer) {
         spawnAtLocation(new ItemStack(ModItems.ADMIRALS_WARRANT.get()));
+        if (random.nextFloat() < 0.2F + looting * 0.05F) spawnAtLocation(ModItems.legend(com.piratecrew.item.LegendaryWeaponItem.Legend.FANG));
         spawnAtLocation(new ItemStack(ModItems.LEVIATHAN_SCALE.get(), 8 + random.nextInt(7 + looting)));
         spawnAtLocation(new ItemStack(ModItems.STORMFORGED_INGOT.get(), 1 + random.nextInt(3)));
         spawnAtLocation(new ItemStack(Items.HEART_OF_THE_SEA));

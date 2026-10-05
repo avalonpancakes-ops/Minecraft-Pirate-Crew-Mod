@@ -1,0 +1,6 @@
+{
+  "parent": "piratecrew:item/boss_handheld",
+  "textures": {
+    "layer0": "piratecrew:item/leviathans_fang"
+  }
+}

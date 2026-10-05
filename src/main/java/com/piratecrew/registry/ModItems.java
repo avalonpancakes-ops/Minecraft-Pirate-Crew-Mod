@@ -190,6 +190,21 @@ public class ModItems {
     public static final RegistryObject<Item> CAPTAINS_LOG = ITEMS.register("captains_log",
             () -> new com.piratecrew.item.CaptainsLogItem(new Item.Properties()));
 
+    /** One unique weapon per boss. */
+    public static final Map<com.piratecrew.item.LegendaryWeaponItem.Legend, RegistryObject<Item>> LEGENDS = legends();
+
+    private static Map<com.piratecrew.item.LegendaryWeaponItem.Legend, RegistryObject<Item>> legends() {
+        Map<com.piratecrew.item.LegendaryWeaponItem.Legend, RegistryObject<Item>> m = new EnumMap<>(com.piratecrew.item.LegendaryWeaponItem.Legend.class);
+        for (var l : com.piratecrew.item.LegendaryWeaponItem.Legend.values()) {
+            m.put(l, ITEMS.register(l.id, () -> new com.piratecrew.item.LegendaryWeaponItem(l, new Item.Properties())));
+        }
+        return m;
+    }
+
+    public static ItemStack legend(com.piratecrew.item.LegendaryWeaponItem.Legend l) {
+        return new ItemStack(LEGENDS.get(l).get());
+    }
+
     public static final RegistryObject<Item> TRICORN = ITEMS.register("tricorn",
             () -> new com.piratecrew.item.TricornItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
 

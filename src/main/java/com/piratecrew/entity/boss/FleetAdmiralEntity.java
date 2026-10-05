@@ -144,6 +144,7 @@ public class FleetAdmiralEntity extends MarineBossEntity {
     @Override
     protected void dropBossLoot(DamageSource source, int looting) {
         spawnAtLocation(new ItemStack(ModItems.SOVEREIGN_HEART.get(), 3 + random.nextInt(3 + looting)));
+        if (random.nextFloat() < 0.25F + looting * 0.05F) spawnAtLocation(ModItems.legend(com.piratecrew.item.LegendaryWeaponItem.Legend.IRON_TIDE));
         spawnAtLocation(new ItemStack(ModItems.LEVIATHAN_INGOT.get(), 2 + random.nextInt(3)));
         spawnAtLocation(new ItemStack(ModItems.RUBY.get(), 64));
         spawnAtLocation(new ItemStack(ModItems.RUBY.get(), 36 + random.nextInt(51)));

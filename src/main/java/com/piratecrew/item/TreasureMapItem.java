@@ -72,7 +72,7 @@ public class TreasureMapItem extends Item {
             level.getChunk(x >> 4, z >> 4);
             // WORLD_SURFACE counts water, so the top block is water at sea and ground on land
             int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-            if (y <= level.getMinBuildHeight() + 4 || y >= level.getMaxBuildHeight() - 8) continue;
+            if (y <= level.getMinBuildHeight() + 3 || y >= level.getMaxBuildHeight() - 8) continue;
             BlockPos top = new BlockPos(x, y - 1, z);
             BlockState ground = level.getBlockState(top);
             if (!level.getFluidState(top).isEmpty() || !level.getFluidState(top.above()).isEmpty()) continue;

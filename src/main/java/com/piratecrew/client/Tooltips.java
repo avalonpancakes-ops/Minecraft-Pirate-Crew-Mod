@@ -26,6 +26,9 @@ public class Tooltips {
             {"tidesteel", 0x7AF0E8, 0x1F6670, false}, {"abyssal", 0xC9A0FF, 0x4B2C8C, false},
             {"krakenbone", 0xFF8AC4, 0x8A3A6A, true}, {"stormforged", 0xFFE85A, 0x8A6A00, true},
             {"leviathan", 0x7AF0FF, 0x146A78, true}, {"sovereign", 0xFFE070, 0xA0281E, true},
+            {"broadside_cutlass", 0xFFB050, 0x7A3A10, true}, {"krakens_grasp", 0x7AF0D8, 0x6A2A5A, true},
+            {"stormcaller", 0xFFF07A, 0x2E4478, true}, {"leviathans_fang", 0xC8FFF4, 0x0E5A66, true},
+            {"iron_tide", 0xFF6070, 0x7A1018, true},
             {"ruby", 0xFF5A6A, 0x8A1020, false}, {"raw_ruby", 0xFF5A6A, 0x8A1020, false},
     };
 

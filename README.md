@@ -229,6 +229,12 @@ Ruby gear is the starting point. Each new tier is crafted from its ingot, in the
 
 - A full Sovereign set is **65 armor**. The vanilla armor cap of 30 is lifted, and armor above 20 now keeps reducing damage. With 30 armor you take 80% of what you'd take at 20; full Leviathan takes about 56%, full Sovereign about 47%.
 - **Full-set bonuses** (all four armor pieces of one tier, for players and crew pirates): Tidesteel, Water Breathing; Abyssal, Night Vision; Krakenbone, Dolphin's Grace and Water Breathing; Stormforged, Speed and Jump Boost; Leviathan, Conduit Power and Dolphin's Grace; Sovereign, Strength, Fire Resistance and Regeneration.
+- **Legendary weapons**: each boss sometimes drops its own unique, animated blade. The chance is 20% (25% for Vane), and Looting raises it.
+  - **Broadside Cutlass** (Commodore Graves): every third hit fires a burst that hurts all foes around the target.
+  - **Kraken's Grasp** (the Kraken): hits drag foes toward you and slow them; sometimes ink blinds them.
+  - **Stormcaller** (Sorel): 1 in 4 hits calls lightning on the target, which arcs to another foe.
+  - **Leviathan's Fang** (the Leviathan): hits leave a withering wound. In water, each hit heals you and holding it grants Conduit Power.
+  - **The Iron Tide** (Fleet Admiral Vane): use it to send out a shockwave that hurls every foe around you back. 8-second cooldown.
 - Abyssal and later gear is fireproof, and every piece adds a little knockback resistance (a full Sovereign set is immune to knockback).
 
 **Bosses**
