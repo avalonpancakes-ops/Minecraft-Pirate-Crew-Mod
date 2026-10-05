@@ -36,6 +36,15 @@ minecraft {
         server {
             args '--nogui'
         }
+
+        // CI check: start a server, generate Sundered Sea terrain, spawn the mod's mobs, then stop.
+        smokeTest {
+            parent runs.server
+            taskName 'runSmokeTest'
+            args '--nogui'
+            property 'piratecrew.smoketest', 'true'
+            property 'forge.logging.console.level', 'info'
+        }
     }
 }
 

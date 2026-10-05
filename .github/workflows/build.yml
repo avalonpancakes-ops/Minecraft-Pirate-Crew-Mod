@@ -29,6 +29,16 @@ jobs:
           set -o pipefail
           ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log
 
+      # Start a real server once: it loads every dimension, generates Sundered Sea terrain and
+      # spawns the mod's mobs (see debug/SmokeTest.java), catching broken data the compiler can't.
+      - name: Smoke test
+        run: |
+          mkdir -p run
+          echo "eula=true" > run/eula.txt
+          printf "online-mode=false\nspawn-protection=0\nmax-tick-time=-1\n" > run/server.properties
+          timeout 1500 ./gradlew runSmokeTest --no-daemon 2>&1 | tee smoke.log || true
+          grep -q "PIRATECREW SMOKETEST OK" smoke.log
+
       # If the build fails, publish the errors as a "build-log" release so they can be read
       # without downloading the full Actions log.
       - name: Publish build errors
@@ -38,7 +48,9 @@ jobs:
         run: |
           { echo "Build failed for commit ${GITHUB_SHA::7}"; echo; echo '```';
             grep -E "error:|warning: \[|\.java:[0-9]+|FAILURE|What went wrong|> " build.log | head -150;
-            echo '```'; echo; echo "Last lines:"; echo '```'; tail -60 build.log; echo '```'; } > errors.md
+            echo '```'; echo; echo "Last lines:"; echo '```'; tail -60 build.log; echo '```';
+            if [ -f smoke.log ]; then echo; echo "Smoke test:"; echo '```';
+              grep -E "PIRATECREW|ERROR|Exception|Caused by|at com\.piratecrew|Failed to|Couldn't" smoke.log | head -120; echo '```'; fi; } > errors.md
           gh release delete build-log --yes --cleanup-tag || true
           gh release create build-log --title "Last failed build" --notes-file errors.md --prerelease --target "$GITHUB_SHA"
 
