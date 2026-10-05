@@ -47,9 +47,9 @@ public class BountyBoardScreen extends Screen {
         top = Math.max(2, (height - H) / 2);
         int by = top + H - FOOTER + 4;
         prev = addRenderableWidget(Button.builder(Component.literal("<"), b -> { page--; update(); })
-                .bounds(left + PAD, by, 20, 16).build());
+                .bounds(left + PAD, by, 20, 16).build(PirateButton::new));
         next = addRenderableWidget(Button.builder(Component.literal(">"), b -> { page++; update(); })
-                .bounds(left + W - PAD - 20, by, 20, 16).build());
+                .bounds(left + W - PAD - 20, by, 20, 16).build(PirateButton::new));
         update();
     }
 

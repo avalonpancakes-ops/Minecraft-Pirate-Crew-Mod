@@ -57,14 +57,14 @@ public class TaskScreen extends Screen {
             };
             addRenderableWidget(Button.builder(Component.literal(label), b -> choose(c.cmd()))
                     .tooltip(Tooltip.create(Component.literal(c.task().description)))
-                    .bounds(left + 34, y, W - 46, 20).build());
+                    .bounds(left + 34, y, W - 46, 20).build(PirateButton::new));
             y += 24;
         }
         addRenderableWidget(Button.builder(Component.literal("Stop Working").withStyle(ChatFormatting.RED), b -> choose(PirateCommandPacket.Command.TASK_STOP))
                 .tooltip(Tooltip.create(Component.literal("Stop the current job and follow you")))
-                .bounds(left + 12, y + 4, 84, 20).build());
+                .bounds(left + 12, y + 4, 84, 20).build(PirateButton::new));
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose())
-                .bounds(left + W - 96, y + 4, 84, 20).build());
+                .bounds(left + W - 96, y + 4, 84, 20).build(PirateButton::new));
     }
 
     private void choose(PirateCommandPacket.Command cmd) {

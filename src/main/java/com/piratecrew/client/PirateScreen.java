@@ -36,11 +36,11 @@ public class PirateScreen extends AbstractContainerScreen<PirateMenu> {
         super.init();
         int bx = leftPos + 100, by = topPos + 60;
         follow = addRenderableWidget(Button.builder(Component.literal("Follow"), b -> send(PirateCommandPacket.Command.FOLLOW))
-                .bounds(bx, by, 35, 16).build());
+                .bounds(bx, by, 35, 16).build(PirateButton::new));
         hold = addRenderableWidget(Button.builder(Component.literal("Hold"), b -> send(PirateCommandPacket.Command.HOLD))
-                .bounds(bx + 36, by, 35, 16).build());
+                .bounds(bx + 36, by, 35, 16).build(PirateButton::new));
         wander = addRenderableWidget(Button.builder(Component.literal("Roam"), b -> send(PirateCommandPacket.Command.WANDER))
-                .bounds(bx, by + 17, 35, 16).build());
+                .bounds(bx, by + 17, 35, 16).build(PirateButton::new));
         dismiss = addRenderableWidget(Button.builder(Component.literal("Dismiss"), b -> {
             if (!confirmDismiss) {
                 confirmDismiss = true;
@@ -48,10 +48,10 @@ public class PirateScreen extends AbstractContainerScreen<PirateMenu> {
             } else {
                 send(PirateCommandPacket.Command.DISMISS);
             }
-        }).bounds(bx + 36, by + 17, 35, 16).build());
+        }).bounds(bx + 36, by + 17, 35, 16).build(PirateButton::new));
         tasks = addRenderableWidget(Button.builder(Component.literal("Tasks..."), b -> openTasks())
                 .tooltip(Tooltip.create(Component.literal("Send this pirate to mine, farm, fish or chop wood")))
-                .bounds(bx, by + 34, 71, 16).build());
+                .bounds(bx, by + 34, 71, 16).build(PirateButton::new));
     }
 
     private void send(PirateCommandPacket.Command cmd) {

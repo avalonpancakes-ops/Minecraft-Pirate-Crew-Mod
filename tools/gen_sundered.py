@@ -113,7 +113,7 @@ def main():
             write(os.path.join(A, f"models/item/{name}.json"),
                   {"parent": "minecraft:item/handheld" if handheld else "minecraft:item/generated",
                    "textures": {"layer0": f"piratecrew:item/{name}"}})
-            recolour_red(f"item/ruby_{piece}.png", f"item/{name}.png", pal)
+            # item texture: drawn by gen_gear_art.py
             lang[f"item.piratecrew.{name}"] = f"{TIER_NAMES[t]} {pname}"
         recolour_red("models/armor/ruby_layer_1.png", f"models/armor/{t}_layer_1.png", pal)
         recolour_red("models/armor/ruby_layer_2.png", f"models/armor/{t}_layer_2.png", pal)
@@ -136,7 +136,7 @@ def main():
     for name, (eng, pal, src) in MATERIALS.items():
         write(os.path.join(A, f"models/item/{name}.json"),
               {"parent": "minecraft:item/generated", "textures": {"layer0": f"piratecrew:item/{name}"}})
-        recolour_red(src, f"item/{name}.png", PALETTES[pal])
+        # item texture: drawn by gen_item_art.py
         lang[f"item.piratecrew.{name}"] = eng
 
     # ---- ores

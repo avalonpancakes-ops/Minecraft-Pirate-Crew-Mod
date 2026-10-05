@@ -29,10 +29,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Built-in resource pack that gives Sundered Sea materials their own shapes by recolouring the
- * player's own vanilla textures while the game loads (an iron ingot becomes a tidesteel ingot, a bone
- * a kraken bone...). Nothing from Minecraft ships in the jar; if a vanilla texture can't be read, the
- * texture bundled in the mod is used instead.
+ * Built-in resource pack that skins the Kraken and the Leviathan by recolouring the player's own
+ * vanilla squid and elder guardian textures while the game loads (their models use vanilla's UV
+ * layouts). Nothing from Minecraft ships in the jar; if a vanilla texture can't be read, the texture
+ * bundled in the mod is used instead.
  */
 public class SunderedTexturesPack implements PackResources {
     private static final String ID = "piratecrew_sundered_textures";
@@ -62,28 +62,7 @@ public class SunderedTexturesPack implements PackResources {
     }
 
     static {
-        item("raw_tidesteel", "item/raw_iron", TIDESTEEL);
-        item("tidesteel_ingot", "item/iron_ingot", TIDESTEEL);
-        item("abyssal_shard", "item/amethyst_shard", ABYSSAL);
-        item("abyssal_ingot", "item/netherite_ingot", ABYSSAL);
-        item("kraken_bone", "item/bone", KRAKENBONE);
-        item("krakenbone_ingot", "item/iron_ingot", KRAKENBONE);
-        item("stormglass_shard", "item/prismarine_crystals", STORMFORGED);
-        item("storm_core", "item/heart_of_the_sea", STORMFORGED);
-        item("stormforged_ingot", "item/gold_ingot", STORMFORGED);
-        item("leviathan_scale", "item/scute", LEVIATHAN);
-        item("leviathan_ingot", "item/netherite_ingot", LEVIATHAN);
-        item("sovereign_heart", "item/nether_star", SOVEREIGN);
-        item("sovereign_ingot", "item/gold_ingot", SOVEREIGN);
-        item("marine_badge", "item/gold_nugget", MARINE);
-        item("commodore_insignia", "item/emerald", SOVEREIGN);
-        item("siren_conch", "item/nautilus_shell", SIREN);
-        item("signal_flare", "item/firework_rocket", MARINE);
-        item("kraken_lure", "item/ink_sac", KRAKEN);
-        item("storm_sigil", "item/ender_eye", STORMFORGED);
-        item("leviathan_horn", "item/goat_horn", LEVIATHAN);
-        item("admirals_warrant", "item/map", SOVEREIGN);
-        tex("block/siren_portal", "block/nether_portal", PORTAL);
+        // Items and the portal have their own hand-drawn textures; only the giant sea beasts reuse vanilla shapes.
         tex("entity/kraken", "entity/squid/squid", KRAKEN);
         tex("entity/leviathan", "entity/guardian_elder", LEVIATHAN);
     }

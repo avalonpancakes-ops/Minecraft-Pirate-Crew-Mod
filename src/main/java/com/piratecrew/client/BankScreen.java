@@ -79,22 +79,22 @@ public class BankScreen extends Screen {
 
         addRenderableWidget(Button.builder(Component.literal("Shop").withStyle(ChatFormatting.GOLD), b -> minecraft.setScreen(new ShopScreen()))
                 .tooltip(Tooltip.create(Component.literal("Buy items with rubies")))
-                .bounds(left + W - 54, top + 5, 46, 16).build());
+                .bounds(left + W - 54, top + 5, 46, 16).build(PirateButton::new));
 
         int y = top + 81;
         int bw = 44, gap = 4, x0 = left + 12;
-        addRenderableWidget(Button.builder(Component.literal("+1"), b -> send(true, 1)).bounds(x0, y, bw, 18).build());
-        addRenderableWidget(Button.builder(Component.literal("+10"), b -> send(true, 10)).bounds(x0 + (bw + gap), y, bw, 18).build());
-        addRenderableWidget(Button.builder(Component.literal("+64"), b -> send(true, 64)).bounds(x0 + 2 * (bw + gap), y, bw, 18).build());
+        addRenderableWidget(Button.builder(Component.literal("+1"), b -> send(true, 1)).bounds(x0, y, bw, 18).build(PirateButton::new));
+        addRenderableWidget(Button.builder(Component.literal("+10"), b -> send(true, 10)).bounds(x0 + (bw + gap), y, bw, 18).build(PirateButton::new));
+        addRenderableWidget(Button.builder(Component.literal("+64"), b -> send(true, 64)).bounds(x0 + 2 * (bw + gap), y, bw, 18).build(PirateButton::new));
         addRenderableWidget(Button.builder(Component.literal("All").withStyle(ChatFormatting.GREEN), b -> send(true, -1))
-                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build());
+                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build(PirateButton::new));
 
         y = top + 113;
-        addRenderableWidget(Button.builder(Component.literal("-1"), b -> send(false, 1)).bounds(x0, y, bw, 18).build());
-        addRenderableWidget(Button.builder(Component.literal("-10"), b -> send(false, 10)).bounds(x0 + (bw + gap), y, bw, 18).build());
-        addRenderableWidget(Button.builder(Component.literal("-64"), b -> send(false, 64)).bounds(x0 + 2 * (bw + gap), y, bw, 18).build());
+        addRenderableWidget(Button.builder(Component.literal("-1"), b -> send(false, 1)).bounds(x0, y, bw, 18).build(PirateButton::new));
+        addRenderableWidget(Button.builder(Component.literal("-10"), b -> send(false, 10)).bounds(x0 + (bw + gap), y, bw, 18).build(PirateButton::new));
+        addRenderableWidget(Button.builder(Component.literal("-64"), b -> send(false, 64)).bounds(x0 + 2 * (bw + gap), y, bw, 18).build(PirateButton::new));
         addRenderableWidget(Button.builder(Component.literal("Max").withStyle(ChatFormatting.GOLD), b -> send(false, -1))
-                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build());
+                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build(PirateButton::new));
 
         y = top + 141;
         amountBox = new EditBox(font, x0, y + 1, 80, 16, Component.literal("Amount"));
@@ -102,8 +102,8 @@ public class BankScreen extends Screen {
         amountBox.setFilter(s -> s.isEmpty() || s.matches("\\d+"));
         amountBox.setHint(Component.literal("Amount...").withStyle(ChatFormatting.DARK_GRAY));
         addRenderableWidget(amountBox);
-        addRenderableWidget(Button.builder(Component.literal("Deposit"), b -> sendAmount(true)).bounds(x0 + 84, y, 52, 18).build());
-        addRenderableWidget(Button.builder(Component.literal("Withdraw"), b -> sendAmount(false)).bounds(x0 + 140, y, 56, 18).build());
+        addRenderableWidget(Button.builder(Component.literal("Deposit"), b -> sendAmount(true)).bounds(x0 + 84, y, 52, 18).build(PirateButton::new));
+        addRenderableWidget(Button.builder(Component.literal("Withdraw"), b -> sendAmount(false)).bounds(x0 + 140, y, 56, 18).build(PirateButton::new));
 
         // Loans
         borrowButtons.clear();
@@ -116,25 +116,25 @@ public class BankScreen extends Screen {
             if (i == 2) label = Component.literal(String.valueOf(amt)).withStyle(ChatFormatting.GOLD);
             borrowButtons.add(addRenderableWidget(Button.builder(label, b -> loan(BankActionPacket.Action.BORROW, amt))
                     .tooltip(Tooltip.create(Component.literal("Borrow " + amt + " rubies, repay " + previewOwed(amt))))
-                    .bounds(x0 + i * (bw + gap), y, bw, 18).build()));
+                    .bounds(x0 + i * (bw + gap), y, bw, 18).build(PirateButton::new)));
         }
         borrowButtons.add(addRenderableWidget(Button.builder(Component.literal("Typed"), b -> {
                     long n = typedAmount();
                     if (n > 0) loan(BankActionPacket.Action.BORROW, Math.min(n, loanMax));
                 }).tooltip(Tooltip.create(Component.literal("Borrow the amount typed in the box above (up to " + loanMax + ")")))
-                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build()));
+                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build(PirateButton::new)));
 
         repayButtons.add(addRenderableWidget(Button.builder(Component.literal("10"), b -> loan(BankActionPacket.Action.REPAY, 10))
-                .tooltip(Tooltip.create(Component.literal("Repay 10 rubies from your bank balance"))).bounds(x0, y, bw, 18).build()));
+                .tooltip(Tooltip.create(Component.literal("Repay 10 rubies from your bank balance"))).bounds(x0, y, bw, 18).build(PirateButton::new)));
         repayButtons.add(addRenderableWidget(Button.builder(Component.literal("64"), b -> loan(BankActionPacket.Action.REPAY, 64))
-                .tooltip(Tooltip.create(Component.literal("Repay 64 rubies from your bank balance"))).bounds(x0 + (bw + gap), y, bw, 18).build()));
+                .tooltip(Tooltip.create(Component.literal("Repay 64 rubies from your bank balance"))).bounds(x0 + (bw + gap), y, bw, 18).build(PirateButton::new)));
         repayButtons.add(addRenderableWidget(Button.builder(Component.literal("All").withStyle(ChatFormatting.GREEN), b -> loan(BankActionPacket.Action.REPAY, -1))
-                .tooltip(Tooltip.create(Component.literal("Repay as much as your bank balance covers"))).bounds(x0 + 2 * (bw + gap), y, bw, 18).build()));
+                .tooltip(Tooltip.create(Component.literal("Repay as much as your bank balance covers"))).bounds(x0 + 2 * (bw + gap), y, bw, 18).build(PirateButton::new)));
         repayButtons.add(addRenderableWidget(Button.builder(Component.literal("Typed"), b -> {
                     long n = typedAmount();
                     if (n > 0) loan(BankActionPacket.Action.REPAY, n);
                 }).tooltip(Tooltip.create(Component.literal("Repay the amount typed in the box above")))
-                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build()));
+                .bounds(x0 + 3 * (bw + gap), y, bw, 18).build(PirateButton::new)));
         updateLoanButtons();
     }
 

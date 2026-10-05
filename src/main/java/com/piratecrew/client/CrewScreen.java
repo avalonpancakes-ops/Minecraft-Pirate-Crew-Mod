@@ -93,15 +93,15 @@ public class CrewScreen extends Screen {
         nameBox.setHint(Component.literal("Crew name...").withStyle(ChatFormatting.DARK_GRAY));
         addRenderableWidget(nameBox);
         addRenderableWidget(Button.builder(Component.literal("Create Crew"), b -> send(Action.CREATE, nameBox.getValue(), null))
-                .bounds(left + 176, top + 51, 74, 20).build());
+                .bounds(left + 176, top + 51, 74, 20).build(PirateButton::new));
 
         int y = top + 106;
         for (int i = 0; i < Math.min(5, d.invites.size()); i++) {
             CrewSyncPacket.InviteInfo inv = d.invites.get(i);
             addRenderableWidget(Button.builder(Component.literal("Accept").withStyle(ChatFormatting.GREEN), b -> send(Action.ACCEPT, "", inv.crewId()))
-                    .bounds(left + 146, y + i * 20, 50, 18).build());
+                    .bounds(left + 146, y + i * 20, 50, 18).build(PirateButton::new));
             addRenderableWidget(Button.builder(Component.literal("Decline"), b -> send(Action.DECLINE, "", inv.crewId()))
-                    .bounds(left + 200, y + i * 20, 50, 18).build());
+                    .bounds(left + 200, y + i * 20, 50, 18).build(PirateButton::new));
         }
     }
 
@@ -180,10 +180,10 @@ public class CrewScreen extends Screen {
             addRenderableWidget(Button.builder(Component.literal("Invite"), b -> {
                 send(Action.INVITE, inviteBox.getValue(), null);
                 inviteBox.setValue("");
-            }).bounds(left + 138, y1 - 1, 52, 20).build());
+            }).bounds(left + 138, y1 - 1, 52, 20).build(PirateButton::new));
             addRenderableWidget(Button.builder(Component.literal("Set Icon"), b -> send(Action.SET_ICON, "", null))
                     .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal("Uses the item in your main hand as the crew icon")))
-                    .bounds(left + 194, y1 + 1, 56, 16).build());
+                    .bounds(left + 194, y1 + 1, 56, 16).build(PirateButton::new));
         }
         if (captain) {
             renameBox = new EditBox(font, left + 10, y2, 124, 18, Component.literal("New name"));
@@ -192,15 +192,15 @@ public class CrewScreen extends Screen {
             renameBox.setHint(Component.literal("Rename crew...").withStyle(ChatFormatting.DARK_GRAY));
             addRenderableWidget(renameBox);
             addRenderableWidget(Button.builder(Component.literal("Rename"), b -> send(Action.RENAME, renameBox.getValue(), null))
-                    .bounds(left + 138, y2 - 1, 52, 20).build());
+                    .bounds(left + 138, y2 - 1, 52, 20).build(PirateButton::new));
             addRenderableWidget(Button.builder(Component.literal("Disband").withStyle(ChatFormatting.RED), b -> {
                 if (confirm("disband", b)) send(Action.DISBAND, "", null);
-            }).bounds(left + 194, y2 - 1, 56, 20).build());
+            }).bounds(left + 194, y2 - 1, 56, 20).build(PirateButton::new));
         }
     }
 
     private Button small(String label, int x, int y, int w, Button.OnPress press) {
-        return Button.builder(Component.literal(label), press).bounds(x, y + 1, w, 14).build();
+        return Button.builder(Component.literal(label), press).bounds(x, y + 1, w, 14).build(PirateButton::new);
     }
 
     // ------------------------------------------------------------------ rendering
@@ -211,7 +211,7 @@ public class CrewScreen extends Screen {
         GuiDraw.panel(g, left, top, W, H);
         CrewSyncPacket d = ClientCrewData.get();
         if (d == null) {
-            g.drawCenteredString(font, "Loading crew...", left + W / 2, top + H / 2, 0xFFFFFF);
+            g.drawString(font, "Loading crew...", left + W / 2 - font.width("Loading crew...") / 2, top + H / 2, GuiDraw.TEXT, false);
         } else if (d.hasCrew) {
             renderCrew(g, d, mouseX, mouseY);
         } else {
@@ -315,7 +315,8 @@ public class CrewScreen extends Screen {
         }
 
         int pages = Math.max(1, (d.members.size() + ROWS - 1) / ROWS);
-        g.drawCenteredString(font, (page + 1) + "/" + pages, left + 52, top + PAGER_Y + 3, 0xFFFFFF);
+        String pg = (page + 1) + "/" + pages;
+        g.drawString(font, pg, left + 52 - font.width(pg) / 2, top + PAGER_Y + 3, GuiDraw.TEXT, false);
 
         // Hovering a member's name shows their bounty and kills
         for (int i = 0; i < ROWS; i++) {

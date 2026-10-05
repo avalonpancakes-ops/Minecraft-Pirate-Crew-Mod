@@ -41,14 +41,14 @@ public class ShopScreen extends Screen {
         left = (width - W) / 2;
         top = (height - H) / 2;
         addRenderableWidget(Button.builder(Component.literal("Bank"), b -> minecraft.setScreen(new BankScreen()))
-                .bounds(left + W - 54, top + 5, 46, 16).build());
+                .bounds(left + W - 54, top + 5, 46, 16).build(PirateButton::new));
         tabButtons.clear();
         ShopCatalog.Category[] cats = ShopCatalog.Category.values();
         int tw = (W - 20) / cats.length;
         for (int i = 0; i < cats.length; i++) {
             ShopCatalog.Category c = cats[i];
             tabButtons.add(addRenderableWidget(Button.builder(Component.literal(c.label), b -> selectTab(c))
-                    .bounds(left + 10 + i * tw, top + 40, tw - 1, 16).build()));
+                    .bounds(left + 10 + i * tw, top + 40, tw - 1, 16).build(PirateButton::new)));
         }
         selectTab(tab);
     }
