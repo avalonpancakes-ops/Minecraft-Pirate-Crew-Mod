@@ -223,7 +223,7 @@ Each boss has a boss bar and telegraphed special attacks: flames, sparks or ink 
 | # | Boss | Health | Summoned with (recipe) | Fights with | Drops |
 |---|---|---|---|---|---|
 | 1 | **Commodore Graves** | 600 | Signal Flare (7 marine badges + gunpowder + tidesteel ingot) | Abyssal Sharpness III cutlass and shield. Calls cannon broadsides on you. Leaps in with a crushing landing. Calls marines at 2/3 and 1/3 health, and enrages. | Kraken Lure, Commodore's Insignia, abyssal shards, tidesteel, badges, rubies, 25% Soul Pact. Bounty +150 |
-| 2 | **The Kraken** | 1000 | Kraken Lure (insignia + 4 abyssal shards + 2 tropical fish + ink sac) | A ship-sized kraken with eight rippling tentacles and two feeding arms that hunts from below. Tentacle slams, a blinding ink cloud, a tentacle that drags you off boats and shores, geysers. Below half health: a whirlpool. | Storm Sigil, 8–14 kraken bones, abyssal ingots, ink, rubies, 30% Soul Pact. Bounty +250 |
+| 2 | **The Kraken** | 1000 | Kraken Lure (insignia + 4 abyssal shards + 2 tropical fish + ink sac) | A ship-sized kraken with eight rippling tentacles and two feeding arms that hunts from below. Tentacle slams, a blinding ink cloud, a tentacle that drags you off boats and shores, geysers. Below half health: a whirlpool. | Storm Sigil, 8–14 kraken bones, abyssal ingots, ink, rubies, 50% the Kraken's Lullaby disc, 30% Soul Pact. Bounty +250 |
 | 3 | **Tempest Admiral Sorel** | 1600 | Storm Sigil (4 kraken bones + 4 stormglass + eye of ender) | Krakenbone Sharpness IV cutlass and multishot crossbow. Marked lightning strikes, a wind gust that throws you into the air, blinks behind archers. Below half health: a thunderstorm where lightning keeps falling on everyone, plus riflemen and sergeants. | Leviathan Horn, 4–7 storm cores, stormglass, krakenbone ingots, rubies, 35% Soul Pact. Bounty +400 |
 | 4 | **The Leviathan** | 2800 | Leviathan Horn (4 storm cores + 4 prismarine crystals + nautilus shell) | A horned sea serpent the size of a ship. Its beam charges faster as it weakens. Tail slam up close, whirlpool pull, geysers, and guardian broods at 75/50/25%. | Admiral's Warrant, 8–14 leviathan scales, stormforged ingots, heart of the sea, prismarine, rubies, 40% Soul Pact. Bounty +800 |
 | 5 | **Fleet Admiral Vane, the Iron Tide** | 4500 | Admiral's Warrant (4 leviathan scales + 4 badges + insignia) | Sovereign Sharpness V / Fire Aspect II cutlass. Phase 1: dash strikes that cut through everything in a line, plus cannon fire. Phase 2 (below 2/3): two marine captains join and the whole fleet opens fire. Phase 3 (below 1/3): the Iron Tide, with resistance, speed, strength, ground-shaking shockwaves and lightning. | 3–5 sovereign hearts, leviathan ingots, netherite, 100+ rubies, a **guaranteed** Soul Pact. Bounty +1500 |
@@ -279,6 +279,10 @@ Every sound and particle below is original, made from scratch by the scripts in 
   - a title card when you arrive.
 - **Soul Pact particles**: embers (Ember), frost shards (Frost), storm sparks (Tempest and Sorel's lightning), shadow wisps (Shadow and Gravity), blood drops (Blood) and golden glyphs when a pact binds.
 - Boss-tier swords and axes (Krakenbone and up) are held larger than normal weapons.
+- **Music discs** for any jukebox:
+  - **Drunken Sailor**: the traditional shanty, played on concertina and fiddle with stomps and claps. Bank shop, 30 rubies.
+  - **The Ruby Jig**: an original jig. Bank shop, 30 rubies.
+  - **The Kraken's Lullaby**: an original slow waltz. Dropped by the Kraken.
 
 ### Commands
 - `/crew` — open the crew screen

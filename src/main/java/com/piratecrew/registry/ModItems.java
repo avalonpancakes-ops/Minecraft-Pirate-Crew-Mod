@@ -188,6 +188,14 @@ public class ModItems {
     public static final RegistryObject<Item> CAPTAINS_LOG = ITEMS.register("captains_log",
             () -> new com.piratecrew.item.CaptainsLogItem(new Item.Properties()));
 
+    // Music discs (synthesized by tools/gen_discs.py). Lengths in ticks match the recordings.
+    public static final RegistryObject<Item> DISC_SAILOR = ITEMS.register("music_disc_sailor",
+            () -> new RecordItem(4, ModSounds.DISC_SAILOR, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 102 * 20));
+    public static final RegistryObject<Item> DISC_JIG = ITEMS.register("music_disc_jig",
+            () -> new RecordItem(7, ModSounds.DISC_JIG, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 107 * 20));
+    public static final RegistryObject<Item> DISC_KRAKEN = ITEMS.register("music_disc_kraken",
+            () -> new RecordItem(11, ModSounds.DISC_KRAKEN, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC), 116 * 20));
+
     public static final RegistryObject<Item> AGGRO_STICK = ITEMS.register("aggro_stick",
             () -> new com.piratecrew.item.AggroStickItem(new Item.Properties()));
 

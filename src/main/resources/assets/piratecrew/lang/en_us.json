@@ -133,5 +133,11 @@
   "subtitles.piratecrew.boss_horn": "War horn blares",
   "subtitles.piratecrew.pact_bind": "Soul Pact binds",
   "subtitles.piratecrew.coins": "Coins clink",
-  "subtitles.piratecrew.sea_additions": "Gulls and creaking timbers"
+  "subtitles.piratecrew.sea_additions": "Gulls and creaking timbers",
+  "item.piratecrew.music_disc_sailor": "Music Disc",
+  "item.piratecrew.music_disc_sailor.desc": "Pirate Crew - Drunken Sailor (traditional)",
+  "item.piratecrew.music_disc_jig": "Music Disc",
+  "item.piratecrew.music_disc_jig.desc": "Pirate Crew - The Ruby Jig",
+  "item.piratecrew.music_disc_kraken": "Music Disc",
+  "item.piratecrew.music_disc_kraken.desc": "Pirate Crew - The Kraken's Lullaby"
 }

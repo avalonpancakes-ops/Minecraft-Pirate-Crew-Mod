@@ -98,5 +98,29 @@
         "stream": true
       }
     ]
+  },
+  "disc_sailor": {
+    "sounds": [
+      {
+        "name": "piratecrew:disc_sailor",
+        "stream": true
+      }
+    ]
+  },
+  "disc_jig": {
+    "sounds": [
+      {
+        "name": "piratecrew:disc_jig",
+        "stream": true
+      }
+    ]
+  },
+  "disc_kraken": {
+    "sounds": [
+      {
+        "name": "piratecrew:disc_kraken",
+        "stream": true
+      }
+    ]
   }
 }

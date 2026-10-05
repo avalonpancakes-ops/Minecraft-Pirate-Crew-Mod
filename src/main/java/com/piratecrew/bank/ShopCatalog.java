@@ -140,6 +140,8 @@ public class ShopCatalog {
                 .add(Items.EXPERIENCE_BOTTLE, 16, 20)
                 .add(Items.NAUTILUS_SHELL, 1, 10)
                 .add(Items.HEART_OF_THE_SEA, 1, 80)
+                .addMod(() -> com.piratecrew.registry.ModItems.DISC_SAILOR.get(), 1, 30)
+                .addMod(() -> com.piratecrew.registry.ModItems.DISC_JIG.get(), 1, 30)
                 .addMod(() -> com.piratecrew.registry.ModItems.SIREN_CONCH.get(), 1, 1000);
 
         entries = Collections.unmodifiableList(l);

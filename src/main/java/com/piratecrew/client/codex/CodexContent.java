@@ -99,7 +99,18 @@ public class CodexContent {
                         "",
                         "If one kills you, the bank takes what you owe from your bounty, then your account, then your most valuable items."),
                 e("Corpses", "What you leave behind", icon(Items.SKELETON_SKULL),
-                        "When you die your items stay on your §7corpse§r. Only you can loot it for 2 minutes; after that, anyone can.")
+                        "When you die your items stay on your §7corpse§r. Only you can loot it for 2 minutes; after that, anyone can."),
+                with(e("Sea Shanties", "Music for the voyage", icon(ModItems.DISC_SAILOR),
+                        "Three music discs for any jukebox:",
+                        "",
+                        "§cDrunken Sailor§r - the old shanty on concertina and fiddle, with stomps and claps. §6Bank shop§r, 30 rubies.",
+                        "",
+                        "§6The Ruby Jig§r - a quick jig for dancing on deck. §6Bank shop§r, 30 rubies.",
+                        "",
+                        "§dThe Kraken's Lullaby§r - a slow waltz from the deep. Only the §5Kraken§r drops it.",
+                        "",
+                        "In a §6boss fight§r a battle theme takes over the music, and the Sundered Sea has its own waves and gulls."),
+                        ModItems.DISC_SAILOR, ModItems.DISC_JIG, ModItems.DISC_KRAKEN)
         )));
 
         out.add(new Section("THE SUNDERED SEA", 0x3FD6D0, List.of(
@@ -149,7 +160,7 @@ public class CodexContent {
                         "",
                         "§6Summon:§r Kraken Lure (insignia + 4 abyssal shards + 2 tropical fish + ink sac) over deep water.",
                         "",
-                        "§6Drops:§r Storm Sigil, 8-14 kraken bones. Bounty +250."),
+                        "§6Drops:§r Storm Sigil, 8-14 kraken bones, often the §dKraken's Lullaby§r disc. Bounty +250."),
                         ModItems.STORM_SIGIL, ModItems.KRAKEN_BONE, ModItems.ABYSSAL_INGOT, () -> Items.INK_SAC),
                 with(e("Tempest Admiral Sorel", "1,600 health · Storm Sigil", icon(ModItems.STORM_SIGIL),
                         "Lightning marked a heartbeat before it lands, a wind gust that throws you skyward, and a blink that puts her behind archers. Below half health the sky turns to §9storm§r.",
