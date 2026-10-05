@@ -83,11 +83,18 @@ public class SmokeTest {
             renderMap(sea);
             // Marines and an outpost on the first flat island ground found.
             net.minecraft.core.BlockPos outpost = null;
-            for (int x = -180; x <= 180 && outpost == null; x += 12) {
-                for (int z = -180; z <= 180 && outpost == null; z += 12) {
+            int tried = 0;
+            for (int x = -240; x <= 240 && outpost == null && tried < 40; x += 16) {
+                for (int z = -240; z <= 240 && outpost == null && tried < 40; z += 16) {
+                    var rough = sea.getChunk(x >> 4, z >> 4, ChunkStatus.SURFACE, true);
+                    int h = rough.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x & 15, z & 15);
+                    if (h <= sea.getSeaLevel() + 3) continue;
+                    tried++;
+                    for (int cx = (x - 8) >> 4; cx <= (x + 8) >> 4; cx++) for (int cz = (z - 8) >> 4; cz <= (z + 8) >> 4; cz++) sea.getChunk(cx, cz);
                     outpost = com.piratecrew.sundered.SunderedStructures.flatIslandGround(sea, x, z, 7);
                 }
             }
+            PirateCrew.LOGGER.info("PIRATECREW SMOKETEST checked {} island spots for an outpost", tried);
             if (outpost != null) {
                 com.piratecrew.sundered.OutpostBuilder.build(sea, outpost);
                 int marines = sea.getEntitiesOfClass(com.piratecrew.entity.MarineEntity.class, new net.minecraft.world.phys.AABB(outpost).inflate(16)).size();
