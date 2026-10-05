@@ -150,6 +150,23 @@ public class CommonEvents {
         }
     }
 
+    /** Voyage goals for digging up treasure and playing a shanty. */
+    @SubscribeEvent
+    public static void rightClickBlock(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer sp)) return;
+        var level = event.getLevel();
+        var pos = event.getPos();
+        var item = event.getItemStack().getItem();
+        if (level.getBlockState(pos).is(net.minecraft.world.level.block.Blocks.JUKEBOX) && item instanceof net.minecraft.world.item.RecordItem) {
+            var key = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);
+            if (key != null && key.getNamespace().equals(PirateCrew.MODID)) com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.SHANTY);
+        }
+        if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chest && chest.hasCustomName()
+                && chest.getCustomName() != null && "Buried Treasure".equals(chest.getCustomName().getString())) {
+            com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.TREASURE);
+        }
+    }
+
     @SubscribeEvent
     public static void entityJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
         com.piratecrew.compat.ValkyrienPiratesCompat.onJoin(event);

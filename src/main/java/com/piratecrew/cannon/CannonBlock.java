@@ -65,6 +65,7 @@ public class CannonBlock extends HorizontalDirectionalBlock {
         if (!held.is(ModItems.CANNONBALL.get())) return InteractionResult.PASS;
         if (!level.isClientSide) {
             fire((ServerLevel) level, pos, state, player);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.CANNON);
             if (!player.getAbilities().instabuild) held.shrink(1);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);

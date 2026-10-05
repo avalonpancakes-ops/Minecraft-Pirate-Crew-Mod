@@ -135,6 +135,10 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **No escaping through portals:** if you go to the Nether or the End (or any other dimension), the collectors follow you a few seconds later and turn up nearby.
 - **No escaping by logging off:** collectors leave 30 seconds after you log out, but if you come back the same Minecraft day, the same collectors come straight back after you.
 
+### The Jolly Roger
+- A skull-and-crossbones **banner pattern**. Craft it from paper, a bone and an ink sac, then use it at a loom on any banner or shield.
+- Raider camps fly a white Jolly Roger on black.
+
 ### Captain's Tricorn
 - A wearable three-cornered hat with its own 3D model: felt, gold piping, a ruby band and a skull badge.
 - It's a light helmet: 2 armor points, and it enchants well.
@@ -286,7 +290,7 @@ Soul Pacts are found in Pact Shrines (always), sometimes in outpost chests, from
 
 ### The Captain's Log, Voyage Goals and HUD
 - **Captain's Log** (press **J**, or use the book — every player gets one on their first visit; craft more from a book and a ruby): an animated night-chart guidebook to the whole mod. Sections for the pirate's life, the Sundered Sea, the Order of the Tide, every boss (summons, attacks, drops), all ten Soul Pacts and all six gear tiers, with item strips you can hover.
-- **Voyage Goals**: 24 milestones from your first ruby to defeating Fleet Admiral Vane and sailing with an Emperor crew. The Log's Voyage page shows your progress; reaching one pops a **Goal Complete!** toast.
+- **Voyage Goals**: 28 milestones, from your first ruby to defeating Fleet Admiral Vane, sailing with an Emperor crew, firing a cannon and digging up buried treasure. The Log's Voyage page shows your progress; reaching one pops a **Goal Complete!** toast.
 - **Toasts**: a WANTED toast when your bounty rises, a rank-up toast when a crew pirate climbs a tier, and a Boss Defeated toast for everyone who fought.
 - **Bosses** arrive with a title (name and epithet) and have their own rope-and-brass boss bars.
 - **Soul Pact badge** beside the hotbar: your pact's scroll, a draining shadow and seconds while the power recharges, a glow when it's ready, dark blue in water.

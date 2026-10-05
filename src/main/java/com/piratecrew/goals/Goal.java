@@ -33,7 +33,12 @@ public enum Goal {
     SOVEREIGN("Sovereign", "Wear a full set of Sovereign armor", () -> new ItemStack(ModItems.GEAR.get(GearTier.SOVEREIGN).chestplate().get())),
     SSS("Monster of the Deep", "Raise a crew pirate to SSS tier", () -> new ItemStack(Items.WITHER_SKELETON_SKULL)),
     BOUNTY_10000("Legend of the Seas", "Reach a bounty of 10,000 rubies", () -> new ItemStack(Items.NETHER_STAR)),
-    EMPEROR("Emperor of the Sea", "Sail with one of the Four Emperors", () -> new ItemStack(Items.GOLDEN_HELMET));
+    EMPEROR("Emperor of the Sea", "Sail with one of the Four Emperors", () -> new ItemStack(Items.GOLDEN_HELMET)),
+    // added later: keep new goals at the end so saved progress keeps its bits
+    CANNON("Fire in the Hole!", "Fire a ship's cannon", () -> new ItemStack(ModItems.CANNON.get())),
+    TREASURE("X Marks the Spot", "Dig up a buried treasure chest", () -> new ItemStack(ModItems.TREASURE_MAP.get())),
+    LEGENDARY("Legendary", "Hold a legendary boss weapon", () -> ModItems.legend(com.piratecrew.item.LegendaryWeaponItem.Legend.STORMCALLER)),
+    SHANTY("Sing Me a Shanty", "Play a Pirate Crew disc in a jukebox", () -> new ItemStack(ModItems.DISC_SAILOR.get()));
 
     public final String title, description;
     public final Supplier<ItemStack> icon;

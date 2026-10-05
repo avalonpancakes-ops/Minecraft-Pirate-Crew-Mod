@@ -81,6 +81,10 @@ public class CampBuilder {
         BlockPos pole = c.offset(4, 0, 5);
         for (int y = 0; y < 4; y++) level.setBlock(pole.above(y), Blocks.OAK_FENCE.defaultBlockState(), flags | Block.UPDATE_NEIGHBORS);
         level.setBlock(pole.above(4), Blocks.BLACK_BANNER.defaultBlockState(), flags);
+        if (level.getBlockEntity(pole.above(4)) instanceof net.minecraft.world.level.block.entity.BannerBlockEntity banner) {
+            banner.fromItem(com.piratecrew.registry.ModBannerPatterns.jollyRogerBanner(), net.minecraft.world.item.DyeColor.BLACK);
+            banner.setChanged();
+        }
 
         // Lanterns on posts.
         for (BlockPos post : new BlockPos[]{c.offset(-4, 0, -3), c.offset(4, 0, -3)}) {

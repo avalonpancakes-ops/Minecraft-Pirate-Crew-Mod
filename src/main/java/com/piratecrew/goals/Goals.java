@@ -78,5 +78,6 @@ public class Goals {
                 && p.getItemBySlot(EquipmentSlot.LEGS).is(set.leggings().get()) && p.getItemBySlot(EquipmentSlot.FEET).is(set.boots().get())) {
             grant(p, Goal.SOVEREIGN);
         }
+        if (p.getMainHandItem().getItem() instanceof com.piratecrew.item.LegendaryWeaponItem) grant(p, Goal.LEGENDARY);
     }
 }

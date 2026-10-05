@@ -205,6 +205,9 @@ public class ModItems {
         return new ItemStack(LEGENDS.get(l).get());
     }
 
+    public static final RegistryObject<Item> JOLLY_ROGER_PATTERN = ITEMS.register("jolly_roger_pattern",
+            () -> new BannerPatternItem(ModBannerPatterns.JOLLY_ROGER_ITEM_TAG, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+
     public static final RegistryObject<Item> TRICORN = ITEMS.register("tricorn",
             () -> new com.piratecrew.item.TricornItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
 
