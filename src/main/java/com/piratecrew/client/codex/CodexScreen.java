@@ -275,10 +275,67 @@ public class CodexScreen extends Screen {
         return w - SIDEBAR_W - 22;
     }
 
+    // ------------------------------------------------------------------ living portraits of the foes
+
+    private record Portrait(java.util.function.Supplier<? extends net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>> type, int scale) {}
+
+    private static final java.util.Map<String, Portrait> PORTRAITS = java.util.Map.of(
+            "Commodore Graves", new Portrait(com.piratecrew.registry.ModEntities.COMMODORE, 26),
+            "The Kraken", new Portrait(com.piratecrew.registry.ModEntities.KRAKEN, 8),
+            "Tempest Admiral Sorel", new Portrait(com.piratecrew.registry.ModEntities.TEMPEST_ADMIRAL, 25),
+            "The Leviathan", new Portrait(com.piratecrew.registry.ModEntities.LEVIATHAN, 5),
+            "Fleet Admiral Vane", new Portrait(com.piratecrew.registry.ModEntities.FLEET_ADMIRAL, 22),
+            "Marines", new Portrait(com.piratecrew.registry.ModEntities.MARINE, 30));
+    private final java.util.Map<String, net.minecraft.world.entity.LivingEntity> portraitCache = new java.util.HashMap<>();
+
+    private net.minecraft.world.entity.LivingEntity portrait(String title) {
+        Portrait p = PORTRAITS.get(title);
+        if (p == null || minecraft == null || minecraft.level == null) return null;
+        return portraitCache.computeIfAbsent(title, k -> {
+            var e = p.type().get().create(minecraft.level);
+            if (e instanceof com.piratecrew.entity.boss.MarineBossEntity b) b.setupBoss();
+            else if (e instanceof com.piratecrew.entity.MarineEntity m) m.setupMarine(com.piratecrew.entity.MarineEntity.Rank.CAPTAIN);
+            return e;
+        });
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        for (var e : portraitCache.values()) if (e != null) e.tickCount++;
+    }
+
+    private void drawPortrait(GuiGraphics g, net.minecraft.world.entity.LivingEntity mob, int x, int y, int w, int h, float t, int scale) {
+        g.fill(x, y, x + w, y + h, 0xFF0A1620);
+        g.fill(x, y, x + w, y + 1, 0xFFC8901E);
+        g.fill(x, y + h - 1, x + w, y + h, 0xFF8A6420);
+        g.fill(x, y, x + 1, y + h, 0xFFC8901E);
+        g.fill(x + w - 1, y, x + w, y + h, 0xFF8A6420);
+        float spin = (t * 1.2F) % 360F;
+        mob.yBodyRot = spin;
+        mob.yBodyRotO = spin;
+        mob.setYRot(spin);
+        mob.yHeadRot = spin;
+        mob.yHeadRotO = spin;
+        mob.setXRot(0);
+        org.joml.Quaternionf pose = new org.joml.Quaternionf().rotateZ((float) Math.PI);
+        org.joml.Quaternionf cam = new org.joml.Quaternionf().rotateX(12F * Mth.DEG_TO_RAD);
+        pose.mul(cam);
+        g.enableScissor(x + 1, y + 1, x + w - 1, y + h - 1);
+        net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventory(g, x + w / 2, y + h - 10, scale, pose, cam, mob);
+        g.disableScissor();
+    }
+
     private void drawEntry(GuiGraphics g, float t) {
         var sec = CodexContent.sections().get(section);
         var e = sec.entries().get(entry);
         int x = pageX(), y0 = top + HEADER_H + 6, pw = pageW(), ph = h - HEADER_H - 14;
+        var mob = portrait(e.title());
+        if (mob != null) {
+            int bw = 84, bh = ph - 50;
+            drawPortrait(g, mob, x + pw - bw, y0 + 46, bw, bh, t, PORTRAITS.get(e.title()).scale());
+            pw -= bw + 6;
+        }
         // big bobbing icon in a brass ring
         int ix = x, iy = y0 + 2 + Math.round(Mth.sin(t * 0.12F) * 1.5F);
         ring(g, x - 2, y0, 38, t, 0xFF000000 | sec.color());
@@ -294,7 +351,7 @@ public class CodexScreen extends Screen {
         g.drawString(font, Component.literal(e.title()).withStyle(ChatFormatting.BOLD), 0, 0, 0xFFFFF0C8, true);
         g.pose().popPose();
         g.drawString(font, e.subtitle(), x + 44, y0 + 22, 0xFF000000 | sec.color(), false);
-        GuiDraw.rope(g, x, y0 + 38, pw);
+        GuiDraw.rope(g, x, y0 + 38, pageW());
         int by = y0 + 50;
         if (!e.items().isEmpty()) {
             for (int i = 0; i < e.items().size(); i++) {

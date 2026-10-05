@@ -87,6 +87,8 @@ public class ClientShots {
         STEPS.add(new Step("", 40, ClientShots::makeCrew));
         STEPS.add(new Step("crew_full", 40, mc -> mc.setScreen(new CrewScreen())));
         STEPS.add(new Step("pirate_gear", 40, ClientShots::openGear));
+        STEPS.add(new Step("codex_portrait", 40, mc -> CodexScreen.openAt(3, 4, false)));
+        STEPS.add(new Step("codex_portrait_kraken", 40, mc -> CodexScreen.openAt(3, 1, false)));
         STEPS.add(new Step("armor_lineup", 120, mc -> lineup(mc, true)));
         STEPS.add(new Step("boss_lineup", 120, mc -> lineup(mc, false)));
         STEPS.add(new Step("sea_beasts", 120, ClientShots::beasts));
