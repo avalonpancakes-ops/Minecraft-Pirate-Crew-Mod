@@ -135,6 +135,11 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **No escaping through portals:** if you go to the Nether or the End (or any other dimension), the collectors follow you a few seconds later and turn up nearby.
 - **No escaping by logging off:** collectors leave 30 seconds after you log out, but if you come back the same Minecraft day, the same collectors come straight back after you.
 
+### Captain's Tricorn
+- A wearable three-cornered hat with its own 3D model: felt, gold piping, a ruby band and a skull badge.
+- It's a light helmet: 2 armor points, and it enchants well.
+- Craft it from leather, gold ingot, leather over leather, a gap, leather.
+
 ### Ship's cannons
 - **Ship's Cannon**: 3 iron ingots over log, gunpowder, log. It faces the way you're looking when you place it.
 - **Cannonballs**: iron ingot + gunpowder makes 4. You can also buy both in the bank shop.

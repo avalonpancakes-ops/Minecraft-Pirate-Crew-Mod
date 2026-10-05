@@ -144,5 +144,6 @@
   "block.piratecrew.cannon": "Ship's Cannon",
   "item.piratecrew.cannonball": "Cannonball",
   "entity.piratecrew.cannonball": "Cannonball",
-  "subtitles.piratecrew.cannon_fire": "Cannon fires"
+  "subtitles.piratecrew.cannon_fire": "Cannon fires",
+  "item.piratecrew.tricorn": "Captain's Tricorn"
 }

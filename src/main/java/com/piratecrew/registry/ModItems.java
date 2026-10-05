@@ -190,6 +190,9 @@ public class ModItems {
     public static final RegistryObject<Item> CAPTAINS_LOG = ITEMS.register("captains_log",
             () -> new com.piratecrew.item.CaptainsLogItem(new Item.Properties()));
 
+    public static final RegistryObject<Item> TRICORN = ITEMS.register("tricorn",
+            () -> new com.piratecrew.item.TricornItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
+
     public static final RegistryObject<Item> TREASURE_MAP = ITEMS.register("treasure_map",
             () -> new com.piratecrew.item.TreasureMapItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
 

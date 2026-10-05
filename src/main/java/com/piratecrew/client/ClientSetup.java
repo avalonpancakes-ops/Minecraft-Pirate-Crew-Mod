@@ -66,6 +66,7 @@ public class ClientSetup {
         public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) {
             event.registerLayerDefinition(com.piratecrew.client.model.KrakenModel.LAYER, com.piratecrew.client.model.KrakenModel::createBodyLayer);
             event.registerLayerDefinition(com.piratecrew.client.model.LeviathanModel.LAYER, com.piratecrew.client.model.LeviathanModel::createBodyLayer);
+            event.registerLayerDefinition(com.piratecrew.client.model.TricornModel.LAYER, com.piratecrew.client.model.TricornModel::createLayer);
         }
 
         @SubscribeEvent

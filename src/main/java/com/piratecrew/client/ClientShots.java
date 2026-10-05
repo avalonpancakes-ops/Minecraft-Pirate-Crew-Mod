@@ -135,7 +135,18 @@ public class ClientShots {
             for (int i = 0; i < 3; i++) {
                 level.setBlock(new BlockPos(18 + i * 2, g, -38), ModBlocks.CANNON.get().defaultBlockState().setValue(com.piratecrew.cannon.CannonBlock.FACING, dirs[i]), 3);
             }
-            look(sp, level, 20.5, g + 1.2, -33.5, 180F, 18F);
+            var stand = net.minecraft.world.entity.EntityType.ARMOR_STAND.create(level);
+            if (stand != null) {
+                stand.moveTo(16.5, g, -37.5, 0F, 0F);
+                stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(ModItems.TRICORN.get()));
+                level.addFreshEntity(stand);
+            }
+            var cap = place(level, ModEntities.PIRATE.get(), 24.5, g, -37.5, 0F);
+            if (cap != null) {
+                cap.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new ItemStack(ModItems.TRICORN.get()));
+                cap.setNoAi(true);
+            }
+            look(sp, level, 20.5, g + 1.4, -33.5, 180F, 10F);
         })));
         STEPS.add(new Step("portal", 80, ClientShots::portal));
         STEPS.add(new Step("outpost", 120, mc -> structure(mc, 0)));

@@ -70,11 +70,12 @@ public class TreasureMapItem extends Item {
             int d = 250 + r.nextInt(400);
             int x = from.getX() + (int) (Math.cos(ang) * d), z = from.getZ() + (int) (Math.sin(ang) * d);
             level.getChunk(x >> 4, z >> 4);
-            int y = level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z);
-            if (y <= level.getSeaLevel() || y >= level.getMaxBuildHeight() - 8) continue;
+            // WORLD_SURFACE counts water, so the top block is water at sea and ground on land
+            int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+            if (y <= level.getMinBuildHeight() + 4 || y >= level.getMaxBuildHeight() - 8) continue;
             BlockPos top = new BlockPos(x, y - 1, z);
             BlockState ground = level.getBlockState(top);
-            if (!level.getFluidState(top.above()).isEmpty()) continue;
+            if (!level.getFluidState(top).isEmpty() || !level.getFluidState(top.above()).isEmpty()) continue;
             if (ground.is(BlockTags.SAND) || ground.is(BlockTags.DIRT) || ground.is(Blocks.GRAVEL)) return top;
         }
         return null;
