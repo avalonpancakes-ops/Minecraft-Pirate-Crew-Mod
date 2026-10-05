@@ -88,13 +88,19 @@ public class PirateScreen extends AbstractContainerScreen<PirateMenu> {
         PirateEntity p = menu.getPirate();
         if (p != null) {
             int cx = leftPos + 51, cy = topPos + 84;
+            boolean tag = p.isCustomNameVisible();
+            p.setCustomNameVisible(false);   // no floating name tag inside the portrait
             InventoryScreen.renderEntityInInventoryFollowsMouse(g, cx, cy, 30, (float) (cx - mouseX), (float) (cy - 50 - mouseY), p);
+            p.setCustomNameVisible(tag);
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, GuiDraw.TEXT, false);
+        // the name only, cut to fit (the full name carries tier and pact tags shown elsewhere)
+        PirateEntity named = menu.getPirate();
+        String title = named != null ? named.getPirateName() : this.title.getString();
+        g.drawString(this.font, this.font.plainSubstrByWidth(title, imageWidth - 16), this.titleLabelX, this.titleLabelY, GuiDraw.TEXT, false);
         g.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, GuiDraw.TEXT, false);
         g.drawString(this.font, "Pack", 8, PirateMenu.PACK_Y - 11, GuiDraw.TEXT, false);
 
@@ -105,7 +111,8 @@ public class PirateScreen extends AbstractContainerScreen<PirateMenu> {
         g.drawString(font, Component.literal(p.getTier().label).withStyle(p.getTier().color, ChatFormatting.BOLD)
                 .append(Component.literal(" " + style.label).withStyle(s -> s.withBold(false).withColor(styleColor(style)))), x, y, GuiDraw.TEXT, false);
         g.drawString(font, String.format("HP %.0f/%.0f", p.getHealth(), p.getMaxHealth()), x, y + 10, 0xFFAA0000, false);
-        g.drawString(font, String.format("Dmg %.1f  Arm %d", attackDamage(p), p.getArmorValue()), x, y + 20, GuiDraw.TEXT, false);
+        g.drawString(font, String.format("Dmg %.0f  Arm %d", attackDamage(p), p.getArmorValue()), x, y + 20, GuiDraw.TEXT, false);
+
         PirateTask task = p.getTask();
         String doing = p.getOrders() == PirateEntity.Orders.WORK ? task.label
                 : switch (p.getOrders()) { case FOLLOW -> "Following"; case HOLD -> "Holding"; default -> "Roaming"; };

@@ -21,6 +21,21 @@ PACTS = {
     "blood": ("Blood", 0xB4141E, [(0, -1), (-1, 0), (0, 0), (1, 0), (0, 1), (0, -1)]),
 }
 
+# 5x5 glyph inked on the parchment, per pact (X ink, Y highlight)
+GLYPHS = {
+    "ember": ["..X..", ".XX..", ".XXX.", "XXYXX", ".XYX."],
+    "tempest": ["...X.", "..X..", ".XXX.", "..X..", ".X..."],
+    "frost": ["X.X.X", ".XXX.", "XXYXX", ".XXX.", "X.X.X"],
+    "iron": ["XXXXX", "XYYYX", "XYYYX", ".XYX.", "..X.."],
+    "gale": [".XXX.", "X....", "X.XX.", "X...X", ".XXX."],
+    "shadow": [".XXX.", "XX...", "XX...", "XX...", ".XXX."],
+    "quake": ["..X..", ".XYX.", "XX.XX", "X.X.X", "XXXXX"],
+    "venom": ["X...X", "XX.XX", ".X.X.", ".X.X.", "..X.."],
+    "gravity": [".XXX.", "XYYYX", "XXXXX", "XYYYX", ".XXX."],
+    "blood": ["..X..", "..X..", ".XXX.", "XXYXX", ".XXX."],
+}
+INK = {"frost": 0x3A8AC0, "gale": 0x2E9A50, "iron": 0x5A6068}
+
 PAPER = [(118, 86, 50), (196, 160, 104), (226, 198, 142), (240, 220, 170)]
 ROLL = [(80, 54, 30), (150, 112, 66), (190, 150, 92)]
 
@@ -47,11 +62,6 @@ def draw(seal):
             put(x, y, PAPER[2] if (x + y) % 5 else PAPER[3])
         put(3, y, PAPER[1])
         put(12, y, PAPER[1])
-    # writing
-    for y in (5, 7):
-        for x in range(5, 11):
-            if (x * 3 + y) % 4:
-                put(x, y, PAPER[0])
     # rolled ends
     for y, (x0, x1) in ((2, (2, 13)), (13, (2, 13))):
         for x in range(x0, x1 + 1):
@@ -59,17 +69,16 @@ def draw(seal):
             put(x, y - 1 if y == 2 else y + 1, ROLL[1])
         put(x0, y, ROLL[0])
         put(x1, y, ROLL[0])
-    # wax seal with ribbon
+    # small wax seal with ribbon tails, low on the sheet
     c = rgb(seal)
-    cx, cy = 8, 10
-    for dy in range(-2, 3):
-        for dx in range(-2, 3):
-            if dx * dx + dy * dy <= 5:
-                put(cx + dx, cy + dy, shade(c, 0.7) if dx * dx + dy * dy >= 4 else c)
-    put(cx - 1, cy + 3, shade(c, 0.6))
-    put(cx + 1, cy + 3, shade(c, 0.6))
-    put(cx - 2, cy + 4, shade(c, 0.5))
-    put(cx + 2, cy + 4, shade(c, 0.5))
+    cx, cy = 8, 11
+    for dy in range(-1, 2):
+        for dx in range(-1, 2):
+            put(cx + dx, cy + dy, shade(c, 0.7) if abs(dx) + abs(dy) == 2 else c)
+    put(cx - 1, cy + 2, shade(c, 0.6))
+    put(cx + 1, cy + 2, shade(c, 0.6))
+    put(cx - 2, cy + 3, shade(c, 0.5))
+    put(cx + 2, cy + 3, shade(c, 0.5))
     return im, c, (cx, cy)
 
 
@@ -80,14 +89,28 @@ def main():
         im, c, (cx, cy) = draw(seal)
         px = im.load()
         light = tuple(min(255, int(v * 0.4 + 255 * 0.6)) for v in c)
-        for dx, dy in sigil:
-            if dx * dx + dy * dy <= 2:
-                px[cx + dx, cy + dy] = light + (255,)
+        ink = rgb(INK.get(pid, seal))
+        ink = shade(ink, 0.8)
+        glyph_px = []
+        for gy, row in enumerate(GLYPHS[pid]):
+            for gx, ch in enumerate(row):
+                if ch == ".":
+                    continue
+                px[6 + gx, 4 + gy] = (shade(ink, 1.5) if ch == "Y" else ink) + (255,)
+                glyph_px.append((6 + gx, 4 + gy))
+        px[cx, cy] = light + (255,)
+        # crisp dark outline around the whole scroll
+        dark = (40, 26, 14, 255)
+        edge = [(x, y) for y in range(16) for x in range(16) if px[x, y][3] == 0 and any(
+            0 <= x + dx < 16 and 0 <= y + dy < 16 and px[x + dx, y + dy][3] > 0 and px[x + dx, y + dy] != dark
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))]
+        for p in edge:
+            px[p] = dark
         item = f"soul_pact_{pid}"
         # animate: the wax seal breathes with light and a mote of soul-fire drifts up from it
         import math
         frames = []
-        seal_px = [(cx + dx, cy + dy) for dy in range(-2, 3) for dx in range(-2, 3) if dx * dx + dy * dy <= 5]
+        seal_px = [(cx + dx, cy + dy) for dy in range(-1, 2) for dx in range(-1, 2)] + glyph_px
         for f in range(16):
             fr = im.copy()
             fp = fr.load()
@@ -96,9 +119,6 @@ def main():
                 r0, g0, b0, a0 = px[x, y]
                 fp[x, y] = (min(255, int(r0 + (255 - r0) * 0.35 * k)), min(255, int(g0 + (255 - g0) * 0.35 * k)),
                             min(255, int(b0 + (255 - b0) * 0.35 * k)), a0)
-            my = cy - 3 - (f % 8)
-            if f < 8 and my >= 0 and fp[cx + (1 if f % 4 < 2 else 0), my][3] == 0 or (f < 8 and my >= 0):
-                fp[cx + (1 if f % 4 < 2 else 0), my] = light + (220,)
             frames.append(fr)
         anim = Image.new("RGBA", (16, 16 * len(frames)))
         for i, fr in enumerate(frames):

@@ -257,6 +257,15 @@ Soul Pacts are found in Pact Shrines (always), sometimes in outpost chests, from
   - If a pact pirate dies, its pact scroll drops so it isn't lost.
 - `/piratecrew clearpact` (op) frees your soul for testing.
 
+### The Captain's Log, Voyage Goals and HUD
+- **Captain's Log** (press **J**, or use the book — every player gets one on their first visit; craft more from a book and a ruby): an animated night-chart guidebook to the whole mod. Sections for the pirate's life, the Sundered Sea, the Order of the Tide, every boss (summons, attacks, drops), all ten Soul Pacts and all six gear tiers, with item strips you can hover.
+- **Voyage Goals**: 24 milestones from your first ruby to defeating Fleet Admiral Vane and sailing with an Emperor crew. The Log's Voyage page shows your progress; reaching one pops a **Goal Complete!** toast.
+- **Toasts**: a WANTED toast when your bounty rises, a rank-up toast when a crew pirate climbs a tier, and a Boss Defeated toast for everyone who fought.
+- **Bosses** arrive with a title (name and epithet) and have their own rope-and-brass boss bars.
+- **Soul Pact badge** beside the hotbar: your pact's scroll, a draining shadow and seconds while the power recharges, a glow when it's ready, dark blue in water.
+- **Showcase** (operators only): a page of one-click tools in the Log: full Sovereign kit, every set, all pacts and summon items, summon any boss, build a lit portal, jump to the Sundered Sea and back, build outposts/shrines/camps, call marines or raiders, heal, clear foes, set the time.
+- All the mod's screens (bank, shop, crew, pirate gear, tasks) use ship-plank frames, parchment pages and wooden buttons.
+
 ### Commands
 - `/crew` — open the crew screen
 - `/crew create <name>`, `/crew invite <player>`, `/crew leave`, `/crew disband`, `/crew icon`, `/crew emperors`
