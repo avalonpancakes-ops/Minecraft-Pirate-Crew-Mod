@@ -445,7 +445,9 @@ public class CrewManager {
         }
 
         CrewRole myRole = crew.roleOf(player.getUUID());
-        ModNetwork.sendTo(player, new CrewSyncPacket(open, true, crew.id, crew.name, crew.icon.copy(),
-                myRole == null ? 2 : myRole.ordinal(), Config.MAX_CREW_SIZE.get(), Config.MAX_REAL_PLAYERS.get(), members, invites));
+        CrewSyncPacket packet = new CrewSyncPacket(open, true, crew.id, crew.name, crew.icon.copy(),
+                myRole == null ? 2 : myRole.ordinal(), Config.MAX_CREW_SIZE.get(), Config.MAX_REAL_PLAYERS.get(), members, invites);
+        packet.emperorRank = EmperorManager.rankOf(crew.id);
+        ModNetwork.sendTo(player, packet);
     }
 }

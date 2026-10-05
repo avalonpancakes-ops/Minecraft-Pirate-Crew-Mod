@@ -97,6 +97,14 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Craft your own board: planks top and bottom, paper-ruby-paper in the middle.
 - The crew screen shows your crew's total bounty, and hovering a member shows theirs.
 
+### The Four Emperors of the Sea
+- A crew's **total bounty** is every member's bounty added up, players and pirates alike (shown at the top right of the crew screen).
+- The **4 crews with the highest total bounty** become the **Emperors of the Sea**, as long as they have at least **1,000 rubies** of combined bounty. The whole server is told when a crew claims a seat or is toppled from one. `/crew emperors` lists the current Emperors.
+- Every **player** in an Emperor crew has permanent **Strength I and Resistance I**. The **captain and vice captains** get **Strength III and Resistance II**.
+- The buffs go as soon as a player **leaves or is kicked** from the crew, or the crew is **overtaken** and drops out of the top four. They come back after death or drinking milk. A stronger potion still works, and the Emperor buff returns when it wears off.
+- Emperor crews get a **♛ Emperor #1-4** title next to their name in the crew screen (hover it for the perks).
+- The bounty needed and the number of Emperors are in the config (`emperorMinBounty`, `emperorCount`).
+
 ### Banks
 - Every village also gets **one bank**, a stone hall with a teller counter, built on its own spot at least 20 blocks from the bar so they never overlap. Villages you've already visited get theirs the next time you go there.
 - A **Banker** stands behind the counter of every bank (banks built before this update get one when you next visit). He can't be hurt, pushed or led away. Right-click him, or a **Bank Counter**, to open your account. Your balance is just a number (1,200, 1,700...), so rubies stop taking up inventory space.
@@ -145,7 +153,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 
 ### Commands
 - `/crew` — open the crew screen
-- `/crew create <name>`, `/crew invite <player>`, `/crew leave`, `/crew disband`, `/crew icon`
+- `/crew create <name>`, `/crew invite <player>`, `/crew leave`, `/crew disband`, `/crew icon`, `/crew emperors`
 - `/bank` — show your bank balance
 - `/piratecrew spawnbar` / `/piratecrew spawnbank` (op) — build a bar or bank in front of you
 - `/piratecrew spawnpirate <F|D|C|B|A|S>` (op) — spawn a pirate of a given tier

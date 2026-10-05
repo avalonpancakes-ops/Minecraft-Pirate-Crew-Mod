@@ -117,5 +117,6 @@ public class CommonEvents {
         LoanManager.tick(ServerLifecycleHooks.getCurrentServer());
         com.piratecrew.compat.ValkyrienPiratesCompat.tick(ServerLifecycleHooks.getCurrentServer());
         com.piratecrew.world.RaiderCampHandler.tick(ServerLifecycleHooks.getCurrentServer());
+        com.piratecrew.crew.EmperorManager.tick(ServerLifecycleHooks.getCurrentServer());
     }
 }

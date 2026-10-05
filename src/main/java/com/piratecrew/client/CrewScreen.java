@@ -246,6 +246,17 @@ public class CrewScreen extends Screen {
         GuiDraw.slot(g, left + 10, top + 9);
         g.renderItem(d.icon, left + 10, top + 9);
         g.drawString(font, Component.literal(d.crewName).withStyle(ChatFormatting.BOLD), left + 32, top + 9, 0xFF5A3A00, false);
+        if (d.emperorRank > 0) {
+            int nx = left + 32 + font.width(Component.literal(d.crewName).withStyle(ChatFormatting.BOLD)) + 5;
+            Component title = Component.literal("\u265B Emperor #" + d.emperorRank).withStyle(ChatFormatting.GOLD);
+            g.drawString(font, title, nx, top + 9, 0xFFC08000, false);
+            if (mouseX >= nx && mouseX < nx + font.width(title) && mouseY >= top + 8 && mouseY < top + 18) {
+                g.renderComponentTooltip(font, java.util.List.of(
+                        Component.literal("Emperor of the Sea #" + d.emperorRank).withStyle(ChatFormatting.GOLD),
+                        Component.literal("Every player: permanent Strength I and Resistance I").withStyle(ChatFormatting.GRAY),
+                        Component.literal("Captain and vice captains: Strength III and Resistance II").withStyle(ChatFormatting.GRAY)), mouseX, mouseY);
+            }
+        }
         long players = d.members.stream().filter(m -> !m.npc()).count();
         CrewRole me = CrewRole.byId(d.myRole);
         String counts = "Players " + players + "/" + d.maxPlayers + "   Crew " + d.members.size() + "/" + d.maxSize;

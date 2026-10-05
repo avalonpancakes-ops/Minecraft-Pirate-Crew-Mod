@@ -26,6 +26,8 @@ public class CrewSyncPacket {
     public final int maxPlayers;
     public final List<Member> members;
     public final List<InviteInfo> invites;
+    /** 1-4 if the crew is an Emperor of the Sea, else 0. */
+    public int emperorRank;
 
     public CrewSyncPacket(boolean openScreen, boolean hasCrew, UUID crewId, String crewName, ItemStack icon,
                           int myRole, int maxSize, int maxPlayers, List<Member> members, List<InviteInfo> invites) {
@@ -68,6 +70,7 @@ public class CrewSyncPacket {
             buf.writeUtf(i.crewName());
             buf.writeUtf(i.inviter());
         }
+        buf.writeVarInt(emperorRank);
     }
 
     public static CrewSyncPacket decode(FriendlyByteBuf buf) {
@@ -90,7 +93,9 @@ public class CrewSyncPacket {
         for (int i = 0; i < k; i++) {
             invites.add(new InviteInfo(buf.readUUID(), buf.readUtf(), buf.readUtf()));
         }
-        return new CrewSyncPacket(open, has, id, name, icon, role, maxSize, maxPlayers, members, invites);
+        CrewSyncPacket p = new CrewSyncPacket(open, has, id, name, icon, role, maxSize, maxPlayers, members, invites);
+        p.emperorRank = buf.readVarInt();
+        return p;
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {

@@ -41,6 +41,8 @@ public class CrewCommands {
                         .executes(c -> { CrewManager.disband(c.getSource().getPlayerOrException()); return 1; }))
                 .then(Commands.literal("icon")
                         .executes(c -> { CrewManager.setIconFromHand(c.getSource().getPlayerOrException()); return 1; }))
+                .then(Commands.literal("emperors")
+                        .executes(c -> { EmperorManager.list(c.getSource().getPlayerOrException()); return 1; }))
         );
 
         d.register(Commands.literal("bank").executes(c -> {
