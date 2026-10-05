@@ -28,10 +28,10 @@ public class SeaSky {
     private static final float R = 100F;
     /** centre angle, arc width, base elevation (blocks at R), height, phase. */
     private static final float[][] RIBBONS = {
-            {2.10F, 2.6F, 30F, 34F, 0.0F},
-            {4.40F, 2.2F, 44F, 26F, 1.7F},
-            {0.30F, 2.4F, 36F, 30F, 3.1F},
-            {3.20F, 1.6F, 58F, 20F, 4.6F},
+            {2.10F, 2.6F, 34F, 52F, 0.0F},
+            {4.40F, 2.2F, 48F, 40F, 1.7F},
+            {0.30F, 2.4F, 40F, 46F, 3.1F},
+            {3.20F, 1.6F, 66F, 30F, 4.6F},
     };
 
     @SubscribeEvent
@@ -62,7 +62,7 @@ public class SeaSky {
     }
 
     private static void ribbon(BufferBuilder bb, Matrix4f m, float[] r, float time, float strength) {
-        int segs = 64;
+        int segs = 128;
         float centre = r[0], arc = r[1], base = r[2], height = r[3], phase = r[4];
         for (int i = 0; i < segs; i++) {
             float u0 = i / (float) segs, u1 = (i + 1) / (float) segs;
@@ -76,9 +76,8 @@ public class SeaSky {
         float[] b = point(centre, arc, base, height, phase, time, u1);
         float edge0 = Mth.sin(u0 * Mth.PI), edge1 = Mth.sin(u1 * Mth.PI);
         // flickering curtains: brightness rolls along the ribbon
-        float f0 = 0.55F + 0.45F * Mth.sin(u0 * 23F + time * 1.3F + phase * 2F);
-        float f1 = 0.55F + 0.45F * Mth.sin(u1 * 23F + time * 1.3F + phase * 2F);
-        float a0 = 0.42F * strength * edge0 * f0, a1 = 0.42F * strength * edge1 * f1;
+        float f0 = streaks(u0, time, phase), f1 = streaks(u1, time, phase);
+        float a0 = 0.62F * strength * edge0 * f0, a1 = 0.62F * strength * edge1 * f1;
         // bottom: sea green; middle: teal; top: violet fading out
         bb.vertex(m, a[0], a[1], a[2]).color(0.25F, 1.0F, 0.62F, a0).endVertex();
         bb.vertex(m, b[0], b[1], b[2]).color(0.25F, 1.0F, 0.62F, a1).endVertex();
@@ -89,6 +88,13 @@ public class SeaSky {
         bb.vertex(m, b[0], b[3], b[2]).color(0.25F, 0.75F, 0.95F, a1 * 0.55F).endVertex();
         bb.vertex(m, b[0], b[4], b[2]).color(0.55F, 0.3F, 1.0F, 0F).endVertex();
         bb.vertex(m, a[0], a[4], a[2]).color(0.55F, 0.3F, 1.0F, 0F).endVertex();
+    }
+
+    /** Bright vertical rays that slide along the curtain, over a softer rolling glow. */
+    private static float streaks(float u, float time, float phase) {
+        float rays = Mth.sin(u * 71F + time * 0.9F + phase * 3F);
+        rays = rays * rays * rays * rays;
+        return 0.35F + 0.35F * (0.5F + 0.5F * Mth.sin(u * 17F + time * 1.3F + phase * 2F)) + 0.5F * rays;
     }
 
     /** x, bottom y, z, middle y, top y for a point along the ribbon. */

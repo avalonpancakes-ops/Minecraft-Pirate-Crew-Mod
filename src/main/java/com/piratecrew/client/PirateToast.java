@@ -15,12 +15,22 @@ public class PirateToast implements Toast {
     private final ItemStack icon;
     private final String title, detail;
     private final int color;
+    private final int width;
 
     public PirateToast(ItemStack icon, String title, String detail, int color) {
         this.icon = icon;
         this.title = title;
         this.detail = detail;
         this.color = 0xFF000000 | color;
+        // Wide enough for the text (within reason), never narrower than a vanilla toast.
+        Font font = Minecraft.getInstance().font;
+        int text = Math.max(font.width(Component.literal(title).withStyle(net.minecraft.ChatFormatting.BOLD)), font.width(detail));
+        this.width = Mth.clamp(text + 38, 160, 250);
+    }
+
+    @Override
+    public int width() {
+        return width;
     }
 
     public static void show(ItemStack icon, String title, String detail, int color) {

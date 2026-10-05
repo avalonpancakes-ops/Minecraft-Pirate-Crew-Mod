@@ -408,12 +408,8 @@ public class ClientShots {
                     new ItemStack(ModItems.SOUL_PACTS.get(com.piratecrew.pact.SoulPact.values()[0]).get()),
                     new ItemStack(ModItems.KRAKEN_LURE.get()),
             };
-            int x = 4;
-            for (int i = 0; i < stacks.length; i++) {
-                int y = i % 2 == 0 ? 10 : 150;
-                g.renderTooltip(font, stacks[i], x - 12, y + 12);
-                x = 4 + (i + 1) * (width / stacks.length);
-            }
+            int[][] at = {{0, 0}, {0, 100}, {width / 2, 0}, {0, 200}, {width / 2, 100}};
+            for (int i = 0; i < stacks.length; i++) g.renderTooltip(font, stacks[i], at[i][0] - 8, at[i][1] + 4);
         }
     }
 

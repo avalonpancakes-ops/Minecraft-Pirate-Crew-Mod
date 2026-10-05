@@ -266,6 +266,19 @@ Soul Pacts are found in Pact Shrines (always), sometimes in outpost chests, from
 - **Soul Pact badge** beside the hotbar: your pact's scroll, a draining shadow and seconds while the power recharges, a glow when it's ready, dark blue in water.
 - **Showcase** (operators only): a page of one-click tools in the Log: full Sovereign kit, every set, all pacts and summon items, summon any boss, build a lit portal, jump to the Sundered Sea and back, build outposts/shrines/camps, call marines or raiders, heal, clear foes, set the time.
 - All the mod's screens (bank, shop, crew, pirate gear, tasks) use ship-plank frames, parchment pages and wooden buttons.
+- **Tooltips** on mod items get frames in their tier's colours; boss-tier gear and Soul Pacts glint.
+
+### Sound, particles and atmosphere
+Every sound and particle below is original, made from scratch by the scripts in `tools/` (no game audio or art is reused).
+- **Sounds**: a ship's-bell chime for Voyage Goals, a harbour bell for bounty rises, a bugle when a crew pirate ranks up, a victory fanfare when a boss falls, a war horn when a boss is summoned on land, an eerie shimmer when a Soul Pact binds, and clinking coins at the bank.
+- **Boss theme**: an original battle loop (war drums, strings, brass) plays on the Music slider while a Pirate Crew boss bar is on screen. It fades out after the fight.
+- **The Sundered Sea**:
+  - waves to listen to, with gulls and creaking timbers now and then;
+  - glowing sea-motes drifting over the water, and embers over the Ember Isle;
+  - deeper skies, with ribbons of aurora rippling across the stars at night;
+  - a title card when you arrive.
+- **Soul Pact particles**: embers (Ember), frost shards (Frost), storm sparks (Tempest and Sorel's lightning), shadow wisps (Shadow and Gravity), blood drops (Blood) and golden glyphs when a pact binds.
+- Boss-tier swords and axes (Krakenbone and up) are held larger than normal weapons.
 
 ### Commands
 - `/crew` — open the crew screen

@@ -20,6 +20,7 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> COINS = reg("coins");
     public static final RegistryObject<SoundEvent> SEA_AMBIENT = reg("sea_ambient");
     public static final RegistryObject<SoundEvent> SEA_ADDITIONS = reg("sea_additions");
+    public static final RegistryObject<SoundEvent> BOSS_THEME = reg("boss_theme");
 
     private static RegistryObject<SoundEvent> reg(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(PirateCrew.MODID, name)));

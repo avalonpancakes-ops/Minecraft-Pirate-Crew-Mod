@@ -23,6 +23,7 @@ public class BossBars {
         var boss = event.getBossEvent();
         Component name = boss.getName();
         if (!name.getString().startsWith("☠")) return;
+        BossMusic.seen();
         event.setCanceled(true);
         event.setIncrement(26);
         GuiGraphics g = event.getGuiGraphics();

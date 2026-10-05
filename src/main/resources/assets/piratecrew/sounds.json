@@ -90,5 +90,13 @@
         "volume": 0.7
       }
     ]
+  },
+  "boss_theme": {
+    "sounds": [
+      {
+        "name": "piratecrew:boss_theme",
+        "stream": true
+      }
+    ]
   }
 }

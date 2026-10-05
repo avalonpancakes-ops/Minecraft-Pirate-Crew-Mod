@@ -65,7 +65,11 @@ public class SirenTeleporter {
             moved.setPortalCooldown();
             to.playSound(null, arrival, SoundEvents.CONDUIT_ACTIVATE, SoundSource.BLOCKS, 1.0F, 1.2F);
             if (moved instanceof ServerPlayer p && toSea) {
-                p.displayClientMessage(Component.literal("⚓ The Sundered Sea").withStyle(ChatFormatting.DARK_AQUA, ChatFormatting.BOLD), true);
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(20, 70, 30));
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+                        Component.literal("\u2693 Here be monsters, and treasure \u2693").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
+                p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(
+                        Component.literal("The Sundered Sea").withStyle(s -> s.withColor(0x5AE0D0).withBold(true))));
             }
         }
     }
