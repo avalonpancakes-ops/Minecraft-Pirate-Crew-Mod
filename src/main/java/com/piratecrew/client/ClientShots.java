@@ -103,6 +103,9 @@ public class ClientShots {
             PactHud.update(new com.piratecrew.network.PactSyncPacket("tempest", mc.level.getGameTime() + 120, 200));
         }));
         STEPS.add(new Step("portal", 80, ClientShots::portal));
+        STEPS.add(new Step("outpost", 120, mc -> structure(mc, 0)));
+        STEPS.add(new Step("shrine", 100, mc -> structure(mc, 1)));
+        STEPS.add(new Step("camp", 100, mc -> structure(mc, 2)));
         STEPS.add(new Step("", 60, ClientShots::sea));
         STEPS.add(new Step("sundered_sea", 400, ClientShots::hover));
     }
@@ -337,6 +340,26 @@ public class ClientShots {
             BlockPos at = SirenTeleporter.build(level, new BlockPos(0, ground - 1, -74));
             PirateCrew.LOGGER.info("PIRATECREW CLIENTSHOT portal built at {} (ground {}), block there: {}", at, ground, level.getBlockState(at));
             look(sp, level, at.getX() + 1.0, at.getY() + 1.6, at.getZ() - 7.5, 0F, 4F);
+        });
+    }
+
+    /** Build an outpost, a shrine or a raider camp out on the flat and look down on it. */
+    private static void structure(Minecraft mc, int which) {
+        mc.options.hideGui = true;
+        onServer(mc, sp -> {
+            ServerLevel level = sp.serverLevel();
+            int x = 200 + which * 60, z = 0;
+            int ground = ground(level, x, z);
+            for (int cx = (x - 16) >> 4; cx <= (x + 16) >> 4; cx++) for (int cz = (z - 16) >> 4; cz <= (z + 16) >> 4; cz++) level.getChunk(cx, cz);
+            BlockPos floor = new BlockPos(x, ground - 1, z);
+            switch (which) {
+                case 0 -> com.piratecrew.sundered.OutpostBuilder.build(level, floor);
+                case 1 -> com.piratecrew.sundered.ShrineBuilder.build(level, floor);
+                default -> com.piratecrew.world.CampBuilder.build(level, floor);
+            }
+            for (var e : level.getEntitiesOfClass(Mob.class, new net.minecraft.world.phys.AABB(floor).inflate(24))) e.setNoAi(true);
+            double d = which == 0 ? 17 : 12;
+            look(sp, level, x + 0.5, ground + d * 0.75, z - d, 0F, 35F);
         });
     }
 
