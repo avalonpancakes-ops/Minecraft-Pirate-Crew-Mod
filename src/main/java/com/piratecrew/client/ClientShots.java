@@ -78,6 +78,7 @@ public class ClientShots {
         }));
         STEPS.add(new Step("items_a", 120, mc -> { }));
         STEPS.add(new Step("items_b", 9, mc -> { }));
+        STEPS.add(new Step("tooltips", 20, mc -> mc.setScreen(new TooltipScreen())));
         // --- a world to look at
         STEPS.add(new Step("", 0, ClientShots::createWorld));
         STEPS.add(new Step("", 200, mc -> { }));   // let the world settle
@@ -112,6 +113,10 @@ public class ClientShots {
         STEPS.add(new Step("bank_building", 100, mc -> structure(mc, 4)));
         STEPS.add(new Step("", 60, ClientShots::sea));
         STEPS.add(new Step("sundered_sea", 400, ClientShots::hover));
+        STEPS.add(new Step("sea_night", 120, mc -> onServer(mc, sp -> {
+            sp.server.overworld().setDayTime(18000);
+            look(sp, sp.serverLevel(), 0.5, 110, 0.5, 30F, -14F);
+        })));
     }
 
     @SubscribeEvent
@@ -386,6 +391,31 @@ public class ClientShots {
     // ------------------------------------------------------------------ item gallery
 
     /** Every Pirate Crew item on parchment, for the screenshot. */
+    /** A row of item tooltips, to check the tier-coloured frames. */
+    public static class TooltipScreen extends Screen {
+        public TooltipScreen() {
+            super(Component.literal("Tooltips"));
+        }
+
+        @Override
+        public void render(GuiGraphics g, int mouseX, int mouseY, float partial) {
+            renderBackground(g);
+            ItemStack[] stacks = {
+                    new ItemStack(ModItems.GEAR.get(GearTier.TIDESTEEL).sword().get()),
+                    new ItemStack(ModItems.GEAR.get(GearTier.STORMFORGED).sword().get()),
+                    new ItemStack(ModItems.GEAR.get(GearTier.SOVEREIGN).sword().get()),
+                    new ItemStack(ModItems.SOUL_PACTS.get(com.piratecrew.pact.SoulPact.values()[0]).get()),
+                    new ItemStack(ModItems.KRAKEN_LURE.get()),
+            };
+            int x = 4;
+            for (int i = 0; i < stacks.length; i++) {
+                int y = i % 2 == 0 ? 10 : 150;
+                g.renderTooltip(font, stacks[i], x - 12, y + 12);
+                x = 4 + (i + 1) * (width / stacks.length);
+            }
+        }
+    }
+
     public static class GalleryScreen extends Screen {
         public GalleryScreen() {
             super(Component.literal("Gallery"));

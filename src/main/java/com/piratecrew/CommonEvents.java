@@ -158,8 +158,12 @@ public class CommonEvents {
                 && event.getEntity() instanceof com.piratecrew.entity.boss.BountyBoss boss
                 && event.getEntity() instanceof net.minecraft.world.entity.LivingEntity living) {
             level.getServer().execute(() -> {
-                var name = living.getDisplayName().copy().withStyle(s -> s.withColor(boss.ribbonColor()).withBold(true));
-                var sub = net.minecraft.network.chat.Component.literal(boss.epithet()).withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC);
+                // The skull glyph smears at title size, so it goes on the small epithet line instead.
+                var name = net.minecraft.network.chat.Component.literal(living.getDisplayName().getString().replace("\u2620", "").trim())
+                        .withStyle(s -> s.withColor(boss.ribbonColor()).withBold(true));
+                var sub = net.minecraft.network.chat.Component.literal("\u2620 ").withStyle(net.minecraft.ChatFormatting.DARK_RED)
+                        .append(net.minecraft.network.chat.Component.literal(boss.epithet()).withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC))
+                        .append(net.minecraft.network.chat.Component.literal(" \u2620").withStyle(net.minecraft.ChatFormatting.DARK_RED));
                 for (ServerPlayer sp : level.getPlayers(p -> p.distanceToSqr(living) < 80 * 80)) {
                     sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(10, 60, 20));
                     sp.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(sub));
