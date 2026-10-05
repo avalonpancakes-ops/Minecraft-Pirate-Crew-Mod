@@ -7,13 +7,14 @@
         {
           "type": "minecraft:item",
           "name": "piratecrew:ruby",
+          "weight": 1,
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 8,
-                "max": 24
+                "min": 40,
+                "max": 120
               }
             }
           ]
@@ -29,8 +30,23 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "piratecrew:tidesteel_ingot",
-          "weight": 8,
+          "name": "minecraft:gold_ingot",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 3,
+                "max": 9
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond",
+          "weight": 5,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -44,23 +60,23 @@
         },
         {
           "type": "minecraft:item",
-          "name": "piratecrew:raw_tidesteel",
+          "name": "minecraft:emerald",
           "weight": 8,
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 2,
-                "max": 5
+                "min": 3,
+                "max": 10
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "piratecrew:marine_badge",
-          "weight": 10,
+          "name": "piratecrew:tidesteel_ingot",
+          "weight": 8,
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -75,6 +91,21 @@
         {
           "type": "minecraft:item",
           "name": "piratecrew:abyssal_shard",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 5
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:abyssal_ingot",
           "weight": 3,
           "functions": [
             {
@@ -89,70 +120,30 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:iron_ingot",
-          "weight": 8,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 6
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:gunpowder",
-          "weight": 6,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 6
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:arrow",
-          "weight": 6,
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 8,
-                "max": 20
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:crossbow",
+          "name": "piratecrew:kraken_bone",
           "weight": 3,
           "functions": [
             {
-              "function": "minecraft:enchant_randomly"
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 5
+              }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:cooked_cod",
-          "weight": 6,
+          "name": "piratecrew:stormglass_shard",
+          "weight": 2,
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 3,
-                "max": 8
+                "min": 2,
+                "max": 4
               }
             }
           ]
@@ -160,22 +151,57 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_apple",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:book",
-          "weight": 3,
+          "weight": 4,
           "functions": [
             {
-              "function": "minecraft:enchant_randomly"
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond",
-          "weight": 2
+          "name": "minecraft:nautilus_shell",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:heart_of_the_sea",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:experience_bottle",
+          "weight": 6,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 4,
+                "max": 12
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_golden_apple",
+          "weight": 1
         }
       ]
     },
@@ -184,7 +210,22 @@
       "entries": [
         {
           "type": "minecraft:empty",
-          "weight": 190
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:music_disc_sailor",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:music_disc_jig",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "piratecrew:treasure_map",
+          "weight": 8
         },
         {
           "type": "minecraft:item",
@@ -235,20 +276,6 @@
           "type": "minecraft:item",
           "name": "piratecrew:soul_pact_blood",
           "weight": 1
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:empty",
-          "weight": 70
-        },
-        {
-          "type": "minecraft:item",
-          "name": "piratecrew:treasure_map",
-          "weight": 30
         }
       ]
     }

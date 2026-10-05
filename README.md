@@ -135,6 +135,14 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **No escaping through portals:** if you go to the Nether or the End (or any other dimension), the collectors follow you a few seconds later and turn up nearby.
 - **No escaping by logging off:** collectors leave 30 seconds after you log out, but if you come back the same Minecraft day, the same collectors come straight back after you.
 
+### Treasure maps
+- **Torn Treasure Maps** drop from raider camp chests (35%), marine outpost chests (30%) and always from Commodore Graves.
+- Using one unrolls a real map, with a red X over dry land 250 to 650 blocks away, and tells you the rough distance and direction.
+- The spot is marked by a small cross of coarse dirt or sandstone. Dig 3 blocks down to find a **Buried Treasure** chest:
+  - 40 to 120 rubies;
+  - gold, diamonds, emeralds and sea materials;
+  - sometimes a music disc, another map or a Soul Pact.
+
 ### Corpses
 - When a player dies, their items don't scatter on the ground: they stay on the player's **corpse**, which lies where they died wearing their skin, with a name tag. Chat tells you its coordinates.
 - For the first **2 minutes** only the dead player can loot it: **right-click the corpse** and everything comes back (armor straight back on if the slot is free) and the corpse disappears. Sneak + right-click opens it like a chest to pick items out instead.

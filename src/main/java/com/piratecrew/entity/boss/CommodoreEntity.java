@@ -90,6 +90,7 @@ public class CommodoreEntity extends MarineBossEntity {
     @Override
     protected void dropBossLoot(DamageSource source, int looting) {
         spawnAtLocation(new ItemStack(ModItems.KRAKEN_LURE.get()));
+        spawnAtLocation(new ItemStack(ModItems.TREASURE_MAP.get()));
         spawnAtLocation(new ItemStack(ModItems.COMMODORE_INSIGNIA.get(), 1 + random.nextInt(2)));
         spawnAtLocation(new ItemStack(ModItems.ABYSSAL_SHARD.get(), 4 + random.nextInt(5 + looting)));
         spawnAtLocation(new ItemStack(ModItems.TIDESTEEL_INGOT.get(), 3 + random.nextInt(4)));

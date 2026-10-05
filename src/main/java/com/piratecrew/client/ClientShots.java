@@ -106,6 +106,17 @@ public class ClientShots {
             held(mc, ModItems.GEAR.get(GearTier.STORMFORGED).sword());
             PactHud.update(new com.piratecrew.network.PactSyncPacket("tempest", mc.level.getGameTime() + 120, 200));
         }));
+        STEPS.add(new Step("treasure_map", 100, mc -> onServer(mc, sp -> {
+            ServerLevel level = sp.serverLevel();
+            ItemStack torn = new ItemStack(ModItems.TREASURE_MAP.get());
+            sp.getInventory().setItem(0, torn);
+            sp.getInventory().selected = 0;
+            var result = torn.use(level, sp, net.minecraft.world.InteractionHand.MAIN_HAND);
+            sp.getInventory().setItem(0, result.getObject());
+            PirateCrew.LOGGER.info("PIRATECREW CLIENTSHOT treasure map result: {}", result.getObject());
+            int ground = ground(level, 0, -40);
+            look(sp, level, 0.5, ground + 1.6, -40, 0F, 55F);
+        })));
         STEPS.add(new Step("portal", 80, ClientShots::portal));
         STEPS.add(new Step("outpost", 120, mc -> structure(mc, 0)));
         STEPS.add(new Step("shrine", 100, mc -> structure(mc, 1)));
