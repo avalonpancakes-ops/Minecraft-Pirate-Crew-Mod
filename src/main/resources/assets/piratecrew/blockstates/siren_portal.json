@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "piratecrew:block/siren_portal_ns"
+    },
+    "axis=z": {
+      "model": "piratecrew:block/siren_portal_ew"
+    }
+  }
+}

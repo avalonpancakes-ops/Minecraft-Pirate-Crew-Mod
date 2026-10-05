@@ -79,4 +79,15 @@ public class ModBlocks {
     public static final RegistryObject<Block> ABYSSAL_ORE = ore("abyssal_ore", MapColor.DEEPSLATE, 7.0F, SoundType.DEEPSLATE, 5, 10);
     /** Stormglass: Storm Isles only, abyssal pickaxe or better. */
     public static final RegistryObject<Block> STORMGLASS_ORE = ore("stormglass_ore", MapColor.STONE, 8.0F, SoundType.AMETHYST, 6, 12);
+
+    /** Inside a lit ruby frame: the way to (and from) the Sundered Sea. */
+    public static final RegistryObject<Block> SIREN_PORTAL = BLOCKS.register("siren_portal",
+            () -> new com.piratecrew.sundered.SirenPortalBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_CYAN)
+                    .noCollission()
+                    .strength(-1.0F)
+                    .sound(SoundType.GLASS)
+                    .lightLevel(s -> 11)
+                    .pushReaction(net.minecraft.world.level.material.PushReaction.BLOCK)
+                    .noLootTable()));
 }

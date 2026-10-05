@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "piratecrew:sundered_deep",
+      "required": false
+    },
+    {
+      "id": "piratecrew:sundered_shallows",
+      "required": false
+    }
+  ]
+}

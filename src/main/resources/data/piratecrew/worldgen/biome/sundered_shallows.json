@@ -1,0 +1,97 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.9,
+  "downfall": 0.5,
+  "effects": {
+    "mood_sound": {
+      "sound": "minecraft:ambient.cave",
+      "tick_delay": 6000,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "sky_color": 7907327,
+    "fog_color": 12638463,
+    "water_color": 3126704,
+    "water_fog_color": 671292
+  },
+  "spawners": {
+    "monster": [],
+    "creature": [],
+    "ambient": [],
+    "axolotls": [],
+    "underground_water_creature": [],
+    "water_creature": [
+      {
+        "type": "minecraft:dolphin",
+        "weight": 2,
+        "minCount": 1,
+        "maxCount": 2
+      },
+      {
+        "type": "minecraft:squid",
+        "weight": 4,
+        "minCount": 1,
+        "maxCount": 4
+      }
+    ],
+    "water_ambient": [
+      {
+        "type": "minecraft:tropical_fish",
+        "weight": 25,
+        "minCount": 8,
+        "maxCount": 8
+      },
+      {
+        "type": "minecraft:cod",
+        "weight": 10,
+        "minCount": 3,
+        "maxCount": 6
+      },
+      {
+        "type": "minecraft:pufferfish",
+        "weight": 5,
+        "minCount": 1,
+        "maxCount": 3
+      }
+    ],
+    "misc": []
+  },
+  "spawn_costs": {},
+  "carvers": {
+    "air": []
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:ore_dirt",
+      "minecraft:ore_gravel",
+      "minecraft:ore_coal_upper",
+      "minecraft:ore_coal_lower",
+      "minecraft:ore_iron_upper",
+      "minecraft:ore_iron_middle",
+      "minecraft:ore_gold",
+      "minecraft:ore_redstone",
+      "minecraft:ore_diamond",
+      "minecraft:ore_lapis",
+      "minecraft:ore_copper",
+      "piratecrew:ore_ruby_sea",
+      "piratecrew:ore_tidesteel",
+      "piratecrew:ore_abyssal"
+    ],
+    [],
+    [],
+    [
+      "minecraft:seagrass_warm",
+      "minecraft:sea_pickle",
+      "minecraft:warm_ocean_vegetation"
+    ],
+    [
+      "minecraft:freeze_top_layer"
+    ]
+  ]
+}

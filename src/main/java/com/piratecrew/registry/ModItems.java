@@ -140,6 +140,9 @@ public class ModItems {
                 ITEMS.register(t.id + "_axe", () -> new AxeItem(t.tier, 5.0F, -3.0F, props.get())));
     }
 
+    public static final RegistryObject<Item> SIREN_CONCH = ITEMS.register("siren_conch",
+            () -> new com.piratecrew.sundered.SirenConchItem(new Item.Properties()));
+
     public static final RegistryObject<Item> AGGRO_STICK = ITEMS.register("aggro_stick",
             () -> new com.piratecrew.item.AggroStickItem(new Item.Properties()));
 

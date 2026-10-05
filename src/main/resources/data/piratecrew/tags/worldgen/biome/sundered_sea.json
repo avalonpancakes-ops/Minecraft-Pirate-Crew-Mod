@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "piratecrew:sundered_deep",
+    "piratecrew:sundered_shallows",
+    "piratecrew:palm_isle",
+    "piratecrew:storm_isle",
+    "piratecrew:ember_isle"
+  ]
+}

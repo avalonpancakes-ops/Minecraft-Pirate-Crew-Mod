@@ -93,5 +93,7 @@
   "block.piratecrew.tidesteel_ore": "Tidesteel Ore",
   "block.piratecrew.deepslate_tidesteel_ore": "Deepslate Tidesteel Ore",
   "block.piratecrew.abyssal_ore": "Abyssal Ore",
-  "block.piratecrew.stormglass_ore": "Stormglass Ore"
+  "block.piratecrew.stormglass_ore": "Stormglass Ore",
+  "item.piratecrew.siren_conch": "Siren Conch",
+  "block.piratecrew.siren_portal": "Siren Portal"
 }

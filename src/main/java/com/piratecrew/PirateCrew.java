@@ -23,6 +23,7 @@ public class PirateCrew {
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
+        ModPoi.POI.register(modBus);
         ModMenus.MENUS.register(modBus);
         ModTabs.TABS.register(modBus);
 

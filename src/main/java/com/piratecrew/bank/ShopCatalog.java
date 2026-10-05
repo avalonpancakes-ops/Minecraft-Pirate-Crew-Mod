@@ -139,7 +139,8 @@ public class ShopCatalog {
                 .add(Items.ENDER_PEARL, 4, 12)
                 .add(Items.EXPERIENCE_BOTTLE, 16, 20)
                 .add(Items.NAUTILUS_SHELL, 1, 10)
-                .add(Items.HEART_OF_THE_SEA, 1, 80);
+                .add(Items.HEART_OF_THE_SEA, 1, 80)
+                .addMod(() -> com.piratecrew.registry.ModItems.SIREN_CONCH.get(), 1, 1000);
 
         entries = Collections.unmodifiableList(l);
     }
@@ -159,6 +160,11 @@ public class ShopCatalog {
 
         Builder add(Item item, int count, int price) {
             list.add(new Entry(list.size(), cat, () -> new ItemStack(item, count), price));
+            return this;
+        }
+
+        Builder addMod(Supplier<Item> item, int count, int price) {
+            list.add(new Entry(list.size(), cat, () -> new ItemStack(item.get(), count), price));
             return this;
         }
 
