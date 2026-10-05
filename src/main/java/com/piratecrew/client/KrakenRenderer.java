@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
 /** The Kraken: the squid model, recoloured and scaled up to the size of a ship, tentacles writhing. */
 public class KrakenRenderer extends MobRenderer<KrakenEntity, SquidModel<KrakenEntity>> {
     private static final ResourceLocation TEXTURE = PirateCrew.id("textures/entity/kraken.png");
-    private static final float SCALE = 3.2F;
+    private static final float SCALE = 4.0F;
 
     public KrakenRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, new SquidModel<>(ctx.bakeLayer(ModelLayers.SQUID)), 2.5F);

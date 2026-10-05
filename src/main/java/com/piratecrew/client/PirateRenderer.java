@@ -109,7 +109,8 @@ public class PirateRenderer extends EntityRenderer<PirateEntity> {
 
         @Override
         protected void scale(PirateEntity entity, PoseStack pose, float partialTicks) {
-            pose.scale(0.9375F, 0.9375F, 0.9375F); // same scale as players
+            float s = 0.9375F * entity.renderScale(); // players' scale, bigger for bosses
+            pose.scale(s, s, s);
         }
 
         @Override

@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 public class CodexContent {
     public record Section(String title, int color, List<Entry> entries) {}
 
-    public record Entry(String title, String subtitle, Supplier<ItemStack> icon, List<String> body) {}
+    public record Entry(String title, String subtitle, Supplier<ItemStack> icon, List<String> body, List<Supplier<ItemStack>> items) {}
 
     public record Tool(Action action, String title, String subtitle, Supplier<ItemStack> icon, String tooltip) {}
 
@@ -39,7 +39,15 @@ public class CodexContent {
     }
 
     private static Entry e(String title, String subtitle, Supplier<ItemStack> icon, String... body) {
-        return new Entry(title, subtitle, icon, List.of(body));
+        return new Entry(title, subtitle, icon, List.of(body), List.of());
+    }
+
+    /** The same entry with a row of related items shown under its title. */
+    @SafeVarargs
+    private static Entry with(Entry e, Supplier<? extends ItemLike>... items) {
+        List<Supplier<ItemStack>> list = new ArrayList<>();
+        for (Supplier<? extends ItemLike> i : items) list.add(() -> new ItemStack(i.get()));
+        return new Entry(e.title(), e.subtitle(), e.icon(), e.body(), list);
     }
 
     private static List<Section> build() {
@@ -129,36 +137,41 @@ public class CodexContent {
         )));
 
         out.add(new Section("BOSSES", 0xE04040, List.of(
-                e("Commodore Graves", "600 health · Signal Flare", icon(ModItems.SIGNAL_FLARE),
+                with(e("Commodore Graves", "600 health · Signal Flare", icon(ModItems.SIGNAL_FLARE),
                         "A duelist with a fleet behind him. Calls §ccannon broadsides§r on you, leaps in with a crushing landing, and calls marines at 2/3 and 1/3 health.",
                         "",
                         "§6Summon:§r Signal Flare (7 marine badges + gunpowder + tidesteel ingot), used on land.",
                         "",
                         "§6Drops:§r Kraken Lure, Commodore's Insignia, abyssal shards, tidesteel. Bounty +150."),
-                e("The Kraken", "1,000 health · Kraken Lure", icon(ModItems.KRAKEN_LURE),
+                        ModItems.KRAKEN_LURE, ModItems.COMMODORE_INSIGNIA, ModItems.ABYSSAL_SHARD, ModItems.TIDESTEEL_INGOT, ModItems.MARINE_BADGE),
+                with(e("The Kraken", "1,000 health · Kraken Lure", icon(ModItems.KRAKEN_LURE),
                         "A ship-sized squid hunting from below: tentacle slams marked in ink, a blinding ink cloud, a tentacle that drags you off boats, geysers and, when hurt, a §bwhirlpool§r.",
                         "",
                         "§6Summon:§r Kraken Lure (insignia + 4 abyssal shards + 2 tropical fish + ink sac) over deep water.",
                         "",
                         "§6Drops:§r Storm Sigil, 8-14 kraken bones. Bounty +250."),
-                e("Tempest Admiral Sorel", "1,600 health · Storm Sigil", icon(ModItems.STORM_SIGIL),
+                        ModItems.STORM_SIGIL, ModItems.KRAKEN_BONE, ModItems.ABYSSAL_INGOT, () -> Items.INK_SAC),
+                with(e("Tempest Admiral Sorel", "1,600 health · Storm Sigil", icon(ModItems.STORM_SIGIL),
                         "Lightning marked a heartbeat before it lands, a wind gust that throws you skyward, and a blink that puts her behind archers. Below half health the sky turns to §9storm§r.",
                         "",
                         "§6Summon:§r Storm Sigil (4 kraken bones + 4 stormglass + eye of ender) on land.",
                         "",
                         "§6Drops:§r Leviathan Horn, 4-7 storm cores. Bounty +400."),
-                e("The Leviathan", "2,800 health · Leviathan Horn", icon(ModItems.LEVIATHAN_HORN),
+                        ModItems.LEVIATHAN_HORN, ModItems.STORM_CORE, ModItems.STORMGLASS_SHARD, ModItems.KRAKENBONE_INGOT),
+                with(e("The Leviathan", "2,800 health · Leviathan Horn", icon(ModItems.LEVIATHAN_HORN),
                         "An ancient guardian the size of a ship. Its §abeam§r charges faster as it weakens; tail slams, whirlpools, geysers, and broods of guardians.",
                         "",
                         "§6Summon:§r Leviathan Horn (4 storm cores + 4 prismarine crystals + nautilus shell) over deep water.",
                         "",
                         "§6Drops:§r Admiral's Warrant, 8-14 leviathan scales, heart of the sea. Bounty +800."),
-                e("Fleet Admiral Vane", "4,500 health · Admiral's Warrant", icon(ModItems.ADMIRALS_WARRANT),
+                        ModItems.ADMIRALS_WARRANT, ModItems.LEVIATHAN_SCALE, ModItems.STORMFORGED_INGOT, () -> Items.HEART_OF_THE_SEA),
+                with(e("Fleet Admiral Vane", "4,500 health · Admiral's Warrant", icon(ModItems.ADMIRALS_WARRANT),
                         "The Iron Tide. Dash strikes that cut through a line of foes, then captains and the whole fleet's guns, then §cthe Iron Tide§r: shockwaves and lightning.",
                         "",
                         "§6Summon:§r Admiral's Warrant (4 leviathan scales + 4 badges + insignia) on land.",
                         "",
-                        "§6Drops:§r 3-5 sovereign hearts and a §dguaranteed Soul Pact§r. Bounty +1,500.")
+                        "§6Drops:§r 3-5 sovereign hearts and a §dguaranteed Soul Pact§r. Bounty +1,500."),
+                        ModItems.SOVEREIGN_HEART, ModItems.LEVIATHAN_INGOT, () -> Items.NETHERITE_INGOT, () -> ModItems.SOUL_PACTS.get(SoulPact.BLOOD).get())
         )));
 
         List<Entry> pacts = new ArrayList<>();
@@ -188,13 +201,15 @@ public class CodexContent {
         for (GearTier t : GearTier.values()) {
             int i = t.ordinal();
             int total = armor[i][0] + armor[i][1] + armor[i][2] + armor[i][3];
-            gear.add(e(names[i] + " Gear", total + " armor · " + dmg[i] + " damage", icon(() -> ModItems.GEAR.get(t).sword().get()),
+            var set = ModItems.GEAR.get(t);
+            gear.add(with(e(names[i] + " Gear", total + " armor · " + dmg[i] + " damage", icon(() -> ModItems.GEAR.get(t).sword().get()),
                     "§6Armor:§r helmet " + armor[i][0] + ", chestplate " + armor[i][1] + ", leggings " + armor[i][2] + ", boots " + armor[i][3] + ".",
                     "§6Cutlass:§r " + dmg[i] + " damage.",
                     "",
                     "§6Ingot:§r " + where[i],
                     "",
-                    i >= 2 ? "Boss-forged: the metal shimmers and its gems pulse." : "Armor past 20 keeps cutting the damage you take."));
+                    i >= 2 ? "Boss-forged: the metal shimmers and its gems pulse." : "Armor past 20 keeps cutting the damage you take."),
+                    set.helmet(), set.chestplate(), set.leggings(), set.boots(), set.sword(), set.pickaxe(), set.axe()));
         }
         out.add(new Section("GEAR", 0x9AE0A0, gear));
         return out;

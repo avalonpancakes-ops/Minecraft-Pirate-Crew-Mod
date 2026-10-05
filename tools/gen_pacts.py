@@ -84,7 +84,27 @@ def main():
             if dx * dx + dy * dy <= 2:
                 px[cx + dx, cy + dy] = light + (255,)
         item = f"soul_pact_{pid}"
-        im.save(os.path.join(A, f"textures/item/{item}.png"))
+        # animate: the wax seal breathes with light and a mote of soul-fire drifts up from it
+        import math
+        frames = []
+        seal_px = [(cx + dx, cy + dy) for dy in range(-2, 3) for dx in range(-2, 3) if dx * dx + dy * dy <= 5]
+        for f in range(16):
+            fr = im.copy()
+            fp = fr.load()
+            k = 0.5 - 0.5 * math.cos(f / 16 * 2 * math.pi)
+            for (x, y) in seal_px:
+                r0, g0, b0, a0 = px[x, y]
+                fp[x, y] = (min(255, int(r0 + (255 - r0) * 0.35 * k)), min(255, int(g0 + (255 - g0) * 0.35 * k)),
+                            min(255, int(b0 + (255 - b0) * 0.35 * k)), a0)
+            my = cy - 3 - (f % 8)
+            if f < 8 and my >= 0 and fp[cx + (1 if f % 4 < 2 else 0), my][3] == 0 or (f < 8 and my >= 0):
+                fp[cx + (1 if f % 4 < 2 else 0), my] = light + (220,)
+            frames.append(fr)
+        anim = Image.new("RGBA", (16, 16 * len(frames)))
+        for i, fr in enumerate(frames):
+            anim.paste(fr, (0, i * 16))
+        anim.save(os.path.join(A, f"textures/item/{item}.png"))
+        json.dump({"animation": {"frametime": 2}}, open(os.path.join(A, f"textures/item/{item}.png.mcmeta"), "w"))
         with open(os.path.join(A, f"models/item/{item}.json"), "w") as f:
             json.dump({"parent": "minecraft:item/generated", "textures": {"layer0": f"piratecrew:item/{item}"}}, f, indent=2)
         lang[f"item.piratecrew.{item}"] = f"{name} Soul Pact"
@@ -93,7 +113,7 @@ def main():
 
     sheet = Image.new("RGBA", (len(PACTS) * 36, 36), (60, 60, 70, 255))
     for i, pid in enumerate(PACTS):
-        im = Image.open(os.path.join(A, f"textures/item/soul_pact_{pid}.png")).resize((32, 32), Image.NEAREST)
+        im = Image.open(os.path.join(A, f"textures/item/soul_pact_{pid}.png")).crop((0, 0, 16, 16)).resize((32, 32), Image.NEAREST)
         sheet.alpha_composite(im, (i * 36 + 2, 2))
     sheet.save(os.path.join(ROOT, "tools/pact_preview.png"))
     print("drew", len(PACTS), "pacts")

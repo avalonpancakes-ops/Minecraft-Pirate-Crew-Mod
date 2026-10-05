@@ -470,6 +470,11 @@ public class PirateEntity extends PathfinderMob {
         return null;
     }
 
+    /** How big this pirate is drawn (bosses tower over ordinary crews). */
+    public float renderScale() {
+        return 1.0F;
+    }
+
     // ------------------------------------------------------------------ tier from bounty
 
     /**

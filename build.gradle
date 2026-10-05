@@ -50,6 +50,7 @@ minecraft {
         clientShots {
             parent runs.client
             taskName 'runClientShots'
+            args '--width', '1280', '--height', '720'
             property 'piratecrew.clientshots', 'true'
             property 'forge.logging.console.level', 'info'
         }

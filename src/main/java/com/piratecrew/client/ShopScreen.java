@@ -18,7 +18,7 @@ import java.util.List;
 
 /** The banker's shop: items for rubies, paid from the bank balance first, then rubies carried. */
 public class ShopScreen extends Screen {
-    private static final int W = 240, H = 194;
+    private static final int W = 256, H = 194;
     private static final int COLS = 7, ROWS = 3, CELL_W = 30, CELL_H = 34, GAP = 2;
     private static ShopCatalog.Category tab = ShopCatalog.Category.FOOD;
 
@@ -44,11 +44,18 @@ public class ShopScreen extends Screen {
                 .bounds(left + W - 54, top + 5, 46, 16).build(PirateButton::new));
         tabButtons.clear();
         ShopCatalog.Category[] cats = ShopCatalog.Category.values();
-        int tw = (W - 20) / cats.length;
+        // tabs sized to their labels, sharing out any spare width
+        int[] tw = new int[cats.length];
+        int sum = 0;
+        for (int i = 0; i < cats.length; i++) sum += tw[i] = font.width(cats[i].label) + 8;
+        int spare = Math.max(0, (W - 20) - sum - (cats.length - 1));
+        int x = left + 10;
         for (int i = 0; i < cats.length; i++) {
             ShopCatalog.Category c = cats[i];
+            int wdt = tw[i] + spare / cats.length;
             tabButtons.add(addRenderableWidget(Button.builder(Component.literal(c.label), b -> selectTab(c))
-                    .bounds(left + 10 + i * tw, top + 40, tw - 1, 16).build(PirateButton::new)));
+                    .bounds(x, top + 40, wdt, 16).build(PirateButton::new)));
+            x += wdt + 1;
         }
         selectTab(tab);
     }

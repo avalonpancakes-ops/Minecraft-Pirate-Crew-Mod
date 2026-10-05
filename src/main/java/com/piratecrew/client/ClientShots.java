@@ -81,7 +81,8 @@ public class ClientShots {
         STEPS.add(new Step("held_sword", 40, mc -> held(mc, ModItems.GEAR.get(GearTier.SOVEREIGN).sword())));
         STEPS.add(new Step("held_storm", 20, mc -> held(mc, ModItems.GEAR.get(GearTier.STORMFORGED).sword())));
         STEPS.add(new Step("portal", 80, ClientShots::portal));
-        STEPS.add(new Step("sundered_sea", 600, ClientShots::sea));
+        STEPS.add(new Step("", 60, ClientShots::sea));
+        STEPS.add(new Step("sundered_sea", 400, ClientShots::hover));
     }
 
     @SubscribeEvent
@@ -161,6 +162,17 @@ public class ClientShots {
         });
     }
 
+    /** Height of the ground, loading the chunk first (unloaded chunks report the bottom of the world). */
+    private static int ground(ServerLevel level, int x, int z) {
+        level.getChunk(x >> 4, z >> 4);
+        return level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+    }
+
+    private static void clearBosses(ServerLevel level) {
+        for (var e : level.getEntities((net.minecraft.world.entity.Entity) null, new net.minecraft.world.phys.AABB(-200, -100, -200, 200, 400, 200),
+                e -> e instanceof com.piratecrew.entity.boss.BountyBoss || e instanceof MarineEntity || e instanceof PirateEntity)) e.discard();
+    }
+
     private static void look(ServerPlayer sp, ServerLevel level, double x, double y, double z, float yaw, float pitch) {
         sp.getAbilities().flying = true;
         sp.onUpdateAbilities();
@@ -186,7 +198,7 @@ public class ClientShots {
             ServerLevel level = sp.serverLevel();
             level.setDayTime(6000);
             int z0 = armor ? 0 : 40;
-            int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, 0, z0 + 6);
+            int ground = ground(level, 0, z0 + 6);
             if (armor) {
                 int i = 0;
                 for (GearTier t : GearTier.values()) {
@@ -218,14 +230,15 @@ public class ClientShots {
                     i++;
                 }
             }
-            look(sp, level, 0.5, ground + 1.0, z0 - 1.5, 0F, 8F);
+            look(sp, level, 0.5, ground + (armor ? 1.2 : 1.4), z0 + (armor ? 1.0 : -0.5), 0F, armor ? 10F : 8F);
         });
     }
 
     private static void beasts(Minecraft mc) {
         onServer(mc, sp -> {
             ServerLevel level = sp.serverLevel();
-            int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, 0, 100);
+            clearBosses(level);
+            int ground = ground(level, 0, 100);
             place(level, ModEntities.KRAKEN.get(), -5, ground + 1, 112, 200F);
             place(level, ModEntities.LEVIATHAN.get(), 6, ground + 2, 114, 160F);
             look(sp, level, 0.5, ground + 4, 96, 0F, 5F);
@@ -246,7 +259,8 @@ public class ClientShots {
             sp.getInventory().setItem(7, new ItemStack(ModItems.SOUL_PACTS.get(com.piratecrew.pact.SoulPact.TEMPEST).get()));
             sp.getInventory().setItem(8, new ItemStack(ModItems.CAPTAINS_LOG.get()));
             ServerLevel level = sp.serverLevel();
-            int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, 0, -40);
+            clearBosses(level);
+            int ground = ground(level, 0, -40);
             look(sp, level, 0.5, ground + 1.6, -40, 0F, 0F);
         });
     }
@@ -255,7 +269,7 @@ public class ClientShots {
         mc.options.hideGui = true;
         onServer(mc, sp -> {
             ServerLevel level = sp.serverLevel();
-            int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, 0, -80);
+            int ground = ground(level, 0, -80);
             SirenTeleporter.build(level, new BlockPos(0, ground - 1, -74));
             look(sp, level, 0.5, ground + 1.5, -82, 0F, -5F);
         });
@@ -265,8 +279,14 @@ public class ClientShots {
         onServer(mc, sp -> {
             ServerLevel sea = sp.server.getLevel(SunderedSea.LEVEL);
             if (sea == null) return;
-            look(sp, sea, 0.5, 110, 0.5, 30F, 25F);
+            sea.setDayTime(6000);
+            look(sp, sea, 0.5, 120, 0.5, 30F, 25F);
         });
+    }
+
+    /** Flying is reset by the dimension change: turn it back on and hold position over the islands. */
+    private static void hover(Minecraft mc) {
+        onServer(mc, sp -> look(sp, sp.serverLevel(), 0.5, 120, 0.5, 30F, 25F));
     }
 
     // ------------------------------------------------------------------ item gallery

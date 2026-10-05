@@ -121,6 +121,7 @@ public class CodexScreen extends Screen {
         else drawEntry(g, t);
         super.render(g, mouseX, mouseY, partial);
         if (showcase) drawToolTooltip(g, mouseX, mouseY);
+        else drawStripTooltip(g, mouseX, mouseY);
     }
 
     private void drawFrame(GuiGraphics g, float t) {
@@ -209,10 +210,19 @@ public class CodexScreen extends Screen {
             g.renderItem(icon, 0, 0);
             g.pose().popPose();
             String name = r.showcaseRow ? "Showcase" : secs.get(r.section).entries().get(r.entry).title();
-            g.drawString(font, font.plainSubstrByWidth(name, SIDEBAR_W - 26), x0 + 18, y + 3, selected ? 0xFFFFF0C0 : 0xFFE0D2B4, false);
+            g.drawString(font, fit(name, SIDEBAR_W - 26, false), x0 + 18, y + 3, selected ? 0xFFFFF0C0 : 0xFFE0D2B4, false);
         }
         g.disableScissor();
         if (contentH > sh) scrollbar(g, x0 + SIDEBAR_W - 4, y0, sh, sideScroll, contentH);
+    }
+
+    /** Text cut to fit, with an ellipsis when it doesn't. */
+    private String fit(String text, int width, boolean bold) {
+        java.util.function.ToIntFunction<String> wOf = s -> bold ? font.width(Component.literal(s).withStyle(ChatFormatting.BOLD)) : font.width(s);
+        if (wOf.applyAsInt(text) <= width) return text;
+        String t = text;
+        while (!t.isEmpty() && wOf.applyAsInt(t + "\u2026") > width) t = t.substring(0, t.length() - 1);
+        return t + "\u2026";
     }
 
     private void scrollbar(GuiGraphics g, int x, int y, int h, double scroll, int contentH) {
@@ -250,8 +260,18 @@ public class CodexScreen extends Screen {
         g.pose().popPose();
         g.drawString(font, e.subtitle(), x + 44, y0 + 22, 0xFF000000 | sec.color(), false);
         GuiDraw.rope(g, x, y0 + 38, pw);
+        int by = y0 + 50;
+        if (!e.items().isEmpty()) {
+            for (int i = 0; i < e.items().size(); i++) {
+                int sx = x + 2 + i * 20, sy = y0 + 49 + Math.round(Mth.sin(t * 0.12F + i * 0.7F));
+                g.fill(sx - 1, sy - 1, sx + 17, sy + 17, 0xFF1A2A38);
+                g.fill(sx - 1, sy + 17, sx + 17, sy + 18, 0x80C8901E);
+                g.renderItem(e.items().get(i).get(), sx, sy);
+            }
+            by += 24;
+        }
         // body, scrollable
-        int by = y0 + 50, bh = ph - 50;
+        int bh = ph - (by - y0);
         List<FormattedCharSequence> lines = new ArrayList<>();
         for (String para : e.body()) {
             if (para.isEmpty()) lines.add(FormattedCharSequence.EMPTY);
@@ -290,7 +310,7 @@ public class CodexScreen extends Screen {
     // ------------------------------------------------------------------ showcase
 
     private int cols() {
-        return pageW() >= 250 ? 3 : 2;
+        return pageW() >= 330 ? 3 : 2;
     }
 
     private int cardW() {
@@ -325,9 +345,9 @@ public class CodexScreen extends Screen {
             boolean hov = mouseX >= cx && mouseX < cx + cardW() && mouseY >= cy && mouseY < cy + CARD_H && mouseY >= cy0 && mouseY < cy0 + bh;
             card(g, cx, cy - (hov ? 1 : 0), cardW(), CARD_H, hov, t, i);
             g.renderItem(tool.icon().get(), cx + 5, cy + 7 - (hov ? 1 : 0));
-            g.drawString(font, Component.literal(font.plainSubstrByWidth(tool.title(), cardW() - 28)).withStyle(ChatFormatting.BOLD),
+            g.drawString(font, Component.literal(fit(tool.title(), cardW() - 28, true)).withStyle(ChatFormatting.BOLD),
                     cx + 25, cy + 6 - (hov ? 1 : 0), 0xFFFFF0C8, false);
-            g.drawString(font, font.plainSubstrByWidth(tool.subtitle(), cardW() - 28), cx + 25, cy + 17 - (hov ? 1 : 0), 0xFFB8A888, false);
+            g.drawString(font, fit(tool.subtitle(), cardW() - 28, false), cx + 25, cy + 17 - (hov ? 1 : 0), 0xFFB8A888, false);
         }
         g.disableScissor();
         if (pageContentH > bh) scrollbar(g, x + pw - 2, cy0, bh, pageScroll, pageContentH);
@@ -358,6 +378,17 @@ public class CodexScreen extends Screen {
         if (inX >= cardW() || inY >= CARD_H) return -1;
         int i = row * cols() + col;
         return i < CodexContent.tools().size() ? i : -1;
+    }
+
+    private void drawStripTooltip(GuiGraphics g, int mouseX, int mouseY) {
+        var e = CodexContent.sections().get(section).entries().get(entry);
+        int x = pageX(), y0 = top + HEADER_H + 6;
+        for (int i = 0; i < e.items().size(); i++) {
+            int sx = x + 2 + i * 20, sy = y0 + 49;
+            if (mouseX >= sx && mouseX < sx + 16 && mouseY >= sy && mouseY < sy + 16) {
+                g.renderTooltip(font, e.items().get(i).get(), mouseX, mouseY);
+            }
+        }
     }
 
     private void drawToolTooltip(GuiGraphics g, int mouseX, int mouseY) {

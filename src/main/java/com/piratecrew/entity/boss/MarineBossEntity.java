@@ -45,6 +45,22 @@ public abstract class MarineBossEntity extends MarineEntity implements BountyBos
         super(type, level);
         this.xpReward = 250;
         this.setPersistenceRequired();
+        this.refreshDimensions();
+    }
+
+    /** Bosses are drawn (and hit-boxed) larger than ordinary marines. */
+    protected float bossScale() {
+        return 1.2F;
+    }
+
+    @Override
+    public float renderScale() {
+        return bossScale();
+    }
+
+    @Override
+    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return super.getDimensions(pose).scale(bossScale());
     }
 
     // ------------------------------------------------------------------ what each boss defines

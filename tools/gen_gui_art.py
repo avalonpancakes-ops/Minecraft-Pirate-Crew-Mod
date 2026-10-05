@@ -34,12 +34,12 @@ def parchment():
     n1, n2, n3 = value_noise(64, 64, 16, 1), value_noise(64, 64, 8, 2), value_noise(64, 64, 4, 3)
     rnd = random.Random(9)
     im = Image.new("RGBA", (64, 64))
-    lo, hi = (205, 178, 128), (238, 220, 176)
+    lo, hi = (218, 196, 148), (238, 222, 182)
     for y in range(64):
         for x in range(64):
             v = 0.55 * n1(x, y) + 0.3 * n2(x, y) + 0.15 * n3(x, y)
             c = lerp(lo, hi, min(1, max(0, (v - 0.2) / 0.6)))
-            if rnd.random() < 0.02:
+            if rnd.random() < 0.012:
                 c = lerp(c, (160, 128, 84), 0.4)       # fibres / flecks
             im.putpixel((x, y), c + (255,))
     return im

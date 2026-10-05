@@ -55,6 +55,7 @@ public class FleetAdmiralEntity extends MarineBossEntity {
     @Override protected double bossDamage() { return 40; }
     @Override protected double bossArmor() { return 12; }
     @Override protected double bossToughness() { return 6; }
+    @Override protected float bossScale() { return 1.35F; }
     @Override public int bountyValue() { return 1500; }
 
     @Override

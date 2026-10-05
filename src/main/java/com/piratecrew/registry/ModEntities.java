@@ -54,7 +54,7 @@ public class ModEntities {
 
     public static final RegistryObject<EntityType<KrakenEntity>> KRAKEN = ENTITIES.register("kraken",
             () -> EntityType.Builder.<KrakenEntity>of(KrakenEntity::new, MobCategory.MONSTER)
-                    .sized(3.0F, 6.0F)
+                    .sized(3.6F, 7.6F)
                     .clientTrackingRange(16)
                     .build(PirateCrew.id("kraken").toString()));
 

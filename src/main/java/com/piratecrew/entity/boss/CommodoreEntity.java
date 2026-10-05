@@ -43,6 +43,7 @@ public class CommodoreEntity extends MarineBossEntity {
     @Override protected double bossDamage() { return 9; }
     @Override protected double bossArmor() { return 6; }
     @Override protected double bossToughness() { return 0; }
+    @Override protected float bossScale() { return 1.15F; }
     @Override public int bountyValue() { return 150; }
 
     @Override

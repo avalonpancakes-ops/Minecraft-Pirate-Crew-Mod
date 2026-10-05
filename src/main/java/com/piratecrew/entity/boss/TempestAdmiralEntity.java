@@ -48,6 +48,7 @@ public class TempestAdmiralEntity extends MarineBossEntity {
     @Override protected double bossDamage() { return 26; }
     @Override protected double bossArmor() { return 8; }
     @Override protected double bossToughness() { return 2; }
+    @Override protected float bossScale() { return 1.2F; }
     @Override public int bountyValue() { return 400; }
 
     @Override
