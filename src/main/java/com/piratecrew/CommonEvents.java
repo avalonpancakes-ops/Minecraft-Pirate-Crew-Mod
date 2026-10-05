@@ -34,6 +34,8 @@ public class CommonEvents {
         if (event.getEntity() instanceof ServerPlayer sp) {
             BountyManager.onLogin(sp);
             LoanManager.onLogin(sp);
+            com.piratecrew.goals.Goals.sync(sp);
+            com.piratecrew.pact.SoulPacts.sync(sp);
             // First time aboard: a Captain's Log to learn the ropes.
             var tag = sp.getPersistentData();
             if (!tag.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG)) tag.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG, new net.minecraft.nbt.CompoundTag());
@@ -206,6 +208,7 @@ public class CommonEvents {
             return;
         }
         pirate.bindPact(item.pact);
+        com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.PACT_PIRATE);
         com.piratecrew.pact.SoulPactItem.bindEffects(sp.serverLevel(), pirate, item.pact);
         pirate.say("The " + item.pact.title() + " is mine now... I feel it. " + item.pact.power + "!");
         sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("\u2726 " + pirate.getPirateName() + " is bound to the " + item.pact.title()
@@ -246,10 +249,64 @@ public class CommonEvents {
         if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide || event.player.tickCount % 20 != 0) return;
         var pact = com.piratecrew.pact.SoulPacts.of(event.player);
         if (pact != null && !event.player.isSpectator()) com.piratecrew.pact.PactPowers.passives(event.player, pact);
+        if (event.player.tickCount % 40 == 0 && event.player instanceof ServerPlayer sp) com.piratecrew.goals.Goals.check(sp);
     }
 
     @SubscribeEvent
     public static void pactClone(PlayerEvent.Clone event) {
         com.piratecrew.pact.SoulPacts.copy(event.getOriginal(), event.getEntity());
+        com.piratecrew.goals.Goals.copy(event.getOriginal(), event.getEntity());
+    }
+
+    @SubscribeEvent
+    public static void respawned(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp) {
+            com.piratecrew.pact.SoulPacts.sync(sp);
+            com.piratecrew.goals.Goals.sync(sp);
+        }
+    }
+
+    @SubscribeEvent
+    public static void changedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer sp) com.piratecrew.pact.SoulPacts.sync(sp);
+    }
+
+    // ------------------------------------------------------------------ voyage goals
+
+    @SubscribeEvent
+    public static void goalBlocks(net.minecraftforge.event.level.BlockEvent.BreakEvent event) {
+        if (!(event.getPlayer() instanceof ServerPlayer sp) || sp.isCreative()) return;
+        var b = event.getState().getBlock();
+        if (b == com.piratecrew.registry.ModBlocks.RUBY_ORE.get() || b == com.piratecrew.registry.ModBlocks.DEEPSLATE_RUBY_ORE.get()) {
+            com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.FIRST_RUBY);
+        } else if (b == com.piratecrew.registry.ModBlocks.TIDESTEEL_ORE.get() || b == com.piratecrew.registry.ModBlocks.DEEPSLATE_TIDESTEEL_ORE.get()) {
+            com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.TIDESTEEL);
+        } else if (b == com.piratecrew.registry.ModBlocks.ABYSSAL_ORE.get()) {
+            com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.ABYSSAL);
+        } else if (b == com.piratecrew.registry.ModBlocks.STORMGLASS_ORE.get()) {
+            com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.STORMGLASS);
+        }
+    }
+
+    @SubscribeEvent
+    public static void goalKills(LivingDeathEvent event) {
+        var victim = event.getEntity();
+        if (victim.level().isClientSide) return;
+        if (victim instanceof com.piratecrew.entity.MarineEntity m && !(m instanceof com.piratecrew.entity.boss.BountyBoss)
+                && event.getSource().getEntity() instanceof ServerPlayer sp) {
+            com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.MARINE);
+            if (m.getRank() == com.piratecrew.entity.MarineEntity.Rank.CAPTAIN) com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.CAPTAIN);
+        }
+        com.piratecrew.goals.Goal boss = victim instanceof com.piratecrew.entity.boss.CommodoreEntity ? com.piratecrew.goals.Goal.COMMODORE
+                : victim instanceof com.piratecrew.entity.boss.KrakenEntity ? com.piratecrew.goals.Goal.KRAKEN
+                : victim instanceof com.piratecrew.entity.boss.TempestAdmiralEntity ? com.piratecrew.goals.Goal.SOREL
+                : victim instanceof com.piratecrew.entity.boss.LeviathanEntity ? com.piratecrew.goals.Goal.LEVIATHAN
+                : victim instanceof com.piratecrew.entity.boss.FleetAdmiralEntity ? com.piratecrew.goals.Goal.VANE : null;
+        if (boss != null) {
+            // everyone who fought nearby shares the victory
+            for (ServerPlayer sp : ((ServerLevel) victim.level()).getPlayers(p -> p.distanceToSqr(victim) < 64 * 64)) {
+                com.piratecrew.goals.Goals.grant(sp, boss);
+            }
+        }
     }
 }

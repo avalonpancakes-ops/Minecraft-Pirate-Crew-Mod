@@ -377,7 +377,11 @@ public class CrewManager {
                 .append(net.minecraft.network.chat.Component.literal(String.format(" (bounty %,d rubies)!", bounty)).withStyle(net.minecraft.ChatFormatting.YELLOW));
         for (UUID u : crew.players) {
             ServerPlayer sp = server.getPlayerList().getPlayer(u);
-            if (sp != null) sp.sendSystemMessage(msg);
+            if (sp == null) continue;
+            sp.sendSystemMessage(msg);
+            com.piratecrew.network.ModNetwork.sendTo(sp, new com.piratecrew.network.ToastPacket(new net.minecraft.world.item.ItemStack(com.piratecrew.registry.ModItems.PIRATE_SPAWN_EGG.get()),
+                    pirate.getPirateName() + " ranks up!", from.label + " \u2192 " + to.label + " tier", to.color.getColor() == null ? 0xE8B84A : to.color.getColor()));
+            if (to == com.piratecrew.entity.PirateTier.SSS) com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.SSS);
         }
         syncCrew(server, crew);
     }

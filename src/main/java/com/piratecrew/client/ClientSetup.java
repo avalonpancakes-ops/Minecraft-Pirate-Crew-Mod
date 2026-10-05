@@ -51,6 +51,11 @@ public class ClientSetup {
         }
 
         @SubscribeEvent
+        public static void overlays(net.minecraftforge.client.event.RegisterGuiOverlaysEvent event) {
+            event.registerAbove(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.HOTBAR.id(), "soul_pact", PactHud::render);
+        }
+
+        @SubscribeEvent
         public static void keys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_CREW);
             event.register(PACT_POWER);

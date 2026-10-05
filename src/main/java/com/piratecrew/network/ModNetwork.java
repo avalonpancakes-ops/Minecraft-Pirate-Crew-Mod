@@ -8,7 +8,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ModNetwork {
-    private static final String VERSION = "9";
+    private static final String VERSION = "10";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             PirateCrew.id("main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -57,6 +57,21 @@ public class ModNetwork {
                 .encoder(CodexActionPacket::encode)
                 .decoder(CodexActionPacket::decode)
                 .consumerMainThread(CodexActionPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(GoalSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(GoalSyncPacket::encode)
+                .decoder(GoalSyncPacket::decode)
+                .consumerMainThread(GoalSyncPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(ToastPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ToastPacket::encode)
+                .decoder(ToastPacket::decode)
+                .consumerMainThread(ToastPacket::handle)
+                .add();
+        CHANNEL.messageBuilder(PactSyncPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PactSyncPacket::encode)
+                .decoder(PactSyncPacket::decode)
+                .consumerMainThread(PactSyncPacket::handle)
                 .add();
         CHANNEL.messageBuilder(ShopBuyPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ShopBuyPacket::encode)

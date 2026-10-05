@@ -54,6 +54,14 @@ public class SoulPacts {
         data(p).remove(READY);
     }
 
+    /** Tell the player's client their pact and its cooldown (for the HUD badge). */
+    public static void sync(ServerPlayer p) {
+        SoulPact pact = of(p);
+        long ready = data(p).getLong(READY);
+        com.piratecrew.network.ModNetwork.sendTo(p, new com.piratecrew.network.PactSyncPacket(pact == null ? "" : pact.id, ready,
+                pact == null ? 1 : pact.cooldown));
+    }
+
     /** Respawned players keep their pact (in case the persisted tag wasn't carried over). */
     public static void copy(Player from, Player to) {
         SoulPact p = of(from);
@@ -88,6 +96,7 @@ public class SoulPacts {
         if (target != null) aim = target.getEyePosition();
         if (!PactPowers.activate(player, pact, target, aim)) return;
         data(player).putLong(READY, now + pact.cooldown);
+        sync(player);
         player.displayClientMessage(Component.literal("✦ " + pact.power + "!").withStyle(pact.color, ChatFormatting.BOLD), true);
     }
 

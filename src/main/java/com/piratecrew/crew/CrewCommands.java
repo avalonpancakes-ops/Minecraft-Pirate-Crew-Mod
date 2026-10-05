@@ -129,6 +129,7 @@ public class CrewCommands {
                 .then(Commands.literal("clearpact").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     com.piratecrew.pact.SoulPacts.set(p, null);
+                    com.piratecrew.pact.SoulPacts.sync(p);
                     c.getSource().sendSuccess(() -> Component.literal("Your soul is free of its pact."), true);
                     return 1;
                 }))

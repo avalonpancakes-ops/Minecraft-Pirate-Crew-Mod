@@ -130,6 +130,7 @@ public class BountyManager {
                     else k.pirateKills++;
                     if (killer instanceof ServerPlayer kp) {
                         kp.displayClientMessage(Component.literal("Your bounty rose to " + k.amount + " rubies!").withStyle(ChatFormatting.GOLD), true);
+                        toast(kp, k.amount, gain);
                     } else if (killer instanceof PirateEntity kp) {
                         data.setDirty();
                         kp.checkBountyPromotion();
@@ -172,6 +173,8 @@ public class BountyManager {
         if (killer instanceof PirateEntity kp) {
             kp.checkBountyPromotion();
             k.tier = kp.getTier().ordinal();
+        } else if (killer instanceof ServerPlayer sp) {
+            toast(sp, k.amount, value);
         }
         server.getPlayerList().broadcastSystemMessage(Component.literal("☠ The bounty on ").withStyle(ChatFormatting.YELLOW)
                 .append(Component.literal(displayName(killer)).withStyle(ChatFormatting.GOLD))
@@ -180,6 +183,13 @@ public class BountyManager {
                 .append(Component.literal("!").withStyle(ChatFormatting.YELLOW)), false);
         Crew crew = CrewData.get(server).byId(crewId);
         if (crew != null) CrewManager.syncCrew(server, crew);
+    }
+
+    /** The WANTED toast when a player's bounty climbs. */
+    private static void toast(ServerPlayer p, int amount, int gain) {
+        com.piratecrew.network.ModNetwork.sendTo(p, new com.piratecrew.network.ToastPacket(
+                new net.minecraft.world.item.ItemStack(com.piratecrew.registry.ModItems.BOUNTY_BOARD.get()),
+                "WANTED: " + String.format("%,d", amount), String.format("Your bounty rose by %,d rubies", gain), 0xD03030));
     }
 
     private static void announceClaim(MinecraftServer server, LivingEntity killer, LivingEntity victim, int amount, @Nullable String forCrew) {

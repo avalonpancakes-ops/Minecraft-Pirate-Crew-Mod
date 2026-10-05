@@ -50,6 +50,7 @@ public class SirenConchItem extends Item {
         }
         if (player != null) {
             if (!player.getAbilities().instabuild) ctx.getItemInHand().shrink(1);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.PORTAL);
             player.displayClientMessage(Component.literal("The Sundered Sea answers the siren's call...").withStyle(ChatFormatting.DARK_AQUA), true);
         }
         return InteractionResult.CONSUME;

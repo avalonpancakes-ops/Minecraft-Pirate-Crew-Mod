@@ -33,15 +33,15 @@ public class CodexScreen extends Screen {
 
     // remembered between openings
     private static int lastSection = 0, lastEntry = 0;
-    private static boolean lastShowcase = false;
+    private static int lastMode = 0;   // 0 an entry, 1 showcase, 2 voyage goals
 
     private int left, top, w, h;
     private int section = lastSection, entry = lastEntry;
-    private boolean showcase = lastShowcase;
+    private int mode = lastMode;
     private double sideScroll, pageScroll;
     private int pageContentH;
 
-    private record Row(int section, int entry, boolean header, boolean showcaseRow) {}
+    private record Row(int section, int entry, boolean header, int kind) {}
 
     private final List<Row> rows = new ArrayList<>();
 
@@ -57,8 +57,14 @@ public class CodexScreen extends Screen {
     public static void openAt(int section, int entry, boolean showcase) {
         lastSection = section;
         lastEntry = entry;
-        lastShowcase = showcase;
+        lastMode = showcase ? 1 : 0;
         forceShowcase = true;
+        open();
+    }
+
+    /** Open on the Voyage Goals page. */
+    public static void openGoals() {
+        lastMode = 2;
         open();
     }
 
@@ -76,18 +82,28 @@ public class CodexScreen extends Screen {
         top = (height - h) / 2;
         rows.clear();
         var secs = CodexContent.sections();
+        rows.add(new Row(-2, -1, true, 2));
+        rows.add(new Row(-2, 0, false, 2));
         for (int s = 0; s < secs.size(); s++) {
-            rows.add(new Row(s, -1, true, false));
-            for (int e = 0; e < secs.get(s).entries().size(); e++) rows.add(new Row(s, e, false, false));
+            rows.add(new Row(s, -1, true, 0));
+            for (int e = 0; e < secs.get(s).entries().size(); e++) rows.add(new Row(s, e, false, 0));
         }
         if (isOp()) {
-            rows.add(new Row(-1, -1, true, true));
-            rows.add(new Row(-1, 0, false, true));
-        } else if (showcase) {
-            showcase = false;
+            rows.add(new Row(-1, -1, true, 1));
+            rows.add(new Row(-1, 0, false, 1));
+        } else if (mode == 1) {
+            mode = 0;
         }
         if (section >= secs.size()) section = 0;
         if (entry >= secs.get(section).entries().size()) entry = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            Row r = rows.get(i);
+            boolean sel = !r.header && (r.kind != 0 ? mode == r.kind : mode == 0 && r.section == section && r.entry == entry);
+            if (sel) {
+                int sh = h - HEADER_H - 10;
+                sideScroll = Math.max(0, i * ROW_H - sh / 2);
+            }
+        }
         addRenderableWidget(Button.builder(Component.literal("✕"), b -> onClose())
                 .bounds(left + w - 20, top + 5, 14, 14).build(PirateButton::new));
     }
@@ -101,12 +117,12 @@ public class CodexScreen extends Screen {
     public void onClose() {
         lastSection = section;
         lastEntry = entry;
-        lastShowcase = showcase;
+        lastMode = mode;
         super.onClose();
     }
 
     private float time(float partial) {
-        return (minecraft != null && minecraft.level != null ? minecraft.level.getGameTime() : 0) + partial;
+        return (System.currentTimeMillis() % 1_000_000L) / 50F;
     }
 
     // ------------------------------------------------------------------ drawing
@@ -117,11 +133,12 @@ public class CodexScreen extends Screen {
         float t = time(partial);
         drawFrame(g, t);
         drawSidebar(g, mouseX, mouseY, t);
-        if (showcase) drawShowcase(g, mouseX, mouseY, t);
+        if (mode == 1) drawShowcase(g, mouseX, mouseY, t);
+        else if (mode == 2) drawGoals(g, mouseX, mouseY, t);
         else drawEntry(g, t);
         super.render(g, mouseX, mouseY, partial);
-        if (showcase) drawToolTooltip(g, mouseX, mouseY);
-        else drawStripTooltip(g, mouseX, mouseY);
+        if (mode == 1) drawToolTooltip(g, mouseX, mouseY);
+        else if (mode == 0) drawStripTooltip(g, mouseX, mouseY);
     }
 
     private void drawFrame(GuiGraphics g, float t) {
@@ -185,15 +202,15 @@ public class CodexScreen extends Screen {
             int y = y0 + i * ROW_H - (int) sideScroll;
             if (y < y0 - ROW_H || y > y0 + sh) continue;
             if (r.header) {
-                int color = r.showcaseRow ? 0xFFE8B84A : (0xFF000000 | secs.get(r.section).color());
-                String label = r.showcaseRow ? "SHOWCASE" : secs.get(r.section).title();
+                int color = r.kind == 1 ? 0xFFE8B84A : r.kind == 2 ? 0xFF7FE0C8 : (0xFF000000 | secs.get(r.section).color());
+                String label = r.kind == 1 ? "SHOWCASE" : r.kind == 2 ? "VOYAGE" : secs.get(r.section).title();
                 g.drawString(font, "◆", x0 + 1, y + 3, color, false);
                 g.drawString(font, Component.literal(label).withStyle(ChatFormatting.BOLD), x0 + 9, y + 3, color, false);
                 int lx = x0 + 12 + font.width(Component.literal(label).withStyle(ChatFormatting.BOLD));
                 if (lx < x0 + SIDEBAR_W - 8) g.fill(lx, y + 7, x0 + SIDEBAR_W - 8, y + 8, (color & 0x00FFFFFF) | 0x80000000);
                 continue;
             }
-            boolean selected = r.showcaseRow ? showcase : (!showcase && r.section == section && r.entry == entry);
+            boolean selected = r.kind != 0 ? mode == r.kind : (mode == 0 && r.section == section && r.entry == entry);
             boolean hovered = mouseX >= x0 && mouseX < x0 + SIDEBAR_W - 6 && mouseY >= y && mouseY < y + ROW_H && mouseY >= y0 && mouseY < y0 + sh;
             if (selected) {
                 float k = 0.5F + 0.5F * Mth.sin(t * 0.2F);
@@ -202,14 +219,15 @@ public class CodexScreen extends Screen {
             } else if (hovered) {
                 g.fill(x0, y, x0 + SIDEBAR_W - 6, y + ROW_H, 0x30FFFFFF);
             }
-            ItemStack icon = r.showcaseRow ? new ItemStack(net.minecraft.world.item.Items.SPYGLASS)
+            ItemStack icon = r.kind == 1 ? new ItemStack(net.minecraft.world.item.Items.SPYGLASS)
+                    : r.kind == 2 ? new ItemStack(net.minecraft.world.item.Items.COMPASS)
                     : secs.get(r.section).entries().get(r.entry).icon().get();
             g.pose().pushPose();
             g.pose().translate(x0 + 4, y + 1, 0);
             g.pose().scale(0.6875F, 0.6875F, 1F);
             g.renderItem(icon, 0, 0);
             g.pose().popPose();
-            String name = r.showcaseRow ? "Showcase" : secs.get(r.section).entries().get(r.entry).title();
+            String name = r.kind == 1 ? "Showcase" : r.kind == 2 ? "Voyage Goals" : secs.get(r.section).entries().get(r.entry).title();
             g.drawString(font, fit(name, SIDEBAR_W - 26, false), x0 + 18, y + 3, selected ? 0xFFFFF0C0 : 0xFFE0D2B4, false);
         }
         g.disableScissor();
@@ -307,6 +325,69 @@ public class CodexScreen extends Screen {
         g.fill(sx, sy - 1, sx + 1, sy + 2, 0xFFFFFFFF);
     }
 
+    // ------------------------------------------------------------------ voyage goals
+
+    private void drawGoals(GuiGraphics g, int mouseX, int mouseY, float t) {
+        var goals = com.piratecrew.goals.Goal.values();
+        int done = com.piratecrew.client.ClientGoals.count();
+        int x = pageX(), y0 = top + HEADER_H + 6, pw = pageW();
+        g.pose().pushPose();
+        g.pose().translate(x, y0 + 2, 0);
+        g.pose().scale(1.5F, 1.5F, 1F);
+        g.drawString(font, Component.literal("Voyage Goals").withStyle(ChatFormatting.BOLD), 0, 0, 0xFFFFF0C8, true);
+        g.pose().popPose();
+        String count = done + " / " + goals.length;
+        g.drawString(font, count, x + pw - font.width(count) - 2, y0 + 6, 0xFFE8B84A, false);
+        // progress gauge filling with gold, a glint running along it
+        int by = y0 + 20, bw = pw - 2;
+        g.fill(x, by, x + bw, by + 8, 0xFF1A0F08);
+        g.fill(x + 1, by + 1, x + bw - 1, by + 7, 0xFF1C2C3A);
+        int fill = (int) ((bw - 2) * (done / (float) goals.length));
+        for (int i = 0; i < fill; i++) {
+            float k = 0.5F + 0.5F * Mth.sin((i - t * 2F) / 9F);
+            g.fill(x + 1 + i, by + 1, x + 2 + i, by + 7, lerp(0xFFC8901E, 0xFFFFE070, k * 0.6F));
+        }
+        g.fill(x + 1, by + 1, x + 1 + fill, by + 2, 0x60FFFFFF);
+        GuiDraw.rope(g, x, y0 + 30, pw);
+        int cy0 = cardsTop(), bh = top + h - 8 - cy0;
+        int cols = 2, cw = (pw - 4) / 2;
+        int rowsN = (goals.length + cols - 1) / cols;
+        pageContentH = rowsN * (CARD_H + 4);
+        pageScroll = Mth.clamp(pageScroll, 0, Math.max(0, pageContentH - bh));
+        g.enableScissor(x, cy0, x + pw, cy0 + bh);
+        for (int i = 0; i < goals.length; i++) {
+            var goal = goals[i];
+            boolean got = com.piratecrew.client.ClientGoals.has(goal);
+            int cx = x + (i % cols) * (cw + 4);
+            int cy = cy0 + (i / cols) * (CARD_H + 4) - (int) pageScroll;
+            if (cy > cy0 + bh || cy + CARD_H < cy0) continue;
+            g.fill(cx, cy, cx + cw, cy + CARD_H, 0xFF1A0F08);
+            g.fill(cx + 1, cy + 1, cx + cw - 1, cy + CARD_H - 1, got ? 0xFF243A2E : 0xFF18222C);
+            int border = got ? lerp(0xFFC8901E, 0xFFFFE890, 0.5F + 0.5F * Mth.sin(t * 0.15F + i)) : 0xFF3A4652;
+            g.fill(cx, cy, cx + cw, cy + 1, border);
+            g.fill(cx, cy, cx + 1, cy + CARD_H, border);
+            g.fill(cx + cw - 1, cy, cx + cw, cy + CARD_H, (border & 0xFFFFFF) | 0x90000000);
+            g.fill(cx, cy + CARD_H - 1, cx + cw, cy + CARD_H, (border & 0xFFFFFF) | 0x90000000);
+            g.renderItem(goal.icon.get(), cx + 5, cy + 7);
+            if (!got) {
+                g.pose().pushPose();
+                g.pose().translate(0, 0, 200);
+                g.fill(cx + 4, cy + 6, cx + 22, cy + 24, 0xB0101820);
+                g.drawString(font, "?", cx + 11, cy + 11, 0xFF6A7682, false);
+                g.pose().popPose();
+            }
+            g.drawString(font, Component.literal(fit(goal.title, cw - 30, true)).withStyle(ChatFormatting.BOLD), cx + 25, cy + 6,
+                    got ? 0xFFFFF0C8 : 0xFF8A96A2, false);
+            g.drawString(font, fit(goal.description, cw - 30, false), cx + 25, cy + 17, got ? 0xFFB8D8B0 : 0xFF6A7682, false);
+            if (got) g.drawString(font, "\u2714", cx + cw - 10, cy + 3, 0xFF7FE07F, false);
+            if (mouseX >= cx && mouseX < cx + cw && mouseY >= cy && mouseY < cy + CARD_H && mouseY >= cy0 && mouseY < cy0 + bh) {
+                g.fill(cx + 1, cy + 1, cx + cw - 1, cy + CARD_H - 1, 0x18FFFFFF);
+            }
+        }
+        g.disableScissor();
+        if (pageContentH > bh) scrollbar(g, x + pw - 2, cy0, bh, pageScroll, pageContentH);
+    }
+
     // ------------------------------------------------------------------ showcase
 
     private int cols() {
@@ -368,7 +449,7 @@ public class CodexScreen extends Screen {
     }
 
     private int toolAt(double mx, double my) {
-        if (!showcase) return -1;
+        if (mode != 1) return -1;
         int x = pageX(), cy0 = cardsTop(), bh = top + h - 8 - cy0;
         if (my < cy0 || my >= cy0 + bh || mx < x || mx >= x + pageW()) return -1;
         int col = (int) ((mx - x) / (cardW() + 4));
@@ -406,9 +487,9 @@ public class CodexScreen extends Screen {
             int i = (int) ((my - y0 + sideScroll) / ROW_H);
             if (i >= 0 && i < rows.size() && !rows.get(i).header) {
                 Row r = rows.get(i);
-                if (r.showcaseRow) showcase = true;
+                if (r.kind != 0) mode = r.kind;
                 else {
-                    showcase = false;
+                    mode = 0;
                     section = r.section;
                     entry = r.entry;
                 }

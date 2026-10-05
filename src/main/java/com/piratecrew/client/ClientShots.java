@@ -55,7 +55,7 @@ public class ClientShots {
     private record Step(String name, int delay, Consumer<Minecraft> setup) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
-    private static final int WORLD_FROM = 9;   // steps from here on need the world loaded
+    private static final int WORLD_FROM = 11;   // steps from here on need the world loaded
     private static int index = -1, frames, idle;
     private static boolean started, setupDone;
 
@@ -67,7 +67,16 @@ public class ClientShots {
         STEPS.add(new Step("codex_gear", 30, mc -> CodexScreen.openAt(5, 5, false)));
         STEPS.add(new Step("codex_pact", 30, mc -> CodexScreen.openAt(4, 0, false)));
         STEPS.add(new Step("codex_showcase", 30, mc -> CodexScreen.openAt(0, 0, true)));
-        STEPS.add(new Step("items_a", 30, mc -> mc.setScreen(new GalleryScreen())));
+        STEPS.add(new Step("codex_goals", 30, mc -> {
+            ClientGoals.set(0b1011_0110_1101_0111L);
+            CodexScreen.openGoals();
+        }));
+        STEPS.add(new Step("toast", 20, mc -> {
+            mc.setScreen(new GalleryScreen());
+            PirateToast.show(new ItemStack(ModItems.KRAKEN_LURE.get()), "Goal Complete!", "Release the Kraken", 0xE8B84A);
+            PirateToast.show(new ItemStack(ModItems.BOUNTY_BOARD.get()), "WANTED: 1,250", "Your bounty rose by 50 rubies", 0xD03030);
+        }));
+        STEPS.add(new Step("items_a", 120, mc -> { }));
         STEPS.add(new Step("items_b", 9, mc -> { }));
         // --- a world to look at
         STEPS.add(new Step("", 0, ClientShots::createWorld));
@@ -79,7 +88,10 @@ public class ClientShots {
         STEPS.add(new Step("boss_lineup", 120, mc -> lineup(mc, false)));
         STEPS.add(new Step("sea_beasts", 120, ClientShots::beasts));
         STEPS.add(new Step("held_sword", 40, mc -> held(mc, ModItems.GEAR.get(GearTier.SOVEREIGN).sword())));
-        STEPS.add(new Step("held_storm", 20, mc -> held(mc, ModItems.GEAR.get(GearTier.STORMFORGED).sword())));
+        STEPS.add(new Step("held_storm", 20, mc -> {
+            held(mc, ModItems.GEAR.get(GearTier.STORMFORGED).sword());
+            PactHud.update(new com.piratecrew.network.PactSyncPacket("tempest", mc.level.getGameTime() + 120, 200));
+        }));
         STEPS.add(new Step("portal", 80, ClientShots::portal));
         STEPS.add(new Step("", 60, ClientShots::sea));
         STEPS.add(new Step("sundered_sea", 400, ClientShots::hover));

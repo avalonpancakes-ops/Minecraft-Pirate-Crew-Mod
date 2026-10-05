@@ -777,6 +777,7 @@ public class PirateEntity extends PathfinderMob {
         if (!free) takeRubies(sp.getInventory(), cost);
         joinCrew(crew, sp);
         CrewManager.addPirate(sp.server, crew, this);
+        com.piratecrew.goals.Goals.grant(sp, com.piratecrew.goals.Goal.RECRUIT);
 
         ServerLevel sl = (ServerLevel) this.level();
         sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 1.0, getZ(), 12, 0.4, 0.6, 0.4, 0.0);
