@@ -89,6 +89,14 @@ public class CommonEvents {
         event.setCancellationResult(r);
     }
 
+    /** Fighters notice players walling up or towering (see BuildTracker). */
+    @SubscribeEvent
+    public static void blockPlaced(net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent event) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.player.Player p && !p.level().isClientSide) {
+            com.piratecrew.entity.BuildTracker.record(p);
+        }
+    }
+
     @SubscribeEvent
     public static void entityJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
         com.piratecrew.compat.ValkyrienPiratesCompat.onJoin(event);

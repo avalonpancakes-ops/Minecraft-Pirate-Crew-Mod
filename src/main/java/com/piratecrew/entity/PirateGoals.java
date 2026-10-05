@@ -43,7 +43,9 @@ public class PirateGoals {
         public void tick() {
             super.tick();
             // Brawlers charge in faster, marksmen approach warily.
-            if (!pirate.getNavigation().isDone()) pirate.getNavigation().setSpeedModifier(pirate.getCombatStyle().chargeSpeed);
+            if (!pirate.getNavigation().isDone()) {
+                pirate.getNavigation().setSpeedModifier(pirate.getCombatStyle().chargeSpeed * (pirate.isRushing() ? 1.25 : 1.0));
+            }
         }
     }
 

@@ -64,6 +64,12 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
   - **Strength, speed and resistance potions:** drunk at the start of a fight.
   - **Harmful splash and lingering potions** (poison, harming, weakness, slowness): thrown at enemies 5 to 10 blocks away, never when a crewmate is close to the target.
   - Empty bottles and buckets go back in its pack. It lowers its shield to drink and doesn't attack while drinking.
+- **Building in a fight:** give a pirate solid blocks (dirt, cobblestone, planks... anything full and non-falling, but never ore or ruby blocks) in its pack and it builds like a player:
+  - **towers up** under itself to reach an enemy standing above it that it can't walk to;
+  - **bridges** across gaps and water toward an enemy it can't otherwise reach;
+  - **walls up for cover** (3 wide, 2 high) when it has a bow out and is being shot at from range, then steps out around the wall to shoot back (at most every 20 seconds).
+  Pirates on **Hold** only build cover. Debt collectors carry endless cobblestone; raiders often carry some planks or cobblestone (not on ships). Hostile pirates only build if the `mobGriefing` gamerule is on; your crew always can.
+- **Rushing builders:** when a pirate's target starts placing blocks (a player walling up or towering, or an enemy pirate building cover), it notices, draws its blade and rushes in around the wall with a burst of speed before the cover is finished.
 - **Weapon switching:** give a pirate both a melee weapon and a bow, crossbow or trident (one in hand, one in its pack) and it swaps between them mid-fight depending on how close the enemy is and its style. It always grabs the hardest-hitting blade it has.
 - **Tasks:** press **Tasks...** in a crew pirate's screen and pick a job. It works within about 12 blocks of where it's standing when you choose:
   - **Mine Ore**: mines ore it can see (cave walls, cliffs, exposed veins). Needs a pickaxe good enough for the ore.

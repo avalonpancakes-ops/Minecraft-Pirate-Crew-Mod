@@ -60,6 +60,8 @@ import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
@@ -306,6 +308,7 @@ public class PirateEntity extends PathfinderMob {
     public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
         if (hurt) lastCombatTick = this.tickCount;
+        if (hurt && source.getDirectEntity() instanceof Projectile) lastShotAt = this.tickCount;
         return hurt;
     }
 
@@ -650,7 +653,8 @@ public class PirateEntity extends PathfinderMob {
         double dist = this.distanceTo(target);
         // A little stickiness so it doesn't flip back and forth at the boundary.
         float threshold = holdingRanged ? meleeRange : meleeRange + 1.5F;
-        boolean wantMelee = !hasRanged || dist < threshold;
+        // Rushing an enemy who's walling up: blade out.
+        boolean wantMelee = !hasRanged || dist < threshold || rushTicks > 0;
         if (wantMelee) {
             if (meleeSlot >= 0) swapWithPack(meleeSlot);
         } else if (!holdingRanged && rangedSlot >= 0) {
@@ -756,6 +760,153 @@ public class PirateEntity extends PathfinderMob {
             }
         }
         inv.setChanged();
+    }
+
+    // ------------------------------------------------------------------ building in a fight
+
+    private int lastShotAt = -1000;
+    @Nullable private BlockPos pillarBase;
+    private int pillarStart;
+    private int coverCooldown;
+    private int rushTicks;
+    private int lastReachCheck = -1000;
+    private boolean lastReachable = true;
+    private final java.util.ArrayDeque<BlockPos> buildQueue = new java.util.ArrayDeque<>();
+
+    /** Can this pirate build right now? (Ship crews don't; hostile NPCs respect the mobGriefing rule.) */
+    protected boolean canBuild() {
+        if (isRecruited()) return true;
+        return this.level().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_MOBGRIEFING);
+    }
+
+    public boolean isRushing() {
+        return rushTicks > 0;
+    }
+
+    /** Solid, full, non-falling blocks without a block entity, and nothing valuable (no ore or ruby blocks). */
+    private static boolean isBuildBlock(ItemStack s) {
+        if (!(s.getItem() instanceof net.minecraft.world.item.BlockItem bi)) return false;
+        net.minecraft.world.level.block.Block b = bi.getBlock();
+        if (b instanceof net.minecraft.world.level.block.FallingBlock || b instanceof net.minecraft.world.level.block.EntityBlock) return false;
+        if (com.piratecrew.bank.RubyValues.unitValue(s) > 0) return false;
+        return b.defaultBlockState().isCollisionShapeFullBlock(net.minecraft.world.level.EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
+    }
+
+    private int findBuildBlock() {
+        for (int i = 0; i < pack.getContainerSize(); i++) if (isBuildBlock(pack.getItem(i))) return i;
+        return -1;
+    }
+
+    /** Place one of its blocks at {@code pos} if the spot is free. */
+    private boolean placeBuildBlock(BlockPos pos) {
+        if (!canBuild()) return false;
+        if (!this.level().getBlockState(pos).canBeReplaced()) return false;
+        int slot = findBuildBlock();
+        if (slot < 0) return false;
+        ItemStack stack = pack.getItem(slot);
+        BlockState state = ((net.minecraft.world.item.BlockItem) stack.getItem()).getBlock().defaultBlockState();
+        if (!this.level().isUnobstructed(state, pos, net.minecraft.world.phys.shapes.CollisionContext.empty())) return false;
+        this.level().setBlock(pos, state, 3);
+        var sound = state.getSoundType();
+        this.level().playSound(null, pos, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
+        this.swing(InteractionHand.MAIN_HAND);
+        if (!infiniteConsumables()) {
+            stack.shrink(1);
+            pack.setChanged();
+        }
+        BuildTracker.record(this);
+        return true;
+    }
+
+    private boolean canReach(LivingEntity t) {
+        if (this.tickCount - lastReachCheck < 20) return lastReachable;
+        lastReachCheck = this.tickCount;
+        net.minecraft.world.level.pathfinder.Path path = this.getNavigation().createPath(t, 0);
+        lastReachable = path != null && path.canReach();
+        return lastReachable;
+    }
+
+    /**
+     * In a fight, with blocks in its pack, a pirate builds like a player would: pillars up to an
+     * enemy above it, bridges over gaps and water toward one it can't reach, and throws up a wall
+     * for cover when it's being shot at from range. When its own target starts building, it rushes in.
+     */
+    private void tickBuilding() {
+        if (rushTicks > 0) rushTicks--;
+        if (coverCooldown > 0) coverCooldown--;
+        LivingEntity t = getTarget();
+
+        // Finishing a cover wall, a block at a time.
+        if (!buildQueue.isEmpty()) {
+            this.getNavigation().stop();
+            if (t != null) this.getLookControl().setLookAt(t);
+            if (this.tickCount % 2 == 0) placeBuildBlock(buildQueue.poll());
+            return;
+        }
+        if (t == null || !t.isAlive()) {
+            pillarBase = null;
+            return;
+        }
+
+        // Spot the enemy walling up or towering: get in there before it's finished.
+        if (this.tickCount % 10 == 0 && rushTicks == 0 && BuildTracker.isBuilding(t, 2) && this.distanceToSqr(t) < 24 * 24) {
+            rushTicks = 100;
+            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 100, 0, false, false));
+        }
+
+        // Mid-pillar: once it's jumped clear of the block below its feet, put a block there.
+        if (pillarBase != null) {
+            if (!this.onGround() && this.getY() > pillarBase.getY() + 1.0) {
+                placeBuildBlock(pillarBase);
+                pillarBase = null;
+            } else if (this.tickCount - pillarStart > 20) {
+                pillarBase = null;
+            }
+            return;
+        }
+
+        if (this.tickCount % 5 != 0 || isUsingItem() || findBuildBlock() < 0 || !canBuild()) return;
+        double dx = t.getX() - getX(), dz = t.getZ() - getZ();
+        double flat = Math.sqrt(dx * dx + dz * dz);
+        double dy = t.getY() - getY();
+        boolean holding = getOrders() == Orders.HOLD;
+
+        // 1. Tower up to an enemy above that it can't walk to.
+        if (!holding && dy >= 2.0 && flat < 5.0 && this.onGround() && !canReach(t)
+                && this.level().getBlockState(blockPosition().above(2)).canBeReplaced()) {
+            pillarBase = blockPosition();
+            pillarStart = this.tickCount;
+            this.getNavigation().stop();
+            this.getJumpControl().jump();
+            return;
+        }
+
+        // 2. Bridge over a gap or water toward an enemy it can't reach.
+        if (!holding && flat > 2.0 && Math.abs(dy) < 4.0 && (this.onGround() || this.isInWater()) && !canReach(t)) {
+            Direction d = Direction.getNearest(dx, 0, dz);
+            BlockPos front = blockPosition().relative(d);
+            BlockPos under = front.below();
+            if (this.level().getBlockState(front).canBeReplaced() && this.level().getBlockState(front.above()).canBeReplaced()
+                    && !this.level().getBlockState(under).isFaceSturdy(this.level(), under, Direction.UP)) {
+                if (placeBuildBlock(under)) {
+                    this.getMoveControl().setWantedPosition(front.getX() + 0.5, front.getY(), front.getZ() + 0.5, 1.0);
+                }
+            }
+            return;
+        }
+
+        // 3. Being shot at from range with a bow out: wall up for cover (3 wide, 2 high, 2 blocks out).
+        if (coverCooldown == 0 && isRangedWeapon(getMainHandItem()) && this.tickCount - lastShotAt < 40 && flat > 8.0 && flat < 32.0) {
+            Direction d = Direction.getNearest(dx, 0, dz);
+            Direction side = d.getClockWise();
+            BlockPos centre = blockPosition().relative(d, 2);
+            if (this.level().getBlockState(centre.below()).isFaceSturdy(this.level(), centre.below(), Direction.UP)) {
+                for (int h = 0; h < 2; h++) {
+                    for (int o = -1; o <= 1; o++) buildQueue.add(centre.relative(side, o).above(h));
+                }
+                coverCooldown = 400;
+            }
+        }
     }
 
     // ------------------------------------------------------------------ potions & food
@@ -1100,6 +1251,7 @@ public class PirateEntity extends PathfinderMob {
         if (this.tickCount % 10 == 0 && this.getTarget() != null) chooseWeapon();
         tickShield();
         if (this.tickCount % 10 == 0) tickConsumables();
+        tickBuilding();
 
         // Players regenerate, so do pirates (slowly, out of combat).
         if (this.tickCount % 60 == 0 && this.getHealth() < this.getMaxHealth()

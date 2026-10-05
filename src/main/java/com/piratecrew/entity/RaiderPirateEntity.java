@@ -86,6 +86,11 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
     }
 
     @Override
+    protected boolean canBuild() {
+        return !onShip && super.canBuild();
+    }
+
+    @Override
     protected int homeRadius() {
         return 14;
     }
@@ -170,6 +175,9 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
         }
         if (captain && gearLevel >= 4) setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
         if (captain) getPack().setItem(1, new ItemStack(Items.GOLDEN_APPLE, 1 + this.random.nextInt(2)));
+        // Blocks for bridging, towering and cover.
+        if (captain) getPack().setItem(2, new ItemStack(Items.COBBLESTONE, 32));
+        else if (this.random.nextFloat() < 0.6F) getPack().setItem(2, new ItemStack(this.random.nextBoolean() ? Items.OAK_PLANKS : Items.COBBLESTONE, 8 + this.random.nextInt(17)));
     }
 
     public boolean isCaptain() {

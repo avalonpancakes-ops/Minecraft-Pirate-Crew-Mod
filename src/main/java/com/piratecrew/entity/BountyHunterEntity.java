@@ -157,6 +157,7 @@ public class BountyHunterEntity extends PirateEntity {
         if (kb != null) kb.setBaseValue(0.1 * tier.ordinal());
         this.xpReward = 0; // a punishment, not a mob to farm: no XP, no drops
         equip(tier);
+        getPack().setItem(5, new ItemStack(Items.COBBLESTONE, 64)); // for bridging, towering and cover (never runs out)
     }
 
     public void setTest(boolean test) {
@@ -182,6 +183,7 @@ public class BountyHunterEntity extends PirateEntity {
         boolean marksman = getCombatStyle() == CombatStyle.MARKSMAN;
         setItemSlot(EquipmentSlot.MAINHAND, gear(marksman ? Items.BOW : Items.DIAMOND_SWORD));
         getPack().setItem(0, gear(marksman ? Items.DIAMOND_SWORD : Items.BOW));
+        getPack().setItem(5, new ItemStack(Items.COBBLESTONE, 64));
     }
 
     public boolean isMinion() {
