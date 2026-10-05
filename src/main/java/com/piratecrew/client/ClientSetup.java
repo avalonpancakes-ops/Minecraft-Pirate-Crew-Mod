@@ -51,6 +51,11 @@ public class ClientSetup {
         }
 
         @SubscribeEvent
+        public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+            event.registerLayerDefinition(com.piratecrew.client.model.KrakenModel.LAYER, com.piratecrew.client.model.KrakenModel::createBodyLayer);
+        }
+
+        @SubscribeEvent
         public static void overlays(net.minecraftforge.client.event.RegisterGuiOverlaysEvent event) {
             event.registerAbove(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.HOTBAR.id(), "soul_pact", PactHud::render);
         }
