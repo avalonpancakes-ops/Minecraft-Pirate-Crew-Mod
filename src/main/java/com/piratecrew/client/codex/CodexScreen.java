@@ -181,14 +181,31 @@ public class CodexScreen extends Screen {
         g.fill(left + 4 + SIDEBAR_W, py, left + 5 + SIDEBAR_W, py + ph, 0xFF6A4A2A);
     }
 
+    /** A faint eight-point compass rose watermarked on the chart, its north needle glinting. */
     private void compassRose(GuiGraphics g, int cx, int cy, float t) {
-        int col = 0x2030C0D0;
-        for (int r = -26; r <= 26; r++) {
-            int k = 26 - Math.abs(r);
-            g.fill(cx + r, cy - Math.max(1, k / 8), cx + r + 1, cy + Math.max(1, k / 8), col);
-            g.fill(cx - Math.max(1, k / 8), cy + r, cx + Math.max(1, k / 8), cy + r + 1, col);
+        int col = 0x2830C0D0, dim = 0x1830C0D0;
+        // ring
+        for (int a = 0; a < 360; a += 4) {
+            double r = Math.toRadians(a);
+            int x = cx + (int) Math.round(Math.cos(r) * 19), y = cy + (int) Math.round(Math.sin(r) * 19);
+            g.fill(x, y, x + 1, y + 1, col);
         }
-        g.fill(cx - 1, cy - 30, cx + 1, cy - 26, 0x40E8B84A);
+        // cardinal points: tapering diamonds
+        for (int d = 0; d <= 26; d++) {
+            int half = Math.max(0, 3 - d * 3 / 26);
+            g.fill(cx - half, cy - d, cx + half + 1, cy - d + 1, d > 2 ? lerp(0x40E8B84A, 0x90FFE070, 0.5F + 0.5F * Mth.sin(t * 0.1F)) : col);
+            g.fill(cx - half, cy + d, cx + half + 1, cy + d + 1, col);
+            g.fill(cx + d, cy - half, cx + d + 1, cy + half + 1, col);
+            g.fill(cx - d, cy - half, cx - d + 1, cy + half + 1, col);
+        }
+        // diagonal points
+        for (int d = 0; d <= 14; d++) {
+            g.fill(cx + d, cy + d, cx + d + 1, cy + d + 1, dim);
+            g.fill(cx - d, cy + d, cx - d + 1, cy + d + 1, dim);
+            g.fill(cx + d, cy - d, cx + d + 1, cy - d + 1, dim);
+            g.fill(cx - d, cy - d, cx - d + 1, cy - d + 1, dim);
+        }
+        g.drawString(font, "N", cx - 2, cy - 38, 0x60E8B84A, false);
     }
 
     private void drawSidebar(GuiGraphics g, int mouseX, int mouseY, float t) {

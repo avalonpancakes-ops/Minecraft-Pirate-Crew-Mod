@@ -70,20 +70,17 @@ public class CampBuilder {
         tent(level, c.offset(6, 0, 1), Direction.WEST, TENT_WOOL[r.nextInt(TENT_WOOL.length)], flags);
 
         // Loot chest by the north tent, barrels by the west one.
-        BlockPos chest = c.offset(2, 0, -6);
+        BlockPos chest = c.offset(3, 0, -5);
         level.setBlock(chest, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH), flags);
         BlockEntity be = level.getBlockEntity(chest);
         if (be instanceof RandomizableContainerBlockEntity rc) rc.setLootTable(PirateCrew.id("chests/raider_camp"), r.nextLong());
-        level.setBlock(c.offset(-6, 0, 3), Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), flags);
-        level.setBlock(c.offset(-5, 0, 4), Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), flags);
+        level.setBlock(c.offset(-6, 0, 5), Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), flags);
+        level.setBlock(c.offset(-5, 0, 5), Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP), flags);
 
         // Black flag on a pole.
         BlockPos pole = c.offset(4, 0, 5);
         for (int y = 0; y < 4; y++) level.setBlock(pole.above(y), Blocks.OAK_FENCE.defaultBlockState(), flags | Block.UPDATE_NEIGHBORS);
-        level.setBlock(pole.offset(1, 3, 0), Blocks.BLACK_WOOL.defaultBlockState(), flags);
-        level.setBlock(pole.offset(2, 3, 0), Blocks.BLACK_WOOL.defaultBlockState(), flags);
-        level.setBlock(pole.offset(1, 2, 0), Blocks.BLACK_WOOL.defaultBlockState(), flags);
-        level.setBlock(pole.offset(2, 2, 0), Blocks.BLACK_WOOL.defaultBlockState(), flags);
+        level.setBlock(pole.above(4), Blocks.BLACK_BANNER.defaultBlockState(), flags);
 
         // Lanterns on posts.
         for (BlockPos post : new BlockPos[]{c.offset(-4, 0, -3), c.offset(4, 0, -3)}) {
@@ -101,23 +98,28 @@ public class CampBuilder {
         for (RaiderPirateEntity p : crew) p.setHome(c);
     }
 
-    /** A 3x3 A-frame tent: wool walls and ridge, a closed back, a bedroll inside. */
+    /** A 5-wide A-frame tent: sloping wool sides meeting at a ridge, a closed back, ridge poles, a bedroll inside. */
     private static void tent(ServerLevel level, BlockPos front, Direction facing, Block wool, int flags) {
         Direction back = facing.getOpposite();
         Direction right = facing.getClockWise();
         BlockState w = wool.defaultBlockState();
         for (int d = 0; d < 3; d++) {
             BlockPos row = front.relative(back, d);
-            for (int y = 0; y < 2; y++) {
-                level.setBlock(row.relative(right).above(y), w, flags);
-                level.setBlock(row.relative(right.getOpposite()).above(y), w, flags);
+            for (int side : new int[]{-1, 1}) {
+                Direction dir = side > 0 ? right : right.getOpposite();
+                level.setBlock(row.relative(dir, 2), w, flags);
+                level.setBlock(row.relative(dir, 1).above(), w, flags);
             }
             level.setBlock(row.above(2), w, flags);
             if (d == 2) {
-                level.setBlock(row, w, flags);
+                for (int k = -1; k <= 1; k++) level.setBlock(row.relative(right, k), w, flags);
                 level.setBlock(row.above(), w, flags);
             }
         }
+        // ridge poles poking out front and back
+        level.setBlock(front.relative(facing).above(2), Blocks.SPRUCE_FENCE.defaultBlockState(), flags | Block.UPDATE_NEIGHBORS);
+        level.setBlock(front.relative(facing), Blocks.SPRUCE_FENCE.defaultBlockState(), flags | Block.UPDATE_NEIGHBORS);
+        level.setBlock(front.relative(facing).above(), Blocks.SPRUCE_FENCE.defaultBlockState(), flags | Block.UPDATE_NEIGHBORS);
         level.setBlock(front.relative(back, 1), Blocks.RED_CARPET.defaultBlockState(), flags);
         level.setBlock(front, Blocks.RED_CARPET.defaultBlockState(), flags);
     }
