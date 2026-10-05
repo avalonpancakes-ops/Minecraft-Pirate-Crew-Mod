@@ -55,7 +55,7 @@ public class ClientShots {
     private record Step(String name, int delay, Consumer<Minecraft> setup) {}
 
     private static final List<Step> STEPS = new ArrayList<>();
-    private static final int WORLD_FROM = 11;   // index of the 'settle' step   // steps from here on need the world loaded
+    private static int WORLD_FROM = Integer.MAX_VALUE;   // index of the 'settle' step: steps from here on need the world loaded
     private static int index = -1, frames, idle;
     private static boolean started, setupDone;
 
@@ -81,6 +81,7 @@ public class ClientShots {
         STEPS.add(new Step("tooltips", 20, mc -> mc.setScreen(new TooltipScreen())));
         // --- a world to look at
         STEPS.add(new Step("", 0, ClientShots::createWorld));
+        WORLD_FROM = STEPS.size();
         STEPS.add(new Step("", 200, mc -> { }));   // let the world settle
         STEPS.add(new Step("bank", 40, mc -> mc.setScreen(new BankScreen())));
         STEPS.add(new Step("shop", 30, mc -> mc.setScreen(new ShopScreen())));
