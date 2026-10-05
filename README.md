@@ -128,7 +128,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **Gear is random per crew member**, from nothing up to **diamond** (leather, gold, chainmail, iron, ruby or diamond, with pieces missing here and there), swords to match, and bows or crossbows. The **captain is always the best equipped**: a full set at the crew's best level, or one level better (so a captain isn't always in diamond). Captains are B, A or S tier, carry a shield from iron gear up and a golden apple or two, and their blade and bow are enchanted at ruby/diamond level.
 - They attack **players and recruited pirates** (your crew fights back and helps you), and they look out for each other: hit one and its crewmates come for you. They can't be recruited.
 - On their ship they **hold the deck**: they shoot from where they stand and fight hand to hand with anyone who boards, instead of walking off into the sea.
-- They drop a few rubies (the captain drops 8 to 20) and sometimes a piece of their gear. Killing them doesn't affect bounties.
+- They drop a few rubies (the captain drops 8 to 20) and sometimes a piece of their gear. Killing one raises your bounty just like killing any other pirate of its tier (if you're in a crew).
 - `/piratecrew spawnraiders` (op) brings an enemy crew to you on land for testing.
 
 ### Commands
