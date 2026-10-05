@@ -55,6 +55,9 @@ public class ModItems {
     public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_A = collectorEgg(PirateTier.A, 0xFF55FF);
     public static final RegistryObject<Item> DEBT_COLLECTOR_EGG_S = collectorEgg(PirateTier.S, 0xFFAA00);
 
+    public static final RegistryObject<Item> AGGRO_STICK = ITEMS.register("aggro_stick",
+            () -> new com.piratecrew.item.AggroStickItem(new Item.Properties()));
+
     private static RegistryObject<Item> collectorEgg(PirateTier tier, int color) {
         return ITEMS.register("debt_collector_" + tier.label.toLowerCase() + "_spawn_egg",
                 () -> new com.piratecrew.item.DebtCollectorEggItem(tier, color, new Item.Properties()));

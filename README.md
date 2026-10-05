@@ -145,6 +145,7 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - `/piratecrew spawnpirate <F|D|C|B|A|S>` (op) — spawn a pirate of a given tier
 - `/piratecrew spawncollector <F|D|C|B|A|S>` (op) — send a test debt collector after yourself (doesn't touch your loan)
 - **Debt collector spawn eggs** (creative tab, one per tier F to S): use one on a block to spawn a fully equipped test debt collector of that tier that hunts you. Like `spawncollector`, it never touches loans; fight it in survival.
+- **Aggro Stick** (creative tab, works in creative mode only): right-click a mob to pick it (it glows), then right-click another mob and the two fight. Sneak + right-click a mob to set every mob within 16 blocks on it; sneak + right-click the air to clear your pick. Works on any mob, including pirates, debt collectors, villagers and vanilla monsters (mobs with no way to attack, like cows, just get chased).
 - `/piratecrew loandue` (op) — make your loan overdue now, to test the collectors
 
 ## Config

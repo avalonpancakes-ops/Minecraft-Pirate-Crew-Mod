@@ -37,6 +37,7 @@ public class ModTabs {
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_B.get());
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_A.get());
                 out.accept(ModItems.DEBT_COLLECTOR_EGG_S.get());
+                out.accept(ModItems.AGGRO_STICK.get());
             })
             .build());
 }

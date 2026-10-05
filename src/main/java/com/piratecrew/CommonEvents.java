@@ -78,6 +78,17 @@ public class CommonEvents {
         LoanManager.onCorpse(sp, corpse);
     }
 
+    /** The creative aggro stick acts before a mob's own right-click (trading, recruiting, the bank...). */
+    @SubscribeEvent
+    public static void aggroStick(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
+        net.minecraft.world.item.ItemStack stack = event.getItemStack();
+        if (!(stack.getItem() instanceof com.piratecrew.item.AggroStickItem)) return;
+        if (!(event.getTarget() instanceof net.minecraft.world.entity.LivingEntity target)) return;
+        net.minecraft.world.InteractionResult r = com.piratecrew.item.AggroStickItem.useOnEntity(stack, event.getEntity(), target);
+        event.setCanceled(true);
+        event.setCancellationResult(r);
+    }
+
     @SubscribeEvent
     public static void entityJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
         com.piratecrew.compat.ValkyrienPiratesCompat.onJoin(event);
