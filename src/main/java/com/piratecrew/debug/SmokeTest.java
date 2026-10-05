@@ -18,6 +18,44 @@ import net.minecraftforge.fml.common.Mod;
 public class SmokeTest {
     public static final java.util.List<java.util.function.Consumer<ServerLevel>> CHECKS = new java.util.ArrayList<>();
 
+    /** A top-down picture of the islands around 0,0 (one pixel per block), for checking the terrain by eye. */
+    private static void renderMap(ServerLevel sea) throws java.io.IOException {
+        int chunksAcross = 24, size = chunksAcross * 16, origin = -size / 2;
+        java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(size, size, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        for (int cx = 0; cx < chunksAcross; cx++) {
+            for (int cz = 0; cz < chunksAcross; cz++) {
+                var chunk = sea.getChunk((origin >> 4) + cx, (origin >> 4) + cz, ChunkStatus.SURFACE, true);
+                for (int x = 0; x < 16; x++) {
+                    for (int z = 0; z < 16; z++) {
+                        int h = chunk.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+                        var biome = chunk.getNoiseBiome(x >> 2, Math.max(h, sea.getSeaLevel()) >> 2, z >> 2);
+                        String b = biome.unwrapKey().map(k -> k.location().getPath()).orElse("?");
+                        int rgb;
+                        if (h <= sea.getSeaLevel()) {
+                            int depth = Math.min(40, sea.getSeaLevel() - h);
+                            rgb = rgb(20, 120 - depth * 2, 190 - depth * 2);
+                        } else if (h <= 66) {
+                            rgb = rgb(222, 206, 140);
+                        } else {
+                            float shade = Math.min(1.0F, 0.55F + (h - 66) / 80.0F);
+                            int[] base = b.contains("storm") ? new int[]{50, 100, 70} : b.contains("ember") ? new int[]{90, 70, 70} : new int[]{80, 180, 60};
+                            rgb = rgb((int) (base[0] * shade), (int) (base[1] * shade), (int) (base[2] * shade));
+                        }
+                        img.setRGB(cx * 16 + x, cz * 16 + z, rgb);
+                    }
+                }
+            }
+        }
+        java.io.File dir = new java.io.File("smoke");
+        dir.mkdirs();
+        javax.imageio.ImageIO.write(img, "png", new java.io.File(dir, "sundered_map.png"));
+        PirateCrew.LOGGER.info("PIRATECREW SMOKETEST map written to {}", new java.io.File(dir, "sundered_map.png").getAbsolutePath());
+    }
+
+    private static int rgb(int r, int g, int b) {
+        return (Math.max(0, Math.min(255, r)) << 16) | (Math.max(0, Math.min(255, g)) << 8) | Math.max(0, Math.min(255, b));
+    }
+
     @SubscribeEvent
     public static void started(ServerStartedEvent event) {
         if (!Boolean.getBoolean("piratecrew.smoketest")) return;
@@ -39,6 +77,7 @@ public class SmokeTest {
                 }
             }
             PirateCrew.LOGGER.info("PIRATECREW SMOKETEST generated {} Sundered Sea chunks ({} with land above the sea)", chunks, land);
+            renderMap(sea);
             for (var check : CHECKS) check.accept(sea);
             PirateCrew.LOGGER.info("PIRATECREW SMOKETEST OK");
         } catch (Throwable t) {
