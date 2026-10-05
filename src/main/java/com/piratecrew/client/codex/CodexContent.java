@@ -205,6 +205,7 @@ public class CodexContent {
             gear.add(with(e(names[i] + " Gear", total + " armor · " + dmg[i] + " damage", icon(() -> ModItems.GEAR.get(t).sword().get()),
                     "§6Armor:§r helmet " + armor[i][0] + ", chestplate " + armor[i][1] + ", leggings " + armor[i][2] + ", boots " + armor[i][3] + ".",
                     "§6Cutlass:§r " + dmg[i] + " damage.",
+                    "§6Full set:§r " + com.piratecrew.item.GearSets.bonus(t).text() + ".",
                     "",
                     "§6Ingot:§r " + where[i],
                     "",

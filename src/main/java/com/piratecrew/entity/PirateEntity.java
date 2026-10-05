@@ -1309,6 +1309,7 @@ public class PirateEntity extends PathfinderMob {
         if (this.tickCount % 10 == 0) tickConsumables();
         tickBuilding();
         if (pact != null) com.piratecrew.pact.PactPowers.pirateTick(this);
+        if (this.tickCount % 20 == 3 && isRecruited()) com.piratecrew.item.GearSets.apply(this);
 
         // Players regenerate, so do pirates (slowly, out of combat).
         if (this.tickCount % 60 == 0 && this.getHealth() < this.getMaxHealth()

@@ -208,6 +208,7 @@ Ruby gear is the starting point. Each new tier is crafted from its ingot, in the
 | Sovereign | 14 / **20** / 18 / 13 | 12 | **31** | 8000 | 1 sovereign heart + 1 leviathan ingot → 2 |
 
 - A full Sovereign set is **65 armor**. The vanilla armor cap of 30 is lifted, and armor above 20 now keeps reducing damage. With 30 armor you take 80% of what you'd take at 20; full Leviathan takes about 56%, full Sovereign about 47%.
+- **Full-set bonuses** (all four armor pieces of one tier, for players and crew pirates): Tidesteel, Water Breathing; Abyssal, Night Vision; Krakenbone, Dolphin's Grace and Water Breathing; Stormforged, Speed and Jump Boost; Leviathan, Conduit Power and Dolphin's Grace; Sovereign, Strength, Fire Resistance and Regeneration.
 - Abyssal and later gear is fireproof, and every piece adds a little knockback resistance (a full Sovereign set is immune to knockback).
 
 **Bosses**

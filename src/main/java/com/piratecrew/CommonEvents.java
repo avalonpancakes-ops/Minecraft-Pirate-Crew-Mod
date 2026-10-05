@@ -264,6 +264,7 @@ public class CommonEvents {
         var pact = com.piratecrew.pact.SoulPacts.of(event.player);
         if (pact != null && !event.player.isSpectator()) com.piratecrew.pact.PactPowers.passives(event.player, pact);
         if (event.player.tickCount % 40 == 0 && event.player instanceof ServerPlayer sp) com.piratecrew.goals.Goals.check(sp);
+        com.piratecrew.item.GearSets.apply(event.player);
     }
 
     @SubscribeEvent
