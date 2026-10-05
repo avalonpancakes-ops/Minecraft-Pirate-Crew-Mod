@@ -38,7 +38,7 @@ public class LeviathanModel extends HierarchicalModel<Guardian> {
     public static LayerDefinition createBodyLayer() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-        PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-5, -5, -12, 10, 9, 12), PartPose.offset(0, 12, -6));
+        PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-5, -5, -12, 10, 9, 12), PartPose.offset(0, 17, -6));
         head.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(0, 21).addBox(-4, 0, -11, 8, 3, 11), PartPose.offset(0, 4, 0));
         head.addOrReplaceChild("horn_l", CubeListBuilder.create().texOffs(44, 0).addBox(-0.5F, -0.5F, 0, 1, 1, 6), PartPose.offsetAndRotation(3, -5, -3, 0.55F, 0.3F, 0));
         head.addOrReplaceChild("horn_r", CubeListBuilder.create().texOffs(44, 0).addBox(-0.5F, -0.5F, 0, 1, 1, 6), PartPose.offsetAndRotation(-3, -5, -3, 0.55F, -0.3F, 0));

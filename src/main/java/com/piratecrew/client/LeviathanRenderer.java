@@ -22,7 +22,7 @@ import net.minecraft.world.entity.monster.Guardian;
  */
 public class LeviathanRenderer extends GuardianRenderer {
     private static final ResourceLocation TEXTURE = PirateCrew.id("textures/entity/leviathan.png");
-    private static final float SCALE = 3.0F;
+    private static final float SCALE = 5.5F;
 
     public LeviathanRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, 3.5F, ModelLayers.ELDER_GUARDIAN);

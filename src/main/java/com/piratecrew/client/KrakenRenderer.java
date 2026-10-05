@@ -13,7 +13,7 @@ import net.minecraft.util.Mth;
 /** The Kraken, drawn with its own many-armed model at the size of a ship. */
 public class KrakenRenderer extends MobRenderer<KrakenEntity, KrakenModel> {
     private static final ResourceLocation TEXTURE = PirateCrew.id("textures/entity/kraken.png");
-    private static final float SCALE = 2.4F;
+    private static final float SCALE = 2.8F;
 
     public KrakenRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, new KrakenModel(ctx.bakeLayer(KrakenModel.LAYER)), 3.0F);

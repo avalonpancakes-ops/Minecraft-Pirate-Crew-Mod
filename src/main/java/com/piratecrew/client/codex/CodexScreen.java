@@ -281,9 +281,9 @@ public class CodexScreen extends Screen {
 
     private static final java.util.Map<String, Portrait> PORTRAITS = java.util.Map.of(
             "Commodore Graves", new Portrait(com.piratecrew.registry.ModEntities.COMMODORE, 26),
-            "The Kraken", new Portrait(com.piratecrew.registry.ModEntities.KRAKEN, 8),
+            "The Kraken", new Portrait(com.piratecrew.registry.ModEntities.KRAKEN, 7),
             "Tempest Admiral Sorel", new Portrait(com.piratecrew.registry.ModEntities.TEMPEST_ADMIRAL, 25),
-            "The Leviathan", new Portrait(com.piratecrew.registry.ModEntities.LEVIATHAN, 5),
+            "The Leviathan", new Portrait(com.piratecrew.registry.ModEntities.LEVIATHAN, 4),
             "Fleet Admiral Vane", new Portrait(com.piratecrew.registry.ModEntities.FLEET_ADMIRAL, 22),
             "Marines", new Portrait(com.piratecrew.registry.ModEntities.MARINE, 30));
     private final java.util.Map<String, net.minecraft.world.entity.LivingEntity> portraitCache = new java.util.HashMap<>();
