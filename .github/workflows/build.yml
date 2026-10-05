@@ -39,6 +39,18 @@ jobs:
           timeout 1500 ./gradlew runSmokeTest --no-daemon 2>&1 | tee smoke.log || true
           grep -q "PIRATECREW SMOKETEST OK" smoke.log
 
+      - name: Publish smoke test summary
+        if: always() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f smoke.log ] || exit 0
+          { echo "Smoke test for ${GITHUB_SHA::7}"; echo '```';
+            grep -E "PIRATECREW|\[piratecrew|piratecrew.*(WARN|ERROR)|(WARN|ERROR).*piratecrew|Exception|Caused by" smoke.log | head -150;
+            echo '```'; } > smoke.md
+          gh release delete smoke-log --yes --cleanup-tag || true
+          gh release create smoke-log --title "Last smoke test" --notes-file smoke.md --prerelease --target "$GITHUB_SHA"
+
       # If the build fails, publish the errors as a "build-log" release so they can be read
       # without downloading the full Actions log.
       - name: Publish build errors
