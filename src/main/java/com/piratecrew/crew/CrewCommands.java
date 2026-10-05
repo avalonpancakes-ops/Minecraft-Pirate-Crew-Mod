@@ -81,7 +81,7 @@ public class CrewCommands {
                     c.getSource().sendSuccess(() -> Component.literal("Your loan is now overdue."), true);
                     return 1;
                 }))
-                .then(Commands.literal("spawnhunter").then(Commands.argument("tier", StringArgumentType.word())
+                .then(Commands.literal("spawncollector").then(Commands.argument("tier", StringArgumentType.word())
                         .suggests((c, b) -> {
                             for (PirateTier t : PirateTier.values()) b.suggest(t.label);
                             return b.buildFuture();
@@ -103,7 +103,7 @@ public class CrewCommands {
                             h.setTest(true);
                             h.finalizeSpawn(level, level.getCurrentDifficultyAt(p.blockPosition()), MobSpawnType.COMMAND, null, null);
                             level.addFreshEntity(h);
-                            c.getSource().sendSuccess(() -> Component.literal("A test bounty hunter is coming for you (switch to survival)."), true);
+                            c.getSource().sendSuccess(() -> Component.literal("A test debt collector is coming for you (switch to survival)."), true);
                             return 1;
                         })))
                 .then(Commands.literal("spawnpirate").then(Commands.argument("tier", StringArgumentType.word())

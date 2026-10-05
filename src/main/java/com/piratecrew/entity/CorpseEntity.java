@@ -169,7 +169,7 @@ public class CorpseEntity extends Entity {
                     // The hunter was killed (or left) before he got to it: the items are safe.
                     unlock();
                     ServerPlayer owner = ownerPlayer(sl);
-                    if (owner != null) owner.sendSystemMessage(Component.literal("The hunter never finished searching your corpse. Your items are safe.").withStyle(ChatFormatting.GREEN));
+                    if (owner != null) owner.sendSystemMessage(Component.literal("The collector never finished searching your corpse. Your items are safe.").withStyle(ChatFormatting.GREEN));
                     LoanManager.cancelSeizure(this);
                 } else if (lockedTicks >= LOCK_TIMEOUT) {
                     LoanManager.seizeFromCorpse(this, hunter);
@@ -195,8 +195,8 @@ public class CorpseEntity extends Entity {
         if (this.level().isClientSide) return InteractionResult.SUCCESS;
         boolean owner = player.getUUID().equals(getOwner());
         if (isLocked()) {
-            player.displayClientMessage(Component.literal(owner ? "A bounty hunter is searching your corpse. Stop him or wait."
-                    : "A bounty hunter is searching this corpse.").withStyle(ChatFormatting.RED), true);
+            player.displayClientMessage(Component.literal(owner ? "A debt collector is searching your corpse. Stop him or wait."
+                    : "A debt collector is searching this corpse.").withStyle(ChatFormatting.RED), true);
             return InteractionResult.CONSUME;
         }
         if (!owner) {

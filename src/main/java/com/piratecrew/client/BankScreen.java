@@ -199,14 +199,14 @@ public class BankScreen extends Screen {
             g.drawString(font, terms, left + W - 12 - font.width(terms), top + 172, 0xFF606060, false);
             g.drawString(font, "Borrowed rubies go into your account.", left + 12, top + 186, 0xFF404040, false);
             g.drawString(font, "Miss the deadline and the bank sends", left + 12, top + 197, 0xFF8A2020, false);
-            g.drawString(font, "bounty hunters after you.", left + 12, top + 206, 0xFF8A2020, false);
+            g.drawString(font, "debt collectors after you.", left + 12, top + 206, 0xFF8A2020, false);
         } else {
             String owed = "Owed: " + String.format("%,d", loanOwed) + " rubies";
             g.drawString(font, owed, left + W - 12 - font.width(owed), top + 172, 0xFFB02020, false);
             String due;
             int color = 0xFF404040;
             if (loanOverdue || loanTicksLeft <= 0) {
-                due = "OVERDUE: bounty hunters are after you!";
+                due = "OVERDUE: debt collectors are after you!";
                 color = 0xFFC01010;
             } else if (loanTicksLeft < 24000) {
                 long hours = Math.max(1, (loanTicksLeft + 999) / 1000);

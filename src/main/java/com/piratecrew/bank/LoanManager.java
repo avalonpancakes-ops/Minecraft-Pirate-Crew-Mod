@@ -99,7 +99,7 @@ public class LoanManager {
             boolean hunted = l.defaulted;
             data.remove(player.getUUID());
             player.sendSystemMessage(Component.literal("Banker: ").withStyle(ChatFormatting.GOLD)
-                    .append(Component.literal(hunted ? "Paid in full, at last. I'll call off the hunters." : "Paid in full. A pleasure doing business.")
+                    .append(Component.literal(hunted ? "Paid in full, at last. I'll call off the collectors." : "Paid in full. A pleasure doing business.")
                             .withStyle(ChatFormatting.GREEN)));
         } else {
             player.displayClientMessage(Component.literal(String.format("Paid %,d rubies. You still owe %,d.", paid, l.owed)).withStyle(ChatFormatting.YELLOW), true);
@@ -149,7 +149,7 @@ public class LoanManager {
                         l.lastReminder = daysLeft;
                         data.setDirty();
                         p.sendSystemMessage(Component.literal("⚠ ").withStyle(ChatFormatting.GOLD)
-                                .append(Component.literal(String.format("Your loan of %,d rubies is due in %d day%s. Repay it at a bank or the bank sends bounty hunters.",
+                                .append(Component.literal(String.format("Your loan of %,d rubies is due in %d day%s. Repay it at a bank or the bank sends debt collectors.",
                                         l.owed, daysLeft, daysLeft == 1 ? "" : "s")).withStyle(ChatFormatting.YELLOW)));
                     }
                 }
@@ -198,7 +198,7 @@ public class LoanManager {
         List<BountyHunterEntity> sent = spawnHunters(p, waveTiers(l.wave), l.serial);
         if (sent.isEmpty()) return;
         l.resumeWave = false;
-        p.sendSystemMessage(Component.literal("\u2620 Logging off won't save you. The bank's hunters have picked up your trail again!").withStyle(ChatFormatting.DARK_RED));
+        p.sendSystemMessage(Component.literal("\u2620 Logging off won't save you. The bank's collectors have picked up your trail again!").withStyle(ChatFormatting.DARK_RED));
         p.playNotifySound(SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.0F, 0.7F);
     }
 
@@ -407,7 +407,7 @@ public class LoanManager {
             data.remove(victim.getUUID());
             victim.sendSystemMessage(Component.literal("Your debt is settled.").withStyle(ChatFormatting.GREEN));
         } else {
-            victim.sendSystemMessage(Component.literal(String.format("You still owe %,d rubies. More hunters come tomorrow.", l.owed)).withStyle(ChatFormatting.RED));
+            victim.sendSystemMessage(Component.literal(String.format("You still owe %,d rubies. More collectors come tomorrow.", l.owed)).withStyle(ChatFormatting.RED));
         }
     }
 
@@ -485,9 +485,9 @@ public class LoanManager {
         LoanData.Loan l = loanOf(server, debtor);
         if (l == null) return;
         PirateTier next = waveTiers(l.wave + 1).get(waveTiers(l.wave + 1).size() - 1);
-        p.sendSystemMessage(Component.literal("You fought off the bank's hunters... for today. Tomorrow a ").withStyle(ChatFormatting.GOLD)
+        p.sendSystemMessage(Component.literal("You fought off the bank's collectors... for today. Tomorrow a ").withStyle(ChatFormatting.GOLD)
                 .append(Component.literal(next.label + "-tier").withStyle(next.color, ChatFormatting.BOLD))
-                .append(Component.literal(String.format(" hunter comes. Repay the %,d rubies to stop them.", l.owed)).withStyle(ChatFormatting.GOLD)));
+                .append(Component.literal(String.format(" collector comes. Repay the %,d rubies to stop them.", l.owed)).withStyle(ChatFormatting.GOLD)));
     }
 
     public static void onLogin(ServerPlayer p) {
@@ -497,7 +497,7 @@ public class LoanManager {
     }
 
     public static String status(MinecraftServer server, LoanData.Loan l) {
-        if (l.defaulted) return String.format("You owe the bank %,d rubies and it's overdue: bounty hunters are after you. Repay it at a bank to call them off.", l.owed);
+        if (l.defaulted) return String.format("You owe the bank %,d rubies and it's overdue: debt collectors are after you. Repay it at a bank to call them off.", l.owed);
         long left = l.deadline - now(server);
         int days = (int) Math.ceil(left / (double) DAY);
         return String.format("You owe the bank %,d rubies, due in %d day%s.", l.owed, days, days == 1 ? "" : "s");
