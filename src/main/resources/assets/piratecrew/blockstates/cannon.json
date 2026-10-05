@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "piratecrew:block/cannon",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "piratecrew:block/cannon",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "piratecrew:block/cannon",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "piratecrew:block/cannon",
+      "y": 270
+    }
+  }
+}

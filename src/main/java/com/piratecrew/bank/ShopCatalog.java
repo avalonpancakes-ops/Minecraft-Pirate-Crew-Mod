@@ -93,7 +93,9 @@ public class ShopCatalog {
                 .add(Items.TRIDENT, 1, 120)
                 .add(Items.TOTEM_OF_UNDYING, 1, 160)
                 .add(Items.TNT, 4, 12)
-                .add(Items.FIREWORK_ROCKET, 16, 10);
+                .add(Items.FIREWORK_ROCKET, 16, 10)
+                .addMod(() -> com.piratecrew.registry.ModItems.CANNON.get(), 1, 25)
+                .addMod(() -> com.piratecrew.registry.ModItems.CANNONBALL.get(), 8, 6);
 
         b.cat(Category.GEAR)
                 .add(Items.IRON_HELMET, 1, 12)

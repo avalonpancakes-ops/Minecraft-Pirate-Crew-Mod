@@ -301,6 +301,20 @@ def creak(seed):
     return norm(fade_out(reverb(s, 0.25)), 0.45)
 
 
+def cannon(seed):
+    """A cannon shot: a sharp crack, a deep chest-thump, then a long rolling rumble."""
+    r = np.random.default_rng(seed)
+    dur = 2.6
+    t = t_axis(dur)
+    crack = hp(r.standard_normal(len(t)), 1200) * np.exp(-t / 0.012)
+    ph = 2 * np.pi * np.cumsum(48 * (1 + 2.0 * np.exp(-t / 0.04))) / SR
+    thump = np.sin(ph) * np.exp(-t / 0.25)
+    rumble = lp(r.standard_normal(len(t)), 260) * np.exp(-t / 0.7) * 2.5
+    body = lp(r.standard_normal(len(t)), 1500) * np.exp(-t / 0.08)
+    x = crack * 0.6 + thump * 1.0 + rumble * 0.8 + body * 0.7
+    return norm(fade_out(reverb(np.tanh(x * 1.6), 0.3, 0.85)), 0.95)
+
+
 def write(name, x):
     os.makedirs(OUT, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
@@ -325,6 +339,8 @@ def main():
         write(f"gull{i + 1}", gull(70 + i))
     for i in range(2):
         write(f"creak{i + 1}", creak(90 + i))
+    for i in range(2):
+        write(f"cannon_fire{i + 1}", cannon(120 + i))
 
 
 if __name__ == "__main__":

@@ -38,6 +38,7 @@ public class ClientSetup {
         @SubscribeEvent
         public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.PIRATE.get(), PirateRenderer::new);
+            event.registerEntityRenderer(ModEntities.CANNONBALL.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
             event.registerEntityRenderer(ModEntities.BANKER.get(), BankerRenderer::new);
             event.registerEntityRenderer(ModEntities.BOUNTY_HUNTER.get(), PirateRenderer::new);
             event.registerEntityRenderer(ModEntities.CORPSE.get(), CorpseRenderer::new);

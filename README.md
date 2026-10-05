@@ -135,6 +135,13 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - **No escaping through portals:** if you go to the Nether or the End (or any other dimension), the collectors follow you a few seconds later and turn up nearby.
 - **No escaping by logging off:** collectors leave 30 seconds after you log out, but if you come back the same Minecraft day, the same collectors come straight back after you.
 
+### Ship's cannons
+- **Ship's Cannon**: 3 iron ingots over log, gunpowder, log. It faces the way you're looking when you place it.
+- **Cannonballs**: iron ingot + gunpowder makes 4. You can also buy both in the bank shop.
+- Right-click the cannon holding a cannonball to fire. A redstone pulse also fires it, with no ammo needed, so you can wire a deck battery.
+- Cannonballs fly in a long arc and burst on impact. They hurt anything nearby but never break blocks.
+- Marine outposts have cannons beside their gates.
+
 ### Treasure maps
 - **Torn Treasure Maps** drop from raider camp chests (35%), marine outpost chests (30%) and always from Commodore Graves.
 - Using one unrolls a real map, with a red X over dry land 250 to 650 blocks away, and tells you the rough distance and direction.

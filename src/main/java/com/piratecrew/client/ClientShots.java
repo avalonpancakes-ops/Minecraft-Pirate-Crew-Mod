@@ -15,6 +15,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import com.piratecrew.registry.ModBlocks;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -112,10 +114,28 @@ public class ClientShots {
             sp.getInventory().setItem(0, torn);
             sp.getInventory().selected = 0;
             var result = torn.use(level, sp, net.minecraft.world.InteractionHand.MAIN_HAND);
-            sp.getInventory().setItem(0, result.getObject());
-            PirateCrew.LOGGER.info("PIRATECREW CLIENTSHOT treasure map result: {}", result.getObject());
+            ItemStack shown = result.getObject();
+            for (int i = 0; i < sp.getInventory().getContainerSize(); i++) {
+                ItemStack st = sp.getInventory().getItem(i);
+                if (st.is(net.minecraft.world.item.Items.FILLED_MAP)) {
+                    shown = st.copy();
+                    sp.getInventory().setItem(i, ItemStack.EMPTY);
+                }
+            }
+            sp.getInventory().setItem(0, shown);
+            PirateCrew.LOGGER.info("PIRATECREW CLIENTSHOT treasure map result: {}", shown);
             int ground = ground(level, 0, -40);
             look(sp, level, 0.5, ground + 1.6, -40, 0F, 55F);
+        })));
+        STEPS.add(new Step("cannons", 60, mc -> onServer(mc, sp -> {
+            ServerLevel level = sp.serverLevel();
+            sp.getInventory().setItem(0, new ItemStack(ModItems.CANNONBALL.get(), 16));
+            int g = ground(level, 20, -40);
+            Direction[] dirs = {Direction.WEST, Direction.SOUTH, Direction.EAST};
+            for (int i = 0; i < 3; i++) {
+                level.setBlock(new BlockPos(18 + i * 2, g, -38), ModBlocks.CANNON.get().defaultBlockState().setValue(com.piratecrew.cannon.CannonBlock.FACING, dirs[i]), 3);
+            }
+            look(sp, level, 20.5, g + 1.2, -33.5, 180F, 18F);
         })));
         STEPS.add(new Step("portal", 80, ClientShots::portal));
         STEPS.add(new Step("outpost", 120, mc -> structure(mc, 0)));

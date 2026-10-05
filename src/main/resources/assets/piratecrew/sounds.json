@@ -122,5 +122,16 @@
         "stream": true
       }
     ]
+  },
+  "cannon_fire": {
+    "subtitle": "subtitles.piratecrew.cannon_fire",
+    "sounds": [
+      {
+        "name": "piratecrew:cannon_fire1"
+      },
+      {
+        "name": "piratecrew:cannon_fire2"
+      }
+    ]
   }
 }

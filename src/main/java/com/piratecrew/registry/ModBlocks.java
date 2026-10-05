@@ -61,6 +61,15 @@ public class ModBlocks {
                     .strength(50.0F, 1200.0F)
                     .sound(SoundType.WOOD)));
 
+    /** A ship's cannon: fires cannonballs on right-click or a redstone pulse. */
+    public static final RegistryObject<Block> CANNON = BLOCKS.register("cannon",
+            () -> new com.piratecrew.cannon.CannonBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .requiresCorrectToolForDrops()
+                    .strength(3.5F, 8.0F)
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
     // ------------------------------------------------------------------ Sundered Sea ores
 
     private static RegistryObject<Block> ore(String name, MapColor color, float hardness, SoundType sound, int minXp, int maxXp) {

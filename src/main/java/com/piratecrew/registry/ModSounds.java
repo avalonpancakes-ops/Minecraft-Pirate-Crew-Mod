@@ -21,6 +21,7 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> SEA_AMBIENT = reg("sea_ambient");
     public static final RegistryObject<SoundEvent> SEA_ADDITIONS = reg("sea_additions");
     public static final RegistryObject<SoundEvent> BOSS_THEME = reg("boss_theme");
+    public static final RegistryObject<SoundEvent> CANNON_FIRE = reg("cannon_fire");
     public static final RegistryObject<SoundEvent> DISC_SAILOR = reg("disc_sailor");
     public static final RegistryObject<SoundEvent> DISC_JIG = reg("disc_jig");
     public static final RegistryObject<SoundEvent> DISC_KRAKEN = reg("disc_kraken");

@@ -18,6 +18,13 @@ import net.minecraftforge.registries.RegistryObject;
 public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, PirateCrew.MODID);
 
+    public static final RegistryObject<EntityType<com.piratecrew.cannon.CannonballEntity>> CANNONBALL = ENTITIES.register("cannonball",
+            () -> EntityType.Builder.<com.piratecrew.cannon.CannonballEntity>of(com.piratecrew.cannon.CannonballEntity::new, MobCategory.MISC)
+                    .sized(0.4F, 0.4F)
+                    .clientTrackingRange(8)
+                    .updateInterval(5)
+                    .build(PirateCrew.id("cannonball").toString()));
+
     public static final RegistryObject<EntityType<PirateEntity>> PIRATE = ENTITIES.register("pirate",
             () -> EntityType.Builder.<PirateEntity>of(PirateEntity::new, MobCategory.MISC)
                     .sized(0.6F, 1.8F)

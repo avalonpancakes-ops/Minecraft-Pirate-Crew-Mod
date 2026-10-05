@@ -140,5 +140,9 @@
   "item.piratecrew.music_disc_jig.desc": "Pirate Crew - The Ruby Jig",
   "item.piratecrew.music_disc_kraken": "Music Disc",
   "item.piratecrew.music_disc_kraken.desc": "Pirate Crew - The Kraken's Lullaby",
-  "item.piratecrew.treasure_map": "Torn Treasure Map"
+  "item.piratecrew.treasure_map": "Torn Treasure Map",
+  "block.piratecrew.cannon": "Ship's Cannon",
+  "item.piratecrew.cannonball": "Cannonball",
+  "entity.piratecrew.cannonball": "Cannonball",
+  "subtitles.piratecrew.cannon_fire": "Cannon fires"
 }

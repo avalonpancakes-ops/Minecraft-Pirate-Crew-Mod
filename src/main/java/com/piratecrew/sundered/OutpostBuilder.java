@@ -69,7 +69,7 @@ public class OutpostBuilder {
             level.setBlock(c.offset(gx, 3, 7), Blocks.LANTERN.defaultBlockState(), flags);
         }
         for (int gx : new int[]{-5, 5}) {
-            level.setBlock(c.offset(gx, 2, 7), Blocks.DISPENSER.defaultBlockState().setValue(net.minecraft.world.level.block.DispenserBlock.FACING, Direction.SOUTH), flags);
+            level.setBlock(c.offset(gx, 2, 7), com.piratecrew.registry.ModBlocks.CANNON.get().defaultBlockState().setValue(com.piratecrew.cannon.CannonBlock.FACING, Direction.SOUTH), flags);
         }
         for (int[] o : new int[][]{{7, -7}, {7, 7}, {-7, 7}}) level.setBlock(c.offset(o[0], 2, o[1]), Blocks.LANTERN.defaultBlockState(), flags);
 
