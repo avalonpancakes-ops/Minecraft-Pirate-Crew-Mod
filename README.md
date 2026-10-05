@@ -122,6 +122,12 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Corpses can't be hurt, don't burn in lava, and never despawn while they hold items. If you die in the void, your corpse floats just above it.
 - With the `keepInventory` gamerule on there's no corpse (you keep your items, and a collector takes his share straight from your inventory).
 
+### Raider camps
+- Now and then, out in the Overworld, you'll stumble on a **raider camp**: a clearing with a campfire ringed by log seats, three wool tents with bedrolls, barrels, a black flag on a pole, lanterns and a **loot chest** (rubies, food, arrows, iron, gold, the odd emerald, enchanted book, golden apple or diamond).
+- An enemy pirate crew is lounging around the fire: a **captain** and 3 to 5 crew, geared exactly like the ship crews (random gear up to diamond, captain always best equipped). They wander about their camp, attack players and recruited pirates who come close, and chase intruders up to about 14 blocks from camp (archers keep shooting further out).
+- Camps only appear in newly generated land, on flat dry ground (not oceans, rivers or beaches), well away from villages, bars, banks and each other. By default a camp is tried in 1 of every 250 new chunks and camps are at least 320 blocks apart; both are in the config (`generateCamps`, `campChance`, `campSpacing`). A camp's crew doesn't come back once it's been wiped out.
+- `/piratecrew spawncamp` (op) builds one in front of you.
+
 ### Enemy pirate crews at sea (with Valkyrien Pirates)
 - Optional: install **[Valkyrien Pirates](https://modrinth.com/mod/valkyrien-pirates)** (it needs **Valkyrien Skies** and **Eureka! Ships!**) and its pirate ships that sail the oceans get boarded by an **enemy NPC pirate crew** from this mod, in the Overworld only. Without those mods, Pirate Crew works exactly as before.
 - Each ship gets a **captain** plus 3 to 8 crew (bigger ships, bigger crews), alongside Valkyrien Pirates' own helmsman and cannoneers, who still sail the ship and fire its cannons.

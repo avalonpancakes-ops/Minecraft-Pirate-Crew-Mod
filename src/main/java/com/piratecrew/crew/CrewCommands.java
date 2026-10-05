@@ -106,6 +106,17 @@ public class CrewCommands {
                             c.getSource().sendSuccess(() -> Component.literal("A test debt collector is coming for you (switch to survival)."), true);
                             return 1;
                         })))
+                .then(Commands.literal("spawncamp").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    ServerLevel level = p.serverLevel();
+                    net.minecraft.core.BlockPos centre = p.blockPosition().relative(p.getDirection(), 14);
+                    int h = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, centre.getX(), centre.getZ());
+                    net.minecraft.core.BlockPos floor = new net.minecraft.core.BlockPos(centre.getX(), h - 1, centre.getZ());
+                    com.piratecrew.world.CampBuilder.build(level, floor);
+                    com.piratecrew.world.CampData.get(level).add(floor);
+                    c.getSource().sendSuccess(() -> Component.literal("Built a raider camp."), true);
+                    return 1;
+                }))
                 .then(Commands.literal("spawnraiders").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     ServerLevel level = p.serverLevel();

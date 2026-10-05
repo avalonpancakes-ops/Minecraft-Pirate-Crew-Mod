@@ -399,10 +399,15 @@ public class PirateEntity extends PathfinderMob {
         if (isRecruited() && getOrders() == Orders.WORK && workCenter != null) {
             this.restrictTo(workCenter, WORK_RADIUS + 10);
         } else if (home != null && (!isRecruited() || getOrders() == Orders.WANDER)) {
-            this.restrictTo(home, isRecruited() ? 12 : HOME_RADIUS);
+            this.restrictTo(home, isRecruited() ? 12 : homeRadius());
         } else {
             this.clearRestriction();
         }
+    }
+
+    /** How far a free pirate strays from its home (bar pirates stay close; raider camps roam wider). */
+    protected int homeRadius() {
+        return HOME_RADIUS;
     }
 
     @Nullable

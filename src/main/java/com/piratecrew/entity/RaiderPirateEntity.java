@@ -62,6 +62,19 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
             }
         });
         this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
+        this.goalSelector.addGoal(5, new net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal(this, 0.8) {
+            @Override
+            public boolean canUse() {
+                return !onShip && super.canUse();
+            }
+        });
+        // Camp crews mill about their camp.
+        this.goalSelector.addGoal(6, new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal(this, 0.5) {
+            @Override
+            public boolean canUse() {
+                return !onShip && getTarget() == null && super.canUse();
+            }
+        });
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
@@ -70,6 +83,11 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
                 e -> !((Player) e).isCreative() && !e.isSpectator()));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, PirateEntity.class, 10, true, false,
                 e -> e instanceof PirateEntity p && p.isRecruited()));
+    }
+
+    @Override
+    protected int homeRadius() {
+        return 14;
     }
 
     private boolean withinReachIfOnShip() {
