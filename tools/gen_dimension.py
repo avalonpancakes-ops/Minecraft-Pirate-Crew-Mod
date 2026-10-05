@@ -61,7 +61,7 @@ write(os.path.join(D, "dimension/sundered_sea.json"), {
 })
 
 # ---------------------------------------------------------------- noise
-write(os.path.join(D, "worldgen/noise/sundered_islands.json"), {"firstOctave": -8, "amplitudes": [1.0, 1.0, 0.6, 0.3, 0.15]})
+write(os.path.join(D, "worldgen/noise/sundered_islands.json"), {"firstOctave": -7, "amplitudes": [1.0, 0.9, 0.6, 0.35, 0.15]})
 write(os.path.join(D, "worldgen/noise/sundered_detail.json"), {"firstOctave": -5, "amplitudes": [1.0, 0.5, 0.25]})
 
 islands = {"type": "minecraft:noise", "noise": "piratecrew:sundered_islands", "xz_scale": 1.0, "y_scale": 0.0}
@@ -136,7 +136,7 @@ write(os.path.join(D, "worldgen/noise_settings/sundered_sea.json"), {
     "noise": {"min_y": -64, "height": 384, "size_horizontal": 1, "size_vertical": 2},
     "noise_router": {
         "barrier": 0.0, "fluid_level_floodedness": 0.0, "fluid_level_spread": 0.0, "lava": 0.0,
-        "temperature": shifted("minecraft:temperature", 0.25),
+        "temperature": shifted("minecraft:temperature", 0.6),
         "vegetation": shifted("minecraft:vegetation", 0.25),
         "continents": islands, "erosion": 0.0, "depth": 0.0, "ridges": 0.0,
         "initial_density_without_jaggedness": density,
