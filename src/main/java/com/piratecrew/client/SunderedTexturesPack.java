@@ -63,7 +63,6 @@ public class SunderedTexturesPack implements PackResources {
 
     static {
         // Items and the portal have their own hand-drawn textures; only the giant sea beasts reuse vanilla shapes.
-        tex("entity/kraken", "entity/squid/squid", KRAKEN);
         tex("entity/leviathan", "entity/guardian_elder", LEVIATHAN);
     }
 

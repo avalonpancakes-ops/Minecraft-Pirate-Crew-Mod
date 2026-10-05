@@ -90,6 +90,13 @@ public class ClientShots {
         STEPS.add(new Step("armor_lineup", 120, mc -> lineup(mc, true)));
         STEPS.add(new Step("boss_lineup", 120, mc -> lineup(mc, false)));
         STEPS.add(new Step("sea_beasts", 120, ClientShots::beasts));
+        STEPS.add(new Step("boss_bars", 30, mc -> {
+            mc.options.hideGui = false;
+            onServer(mc, sp -> {
+                ServerLevel level = sp.serverLevel();
+                place(level, ModEntities.FLEET_ADMIRAL.get(), 2.5, ground(level, 2, 104), 104.5, 180F);
+            });
+        }));
         STEPS.add(new Step("held_sword", 40, mc -> held(mc, ModItems.GEAR.get(GearTier.SOVEREIGN).sword())));
         STEPS.add(new Step("held_storm", 20, mc -> {
             held(mc, ModItems.GEAR.get(GearTier.STORMFORGED).sword());
@@ -285,7 +292,9 @@ public class ClientShots {
     private static void openGear(Minecraft mc) {
         mc.setScreen(null);
         onServer(mc, sp -> {
-            if (gearPirate != null) gearPirate.openEquipment(sp);
+            if (gearPirate == null) return;
+            look(sp, sp.serverLevel(), gearPirate.getX(), gearPirate.getY(), gearPirate.getZ() - 2.5, 0F, 10F);
+            gearPirate.openEquipment(sp);
         });
     }
 
@@ -327,7 +336,7 @@ public class ClientShots {
             int ground = ground(level, 0, -74);
             BlockPos at = SirenTeleporter.build(level, new BlockPos(0, ground - 1, -74));
             PirateCrew.LOGGER.info("PIRATECREW CLIENTSHOT portal built at {} (ground {}), block there: {}", at, ground, level.getBlockState(at));
-            look(sp, level, 0.5, ground + 3.5, -83, 0F, 12F);
+            look(sp, level, at.getX() + 1.0, at.getY() + 1.6, at.getZ() - 7.5, 0F, 4F);
         });
     }
 
