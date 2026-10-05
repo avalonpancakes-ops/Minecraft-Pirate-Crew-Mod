@@ -94,7 +94,8 @@ public class PirateGoals {
         @Override
         public void stop() {
             target = null;
-            if (pirate.isUsingItem()) pirate.stopUsingItem();
+            // Don't cancel a potion or golden apple: another goal (backing off to eat) may have taken over.
+            if (pirate.isUsingItem() && !pirate.isConsuming()) pirate.stopUsingItem();
             pirate.getNavigation().stop();
         }
 
@@ -117,7 +118,9 @@ public class PirateGoals {
             if (stationary.getAsBoolean()) {
                 pirate.getNavigation().stop();
             } else if (!canSee || dist > range * range) {
-                pirate.getNavigation().moveTo(target, 1.1);
+                if (!pirate.getNavigation().moveTo(target, 1.1)) {
+                    pirate.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.1);
+                }
             } else {
                 pirate.getNavigation().stop();
                 // Too close for comfort: back off to this pirate's preferred distance.
@@ -358,6 +361,141 @@ public class PirateGoals {
             Player leader = pirate.getLeader();
             if (leader != null) timestamp = leader.getLastHurtMobTimestamp();
             super.start();
+        }
+    }
+
+    /**
+     * While drinking a potion or eating a golden apple mid-fight, back away from the enemy to make
+     * room instead of standing in front of it. Ship crews stay on deck and eat where they stand.
+     */
+    public static class RetreatToEatGoal extends Goal {
+        private final PirateEntity pirate;
+        private int repath;
+
+        public RetreatToEatGoal(PirateEntity pirate) {
+            this.pirate = pirate;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            LivingEntity t = pirate.getTarget();
+            return pirate.isConsuming() && pirate.canRetreat() && t != null && t.isAlive() && pirate.distanceToSqr(t) < 14 * 14;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return canUse();
+        }
+
+        @Override
+        public void start() {
+            repath = 0;
+        }
+
+        @Override
+        public void stop() {
+            pirate.getNavigation().stop();
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity t = pirate.getTarget();
+            if (t == null) return;
+            pirate.getLookControl().setLookAt(t, 30.0F, 30.0F);
+            if (--repath > 0 && !pirate.getNavigation().isDone()) return;
+            repath = 10;
+            net.minecraft.world.phys.Vec3 away = net.minecraft.world.entity.ai.util.DefaultRandomPos.getPosAway(pirate, 10, 4, t.position());
+            if (away != null) {
+                pirate.getNavigation().moveTo(away.x, away.y, away.z, 1.35);
+            } else {
+                // Cornered: at least step straight back.
+                net.minecraft.world.phys.Vec3 back = pirate.position().subtract(t.position()).normalize().scale(4.0).add(pirate.position());
+                pirate.getMoveControl().setWantedPosition(back.x, pirate.getY(), back.z, 1.35);
+            }
+        }
+    }
+
+    /**
+     * Fallback melee: when the normal melee goal can't find a path (water, a ledge, a gap, or the
+     * target just outside a home area), walk straight at the target and swing when in reach, so
+     * two pirates never end up just staring at each other.
+     */
+    public static class ChargeGoal extends Goal {
+        private final PirateEntity pirate;
+        private int attackCooldown;
+        private int stuckTicks;
+        private double lastDist;
+
+        public ChargeGoal(PirateEntity pirate) {
+            this.pirate = pirate;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        private boolean valid() {
+            LivingEntity t = pirate.getTarget();
+            return t != null && t.isAlive() && !pirate.isConsuming() && pirate.getRangedType() == PirateEntity.Ranged.NONE
+                    && pirate.canRetreat() && pirate.distanceToSqr(t) < 24 * 24;
+        }
+
+        @Override
+        public boolean canUse() {
+            // Only steps in when nothing else is moving the pirate toward its target.
+            return valid() && pirate.getNavigation().isDone();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return valid();
+        }
+
+        @Override
+        public void start() {
+            attackCooldown = 0;
+            stuckTicks = 0;
+            lastDist = Double.MAX_VALUE;
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity t = pirate.getTarget();
+            if (t == null) return;
+            pirate.getLookControl().setLookAt(t, 30.0F, 30.0F);
+            double dist = pirate.distanceToSqr(t);
+            double reach = pirate.getBbWidth() * 2.0F * pirate.getBbWidth() * 2.0F + t.getBbWidth() + 1.0;
+            if (attackCooldown > 0) attackCooldown--;
+            if (dist <= reach) {
+                pirate.getNavigation().stop();
+                if (attackCooldown <= 0 && pirate.getSensing().hasLineOfSight(t)) {
+                    pirate.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+                    pirate.doHurtTarget(t);
+                    attackCooldown = 20;
+                }
+                return;
+            }
+            // Try a real path first, then just walk straight at it (jumping over small steps).
+            if (!pirate.getNavigation().moveTo(t, 1.2)) {
+                pirate.getMoveControl().setWantedPosition(t.getX(), t.getY(), t.getZ(), 1.2);
+                if (pirate.horizontalCollision && pirate.onGround()) pirate.getJumpControl().jump();
+            }
+            // Getting nowhere for 3 seconds: draw a bow if there's one in the pack.
+            stuckTicks = dist < lastDist - 0.05 ? 0 : stuckTicks + 1;
+            lastDist = Math.min(lastDist, dist);
+            if (stuckTicks > 60) {
+                pirate.equipFromPack(PirateEntity::isRangedWeapon);
+                stuckTicks = 0;
+                lastDist = Double.MAX_VALUE;
+            }
         }
     }
 }

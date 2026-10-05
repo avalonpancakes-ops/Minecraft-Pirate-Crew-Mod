@@ -77,6 +77,7 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
         });
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        addCombatFallbacks();
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, RaiderPirateEntity.class).setAlertOthers(RaiderPirateEntity.class));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
@@ -94,6 +95,11 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
     @Override
     protected int homeRadius() {
         return 14;
+    }
+
+    @Override
+    public boolean canRetreat() {
+        return !onShip;
     }
 
     private boolean withinReachIfOnShip() {

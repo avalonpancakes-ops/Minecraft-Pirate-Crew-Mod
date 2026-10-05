@@ -101,6 +101,7 @@ public class BountyHunterEntity extends PirateEntity {
         this.goalSelector.addGoal(4, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 12.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        addCombatFallbacks();
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
     }
 

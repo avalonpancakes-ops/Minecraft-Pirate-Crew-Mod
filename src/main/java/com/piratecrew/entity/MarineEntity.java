@@ -132,6 +132,7 @@ public class MarineEntity extends PirateEntity implements Enemy {
         });
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        addCombatFallbacks();
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, MarineEntity.class).setAlertOthers(MarineEntity.class));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, e -> isPirate((Player) e)));

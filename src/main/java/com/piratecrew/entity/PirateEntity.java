@@ -156,6 +156,7 @@ public class PirateEntity extends PathfinderMob {
         this.goalSelector.addGoal(6, new PirateGoals.IdleStrollGoal(this, 0.6));
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+        addCombatFallbacks();
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new PirateGoals.DefendLeaderGoal(this));
@@ -973,6 +974,24 @@ public class PirateEntity extends PathfinderMob {
     private int lastConsume = -1000;
     private int lastThrow = -1000;
     private int lastMilk = -1000;
+    /** Last golden apple eaten: one apple, then wait for its regeneration to work instead of eating the whole stack. */
+    private int lastApple = -1000;
+
+    /** Drinking or eating right now. */
+    public boolean isConsuming() {
+        return consuming != null;
+    }
+
+    /** Whether this pirate may move away from its spot to make room (ship crews hold the deck). */
+    public boolean canRetreat() {
+        return true;
+    }
+
+    /** Back off to eat, and charge straight in when there's no path: added by every pirate's goal list. */
+    protected void addCombatFallbacks() {
+        this.goalSelector.addGoal(0, new PirateGoals.RetreatToEatGoal(this));
+        this.goalSelector.addGoal(2, new PirateGoals.ChargeGoal(this));
+    }
 
     /** Bounty hunters never run out of potions. */
     protected boolean infiniteConsumables() {
@@ -1094,12 +1113,19 @@ public class PirateEntity extends PathfinderMob {
                 throwPotion(takeOne(src), null);
                 return;
             }
-            boolean desperate = hp < 0.3F && fighting;
-            src = findConsumable(st -> st.is(desperate ? Items.ENCHANTED_GOLDEN_APPLE : Items.GOLDEN_APPLE));
-            if (src == NONE) src = findConsumable(st -> st.is(Items.GOLDEN_APPLE) || st.is(Items.ENCHANTED_GOLDEN_APPLE));
-            if (src != NONE) {
-                startConsuming(takeOne(src));
-                return;
+            // One apple at a time: its regeneration and absorption need time to work, so wait them out
+            // (15 s after a golden apple, 30 s after an enchanted one) instead of eating the whole stack.
+            boolean appleWorking = this.hasEffect(MobEffects.REGENERATION) || this.hasEffect(MobEffects.ABSORPTION);
+            if (!appleWorking && this.tickCount - lastApple > 300) {
+                boolean desperate = hp < 0.3F && fighting;
+                src = findConsumable(st -> st.is(desperate ? Items.ENCHANTED_GOLDEN_APPLE : Items.GOLDEN_APPLE));
+                if (src == NONE) src = findConsumable(st -> st.is(Items.GOLDEN_APPLE) || st.is(Items.ENCHANTED_GOLDEN_APPLE));
+                if (src != NONE) {
+                    ItemStack apple = takeOne(src);
+                    lastApple = this.tickCount + (apple.is(Items.ENCHANTED_GOLDEN_APPLE) ? 300 : 0);
+                    startConsuming(apple);
+                    return;
+                }
             }
         }
 
