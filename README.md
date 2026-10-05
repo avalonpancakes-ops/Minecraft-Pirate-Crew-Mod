@@ -179,6 +179,14 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - They attack **players and recruited pirates** (your crew fights back and helps you), and they look out for each other: hit one and its crewmates come for you. They can't be recruited.
 - On their ship they **hold the deck**: they shoot from where they stand and fight hand to hand with anyone who boards, instead of walking off into the sea.
 - They drop a few rubies (the captain drops 8 to 20) and sometimes a piece of their gear. Killing one raises your bounty just like killing any other pirate of its tier (if you're in a crew).
+- **In the Sundered Sea**, Valkyrien Pirates' ships sail the deep water just like Overworld oceans, but more often:
+  - about 4 to 5 times as many ships, from a second placement on top of the normal one;
+  - wrecks and rafts appear in the shallows too.
+- **Sundered Sea crews**:
+  - each crew is 2 pirates bigger;
+  - they wear the sea's own armor and blades: Tidesteel, Abyssal, Krakenbone and Stormforged;
+  - captains always have Abyssal gear or better, sometimes Leviathan, with enchanted blades and bows and a shield;
+  - 1 captain in 5 carries a Soul Pact, and its scroll drops when it dies.
 - `/piratecrew spawnraiders` (op) brings an enemy crew to you on land for testing.
 
 ### The Sundered Sea (new dimension)

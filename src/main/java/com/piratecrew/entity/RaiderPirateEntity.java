@@ -153,17 +153,35 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
         };
     }
 
+    /** Sundered Sea crews wear the sea's own gear: tidesteel up to stormforged, captains up to leviathan. */
+    private com.piratecrew.item.GearTier seaTier() {
+        if (captain) {
+            if (gearLevel >= 6) return this.random.nextFloat() < 0.35F ? com.piratecrew.item.GearTier.LEVIATHAN : com.piratecrew.item.GearTier.STORMFORGED;
+            return gearLevel >= 4 ? com.piratecrew.item.GearTier.KRAKENBONE : com.piratecrew.item.GearTier.ABYSSAL;
+        }
+        if (gearLevel >= 6) return com.piratecrew.item.GearTier.STORMFORGED;
+        if (gearLevel == 5) return com.piratecrew.item.GearTier.KRAKENBONE;
+        return gearLevel >= 3 ? com.piratecrew.item.GearTier.ABYSSAL : com.piratecrew.item.GearTier.TIDESTEEL;
+    }
+
+    private boolean atSea() {
+        return level().dimension() == com.piratecrew.sundered.SunderedSea.LEVEL;
+    }
+
     private void equip() {
-        Item[] armor = armorFor(gearLevel);
+        boolean sea = atSea();
+        var seaGear = sea ? ModItems.GEAR.get(seaTier()) : null;
+        Item[] armor = sea ? new Item[]{seaGear.helmet().get(), seaGear.chestplate().get(), seaGear.leggings().get(), seaGear.boots().get()}
+                : armorFor(gearLevel);
         EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
         for (int i = 0; i < armor.length; i++) {
             if (captain || this.random.nextFloat() < 0.7F) setItemSlot(slots[i], new ItemStack(armor[i]));
         }
 
-        ItemStack sword = new ItemStack(swordFor(gearLevel));
+        ItemStack sword = new ItemStack(sea ? seaGear.sword().get() : swordFor(gearLevel));
         ItemStack ranged = new ItemStack(this.random.nextInt(3) == 0 ? Items.CROSSBOW : Items.BOW);
-        if (captain && gearLevel >= 5) sword.enchant(Enchantments.SHARPNESS, 1 + this.random.nextInt(3));
-        if (captain && gearLevel >= 5) ranged.enchant(ranged.is(Items.BOW) ? Enchantments.POWER_ARROWS : Enchantments.QUICK_CHARGE, 1 + this.random.nextInt(2));
+        if (captain && (gearLevel >= 5 || sea)) sword.enchant(Enchantments.SHARPNESS, 1 + this.random.nextInt(3));
+        if (captain && (gearLevel >= 5 || sea)) ranged.enchant(ranged.is(Items.BOW) ? Enchantments.POWER_ARROWS : Enchantments.QUICK_CHARGE, 1 + this.random.nextInt(2));
 
         // Ship crews mostly shoot; up close they draw their blade. Brawlers and the captain lead with the blade.
         boolean bladeFirst = captain || getCombatStyle() == CombatStyle.BRAWLER || (!onShip && this.random.nextBoolean());
@@ -174,7 +192,12 @@ public class RaiderPirateEntity extends PirateEntity implements Enemy {
         } else {
             setItemSlot(EquipmentSlot.MAINHAND, sword);
         }
-        if (captain && gearLevel >= 4) setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+        if (captain && (gearLevel >= 4 || sea)) setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
+        // A Sundered Sea captain sometimes sails with a Soul Pact (its scroll drops when it dies).
+        if (sea && captain && this.random.nextFloat() < 0.2F) {
+            var pacts = com.piratecrew.pact.SoulPact.values();
+            bindPact(pacts[this.random.nextInt(pacts.length)]);
+        }
         if (captain) getPack().setItem(1, new ItemStack(Items.GOLDEN_APPLE, 1 + this.random.nextInt(2)));
         // Blocks for bridging, towering and cover.
         if (captain) getPack().setItem(2, new ItemStack(Items.COBBLESTONE, 32));

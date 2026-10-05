@@ -45,6 +45,23 @@ public class ValkyrienPiratesCompat {
         return loaded;
     }
 
+    /**
+     * With Valkyrien Pirates installed, switch on a built-in data pack that adds a second, denser
+     * placement of its ships in the Sundered Sea (on top of the normal one its biome tags give).
+     */
+    public static void addPacks(net.minecraftforge.event.AddPackFindersEvent event) {
+        if (event.getPackType() != net.minecraft.server.packs.PackType.SERVER_DATA || !isLoaded()) return;
+        var file = ModList.get().getModFileById(PirateCrew.MODID);
+        if (file == null) return;
+        java.nio.file.Path root = file.getFile().findResource("resourcepacks/vp_sundered");
+        net.minecraft.server.packs.repository.Pack pack = net.minecraft.server.packs.repository.Pack.readMetaAndCreate(
+                "builtin/piratecrew_sundered_ships", net.minecraft.network.chat.Component.literal("Pirate Crew: Sundered Sea ships"), true,
+                id -> new net.minecraft.server.packs.PathPackResources(id, root, true),
+                net.minecraft.server.packs.PackType.SERVER_DATA, net.minecraft.server.packs.repository.Pack.Position.TOP,
+                net.minecraft.server.packs.repository.PackSource.BUILT_IN);
+        if (pack != null) event.addRepositorySource(consumer -> consumer.accept(pack));
+    }
+
     public static void onJoin(EntityJoinLevelEvent event) {
         if (!isLoaded() || event.loadedFromDisk() || !(event.getLevel() instanceof ServerLevel level)) return;
         if (level.dimension() != Level.OVERWORLD && level.dimension() != com.piratecrew.sundered.SunderedSea.LEVEL) return;
@@ -100,6 +117,7 @@ public class ValkyrienPiratesCompat {
         List<Vec3> spots = new ArrayList<>();
         for (Entity e : shipCrew) spots.add(e.position());
         int crewSize = Math.max(3, Math.min(8, shipCrew.size() + 1 + level.getRandom().nextInt(3)));
+        if (level.dimension() == com.piratecrew.sundered.SunderedSea.LEVEL) crewSize += 2;   // the Sundered Sea's crews are bigger
         List<RaiderPirateEntity> spawned = RaiderCrews.spawnCrew(level, spots, crewSize, true);
         if (!spawned.isEmpty()) {
             PirateCrew.LOGGER.debug("Pirate Crew: boarded a Valkyrien Pirates ship at {} with {} pirates", anchor.blockPosition(), spawned.size());

@@ -32,6 +32,7 @@ public class PirateCrew {
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(ModEntities::registerAttributes);
+        modBus.addListener(com.piratecrew.compat.ValkyrienPiratesCompat::addPacks);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
