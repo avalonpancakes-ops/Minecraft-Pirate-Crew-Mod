@@ -53,8 +53,19 @@ public class CodexScreen extends Screen {
         Minecraft.getInstance().setScreen(new CodexScreen());
     }
 
+    /** Open on a given page (used for screenshots); showcase pages are forced visible. */
+    public static void openAt(int section, int entry, boolean showcase) {
+        lastSection = section;
+        lastEntry = entry;
+        lastShowcase = showcase;
+        forceShowcase = true;
+        open();
+    }
+
+    private static boolean forceShowcase;
+
     private boolean isOp() {
-        return minecraft != null && minecraft.player != null && minecraft.player.hasPermissions(2);
+        return forceShowcase || (minecraft != null && minecraft.player != null && minecraft.player.hasPermissions(2));
     }
 
     @Override

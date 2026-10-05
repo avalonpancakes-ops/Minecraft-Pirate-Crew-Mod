@@ -51,6 +51,25 @@ jobs:
           gh release delete smoke-log --yes --cleanup-tag || true
           gh release create smoke-log --title "Last smoke test" --notes-file smoke.md --prerelease --target "$GITHUB_SHA" $(ls run/smoke/*.png 2>/dev/null)
 
+      # Start the client on a virtual display and screenshot the mod's screens, items, gear and
+      # bosses (see client/ClientShots.java), so the art can be checked without playing.
+      - name: Client screenshots
+        if: github.ref == 'refs/heads/main'
+        continue-on-error: true
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb mesa-utils libgl1-mesa-dri > /dev/null || true
+          mkdir -p run
+          printf "renderDistance:6\nguiScale:2\nonboardAccessibility:false\ntutorialStep:none\nskipMultiplayerWarning:true\njoinedFirstServer:true\n" > run/options.txt
+          timeout 1500 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientShots --no-daemon 2>&1 | tee client.log || true
+          { echo "Client screenshots for ${GITHUB_SHA::7}"; echo '```';
+            grep -E "PIRATECREW|ERROR|Exception|Caused by|at com\.piratecrew|OpenGL|GL version" client.log | head -120;
+            echo '```'; } > client.md
+          gh release delete client-shots --yes --cleanup-tag || true
+          gh release create client-shots --title "Client screenshots" --notes-file client.md --prerelease --target "$GITHUB_SHA" $(ls run/screenshots/*.png 2>/dev/null)
+
       # If the build fails, publish the errors as a "build-log" release so they can be read
       # without downloading the full Actions log.
       - name: Publish build errors

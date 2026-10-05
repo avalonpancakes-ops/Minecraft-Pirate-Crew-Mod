@@ -45,6 +45,14 @@ minecraft {
             property 'piratecrew.smoketest', 'true'
             property 'forge.logging.console.level', 'info'
         }
+
+        // CI check: start the client on a virtual display and screenshot the mod's screens and art.
+        clientShots {
+            parent runs.client
+            taskName 'runClientShots'
+            property 'piratecrew.clientshots', 'true'
+            property 'forge.logging.console.level', 'info'
+        }
     }
 }
 
