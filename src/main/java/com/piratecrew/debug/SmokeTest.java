@@ -20,7 +20,8 @@ public class SmokeTest {
 
     /** A top-down picture of the islands around 0,0 (one pixel per block), for checking the terrain by eye. */
     private static void renderMap(ServerLevel sea) throws java.io.IOException {
-        int chunksAcross = 24, size = chunksAcross * 16, origin = -size / 2;
+        int chunksAcross = 32, size = chunksAcross * 16, origin = -size / 2;
+        java.util.Map<String, Integer> biomes = new java.util.TreeMap<>();
         java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(size, size, java.awt.image.BufferedImage.TYPE_INT_RGB);
         for (int cx = 0; cx < chunksAcross; cx++) {
             for (int cz = 0; cz < chunksAcross; cz++) {
@@ -30,6 +31,7 @@ public class SmokeTest {
                         int h = chunk.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, x, z);
                         var biome = chunk.getNoiseBiome(x >> 2, Math.max(h, sea.getSeaLevel()) >> 2, z >> 2);
                         String b = biome.unwrapKey().map(k -> k.location().getPath()).orElse("?");
+                        biomes.merge(b, 1, Integer::sum);
                         int rgb;
                         if (h <= sea.getSeaLevel()) {
                             int depth = Math.min(40, sea.getSeaLevel() - h);
@@ -46,6 +48,7 @@ public class SmokeTest {
                 }
             }
         }
+        PirateCrew.LOGGER.info("PIRATECREW SMOKETEST biome columns: {}", biomes);
         java.io.File dir = new java.io.File("smoke");
         dir.mkdirs();
         javax.imageio.ImageIO.write(img, "png", new java.io.File(dir, "sundered_map.png"));

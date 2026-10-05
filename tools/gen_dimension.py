@@ -68,7 +68,7 @@ islands = {"type": "minecraft:noise", "noise": "piratecrew:sundered_islands", "x
 # Surface height = 128 + 192 * offset: sea floor near y 32, islands rising where the island noise is high.
 offset = {"type": "minecraft:add", "argument1": -0.5, "argument2": {
     "type": "minecraft:mul", "argument1": 1.1, "argument2": {
-        "type": "minecraft:max", "argument1": 0.0, "argument2": {"type": "minecraft:add", "argument1": islands, "argument2": -0.15}}}}
+        "type": "minecraft:max", "argument1": 0.0, "argument2": {"type": "minecraft:add", "argument1": islands, "argument2": -0.10}}}}
 gradient = {"type": "minecraft:y_clamped_gradient", "from_y": -64, "to_y": 320, "from_value": 1.0, "to_value": -1.0}
 detail = {"type": "minecraft:mul", "argument1": 0.04,
           "argument2": {"type": "minecraft:noise", "noise": "piratecrew:sundered_detail", "xz_scale": 1.0, "y_scale": 1.0}}
