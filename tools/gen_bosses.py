@@ -95,7 +95,7 @@ def main():
         lang[f"item.piratecrew.{boss}_spawn_egg"] = f"{eng.replace('The ', '')} Spawn Egg"
         write(os.path.join(A, f"models/item/{boss}_spawn_egg.json"), {"parent": "minecraft:item/template_spawn_egg"})
     # entity/kraken.png is drawn by gen_kraken_art.py
-    noise_texture("entity/leviathan.png", 64, 64, PAL["leviathan"], 12)
+    # entity/leviathan.png is drawn by gen_leviathan_art.py
     json.dump(lang, open(lang_path, "w"), indent=2, ensure_ascii=False)
     print("generated", len(SUMMONS), "summon items and", len(BOSSES), "bosses")
 
