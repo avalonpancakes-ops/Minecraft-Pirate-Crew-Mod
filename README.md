@@ -122,6 +122,15 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
 - Corpses can't be hurt, don't burn in lava, and never despawn while they hold items. If you die in the void, your corpse floats just above it.
 - With the `keepInventory` gamerule on there's no corpse (you keep your items, and a collector takes his share straight from your inventory).
 
+### Enemy pirate crews at sea (with Valkyrien Pirates)
+- Optional: install **[Valkyrien Pirates](https://modrinth.com/mod/valkyrien-pirates)** (it needs **Valkyrien Skies** and **Eureka! Ships!**) and its pirate ships that sail the oceans get boarded by an **enemy NPC pirate crew** from this mod, in the Overworld only. Without those mods, Pirate Crew works exactly as before.
+- Each ship gets a **captain** plus 3 to 8 crew (bigger ships, bigger crews), alongside Valkyrien Pirates' own helmsman and cannoneers, who still sail the ship and fire its cannons.
+- **Gear is random per crew member**, from nothing up to **diamond** (leather, gold, chainmail, iron, ruby or diamond, with pieces missing here and there), swords to match, and bows or crossbows. The **captain is always the best equipped**: a full set at the crew's best level, or one level better (so a captain isn't always in diamond). Captains are B, A or S tier, carry a shield from iron gear up and a golden apple or two, and their blade and bow are enchanted at ruby/diamond level.
+- They attack **players and recruited pirates** (your crew fights back and helps you), and they look out for each other: hit one and its crewmates come for you. They can't be recruited.
+- On their ship they **hold the deck**: they shoot from where they stand and fight hand to hand with anyone who boards, instead of walking off into the sea.
+- They drop a few rubies (the captain drops 8 to 20) and sometimes a piece of their gear. Killing them doesn't affect bounties.
+- `/piratecrew spawnraiders` (op) brings an enemy crew to you on land for testing.
+
 ### Commands
 - `/crew` — open the crew screen
 - `/crew create <name>`, `/crew invite <player>`, `/crew leave`, `/crew disband`, `/crew icon`

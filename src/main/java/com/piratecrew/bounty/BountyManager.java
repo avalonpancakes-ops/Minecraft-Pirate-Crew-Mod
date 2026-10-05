@@ -40,6 +40,8 @@ public class BountyManager {
         if (!(victim instanceof ServerPlayer) && !(victim instanceof PirateEntity)) return;
         // Bank business, not piracy: bounty hunters neither earn nor carry bounties.
         if (victim instanceof com.piratecrew.entity.BountyHunterEntity || killerEntity instanceof com.piratecrew.entity.BountyHunterEntity) return;
+        // Enemy NPC crews are hostile mobs: sinking them isn't piracy against other crews.
+        if (victim instanceof com.piratecrew.entity.RaiderPirateEntity || killerEntity instanceof com.piratecrew.entity.RaiderPirateEntity) return;
         MinecraftServer server = victim.getServer();
         if (server == null) return;
         BountyData data = BountyData.get(server);

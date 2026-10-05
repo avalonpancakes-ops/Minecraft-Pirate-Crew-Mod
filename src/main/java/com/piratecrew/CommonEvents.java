@@ -79,6 +79,11 @@ public class CommonEvents {
     }
 
     @SubscribeEvent
+    public static void entityJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+        com.piratecrew.compat.ValkyrienPiratesCompat.onJoin(event);
+    }
+
+    @SubscribeEvent
     public static void chunkLoad(ChunkEvent.Load event) {
         if (event.getLevel() instanceof ServerLevel level && event.getChunk() instanceof LevelChunk chunk) {
             VillageBarHandler.onChunkLoad(level, chunk);
@@ -90,5 +95,6 @@ public class CommonEvents {
         if (event.phase != TickEvent.Phase.END) return;
         VillageBarHandler.tick(ServerLifecycleHooks.getCurrentServer());
         LoanManager.tick(ServerLifecycleHooks.getCurrentServer());
+        com.piratecrew.compat.ValkyrienPiratesCompat.tick(ServerLifecycleHooks.getCurrentServer());
     }
 }

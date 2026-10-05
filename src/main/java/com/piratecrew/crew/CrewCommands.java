@@ -106,6 +106,22 @@ public class CrewCommands {
                             c.getSource().sendSuccess(() -> Component.literal("A test debt collector is coming for you (switch to survival)."), true);
                             return 1;
                         })))
+                .then(Commands.literal("spawnraiders").executes(c -> {
+                    ServerPlayer p = c.getSource().getPlayerOrException();
+                    ServerLevel level = p.serverLevel();
+                    java.util.List<net.minecraft.world.phys.Vec3> spots = new java.util.ArrayList<>();
+                    for (int i = 0; i < 6; i++) {
+                        net.minecraft.world.phys.Vec3 s = LoanManager.findSpot(level, p.blockPosition(), 6, 12, p.getRandom());
+                        if (s != null) spots.add(s);
+                    }
+                    if (spots.isEmpty()) {
+                        c.getSource().sendFailure(Component.literal("No room around you."));
+                        return 0;
+                    }
+                    int n = com.piratecrew.entity.RaiderCrews.spawnCrew(level, spots, 4 + p.getRandom().nextInt(3), false).size();
+                    c.getSource().sendSuccess(() -> Component.literal("An enemy pirate crew of " + n + " has arrived (switch to survival)."), true);
+                    return 1;
+                }))
                 .then(Commands.literal("spawnpirate").then(Commands.argument("tier", StringArgumentType.word())
                         .suggests((c, b) -> {
                             for (PirateTier t : PirateTier.values()) b.suggest(t.label);

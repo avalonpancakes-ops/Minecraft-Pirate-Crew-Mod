@@ -4,6 +4,7 @@ import com.piratecrew.PirateCrew;
 import com.piratecrew.entity.BankerEntity;
 import com.piratecrew.entity.BountyHunterEntity;
 import com.piratecrew.entity.CorpseEntity;
+import com.piratecrew.entity.RaiderPirateEntity;
 import com.piratecrew.entity.PirateEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -33,6 +34,12 @@ public class ModEntities {
                     .clientTrackingRange(10)
                     .build(PirateCrew.id("bounty_hunter").toString()));
 
+    public static final RegistryObject<EntityType<RaiderPirateEntity>> RAIDER_PIRATE = ENTITIES.register("raider_pirate",
+            () -> EntityType.Builder.<RaiderPirateEntity>of(RaiderPirateEntity::new, MobCategory.MISC)
+                    .sized(0.6F, 1.8F)
+                    .clientTrackingRange(10)
+                    .build(PirateCrew.id("raider_pirate").toString()));
+
     public static final RegistryObject<EntityType<CorpseEntity>> CORPSE = ENTITIES.register("corpse",
             () -> EntityType.Builder.<CorpseEntity>of(CorpseEntity::new, MobCategory.MISC)
                     .sized(1.2F, 0.5F)
@@ -44,5 +51,6 @@ public class ModEntities {
         event.put(PIRATE.get(), PirateEntity.createAttributes().build());
         event.put(BANKER.get(), BankerEntity.createAttributes().build());
         event.put(BOUNTY_HUNTER.get(), PirateEntity.createAttributes().build());
+        event.put(RAIDER_PIRATE.get(), PirateEntity.createAttributes().build());
     }
 }

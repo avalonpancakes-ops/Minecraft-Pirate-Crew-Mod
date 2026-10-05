@@ -57,8 +57,16 @@ public class PirateGoals {
         private int cooldown;
         private int unseenTicks;
 
+        /** Stationary shooters (ship crews) never walk toward their target, so they don't step off the deck. */
+        private final java.util.function.BooleanSupplier stationary;
+
         public RangedWeaponGoal(PirateEntity pirate) {
+            this(pirate, () -> false);
+        }
+
+        public RangedWeaponGoal(PirateEntity pirate, java.util.function.BooleanSupplier stationary) {
             this.pirate = pirate;
+            this.stationary = stationary;
             this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
         }
 
@@ -104,7 +112,9 @@ public class PirateGoals {
             double range = Math.max(type == PirateEntity.Ranged.TRIDENT ? 12.0 : 18.0, keep + 4.0);
 
             // Movement
-            if (!canSee || dist > range * range) {
+            if (stationary.getAsBoolean()) {
+                pirate.getNavigation().stop();
+            } else if (!canSee || dist > range * range) {
                 pirate.getNavigation().moveTo(target, 1.1);
             } else {
                 pirate.getNavigation().stop();
