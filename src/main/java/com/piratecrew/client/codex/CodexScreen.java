@@ -280,12 +280,12 @@ public class CodexScreen extends Screen {
     private record Portrait(java.util.function.Supplier<? extends net.minecraft.world.entity.EntityType<? extends net.minecraft.world.entity.LivingEntity>> type, int scale) {}
 
     private static final java.util.Map<String, Portrait> PORTRAITS = java.util.Map.of(
-            "Commodore Graves", new Portrait(com.piratecrew.registry.ModEntities.COMMODORE, 26),
-            "The Kraken", new Portrait(com.piratecrew.registry.ModEntities.KRAKEN, 7),
-            "Tempest Admiral Sorel", new Portrait(com.piratecrew.registry.ModEntities.TEMPEST_ADMIRAL, 25),
+            "Commodore Graves", new Portrait(com.piratecrew.registry.ModEntities.COMMODORE, 40),
+            "The Kraken", new Portrait(com.piratecrew.registry.ModEntities.KRAKEN, 10),
+            "Tempest Admiral Sorel", new Portrait(com.piratecrew.registry.ModEntities.TEMPEST_ADMIRAL, 38),
             "The Leviathan", new Portrait(com.piratecrew.registry.ModEntities.LEVIATHAN, 4),
-            "Fleet Admiral Vane", new Portrait(com.piratecrew.registry.ModEntities.FLEET_ADMIRAL, 22),
-            "Marines", new Portrait(com.piratecrew.registry.ModEntities.MARINE, 30));
+            "Fleet Admiral Vane", new Portrait(com.piratecrew.registry.ModEntities.FLEET_ADMIRAL, 36),
+            "Marines", new Portrait(com.piratecrew.registry.ModEntities.MARINE, 44));
     private final java.util.Map<String, net.minecraft.world.entity.LivingEntity> portraitCache = new java.util.HashMap<>();
 
     private net.minecraft.world.entity.LivingEntity portrait(String title) {
@@ -311,6 +311,7 @@ public class CodexScreen extends Screen {
         g.fill(x, y + h - 1, x + w, y + h, 0xFF8A6420);
         g.fill(x, y, x + 1, y + h, 0xFFC8901E);
         g.fill(x + w - 1, y, x + w, y + h, 0xFF8A6420);
+        mob.setCustomNameVisible(false);
         float spin = (t * 1.2F) % 360F;
         mob.yBodyRot = spin;
         mob.yBodyRotO = spin;

@@ -93,6 +93,7 @@ public class PactPowers {
                     attacker.getPersistentData().remove(SHADOW_STRIKE);
                     if (attacker.level() instanceof ServerLevel sl) {
                         sl.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY() + 1, victim.getZ(), 20, 0.4, 0.5, 0.4, 0.2);
+                        sl.sendParticles(com.piratecrew.registry.ModParticles.WISP.get(), victim.getX(), victim.getY() + 1, victim.getZ(), 12, 0.3, 0.5, 0.3, 0.02);
                     }
                     return amount * 2.0F;
                 }
@@ -174,7 +175,7 @@ public class PactPowers {
         for (int i = 0; i < 40; i++) {
             double r = 1 + level.random.nextDouble() * 6;
             Vec3 p = eye.add(dir.scale(r)).add((level.random.nextDouble() - 0.5) * r * 0.5, (level.random.nextDouble() - 0.5) * r * 0.4, (level.random.nextDouble() - 0.5) * r * 0.5);
-            level.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0, 0, 0, 0.02);
+            level.sendParticles(i % 2 == 0 ? com.piratecrew.registry.ModParticles.EMBER.get() : ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0, 0, 0, 0.02);
         }
         level.playSound(null, caster.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.2F, 0.8F);
         for (LivingEntity e : hostiles(caster, eye, 7)) {
@@ -210,15 +211,17 @@ public class PactPowers {
         b.moveTo(at.x, at.y, at.z);
         b.setVisualOnly(true);
         level.addFreshEntity(b);
+        level.sendParticles(com.piratecrew.registry.ModParticles.SPARK.get(), at.x, at.y + 0.5, at.z, 30, 1.2, 0.8, 1.2, 0.1);
     }
 
     private static void frostNova(ServerLevel level, LivingEntity caster, double power) {
         Vec3 c = caster.position();
         for (int i = 0; i < 48; i++) {
             double a = i * Math.PI / 24;
-            level.sendParticles(ParticleTypes.SNOWFLAKE, c.x + Math.cos(a) * 6, c.y + 0.5, c.z + Math.sin(a) * 6, 3, 0.3, 0.3, 0.3, 0.02);
+            level.sendParticles(com.piratecrew.registry.ModParticles.FROST.get(), c.x + Math.cos(a) * 6, c.y + 0.5, c.z + Math.sin(a) * 6, 3, 0.3, 0.3, 0.3, 0.02);
         }
-        level.sendParticles(ParticleTypes.SNOWFLAKE, c.x, c.y + 1, c.z, 150, 4, 1, 4, 0.05);
+        level.sendParticles(com.piratecrew.registry.ModParticles.FROST.get(), c.x, c.y + 1, c.z, 90, 4, 1, 4, 0.05);
+        level.sendParticles(ParticleTypes.SNOWFLAKE, c.x, c.y + 1, c.z, 60, 4, 1, 4, 0.05);
         level.playSound(null, caster.blockPosition(), SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 1.5F, 0.6F);
         level.playSound(null, caster.blockPosition(), SoundEvents.POWDER_SNOW_PLACE, SoundSource.PLAYERS, 1.5F, 0.5F);
         for (LivingEntity e : hostiles(caster, c, 7)) {
@@ -287,8 +290,8 @@ public class PactPowers {
         }
         caster.teleportTo(spot.x, spot.y, spot.z);
         caster.resetFallDistance();
-        level.sendParticles(ParticleTypes.LARGE_SMOKE, from.x, from.y + 1, from.z, 30, 0.3, 0.6, 0.3, 0.02);
-        level.sendParticles(ParticleTypes.REVERSE_PORTAL, caster.getX(), caster.getY() + 1, caster.getZ(), 40, 0.3, 0.6, 0.3, 0.05);
+        level.sendParticles(com.piratecrew.registry.ModParticles.WISP.get(), from.x, from.y + 1, from.z, 30, 0.3, 0.6, 0.3, 0.02);
+        level.sendParticles(com.piratecrew.registry.ModParticles.WISP.get(), caster.getX(), caster.getY() + 1, caster.getZ(), 25, 0.3, 0.6, 0.3, 0.03);
         level.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0F, 0.6F);
         caster.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, target.getEyePosition());
         caster.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 60, 0, false, false, true));
@@ -334,7 +337,8 @@ public class PactPowers {
     }
 
     private static void gravityWell(ServerLevel level, LivingEntity caster, Vec3 at, double power) {
-        level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1, at.z, 200, 4, 2, 4, 0.2);
+        level.sendParticles(ParticleTypes.REVERSE_PORTAL, at.x, at.y + 1, at.z, 120, 4, 2, 4, 0.2);
+        level.sendParticles(com.piratecrew.registry.ModParticles.WISP.get(), at.x, at.y + 1, at.z, 60, 3, 1.5, 3, 0.02);
         level.playSound(null, BlockPos.containing(at), SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 1.5F, 0.6F);
         for (LivingEntity e : hostiles(caster, at, 9)) {
             Vec3 pull = at.subtract(e.position());
@@ -366,10 +370,11 @@ public class PactPowers {
             Vec3 to = caster.position().add(0, 1, 0);
             for (int i = 0; i < 10; i++) {
                 Vec3 p = from.lerp(to, i / 10.0);
-                level.sendParticles(blood, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0);
+                level.sendParticles(i % 2 == 0 ? com.piratecrew.registry.ModParticles.BLOOD.get() : blood, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0);
             }
         }
-        level.sendParticles(blood, caster.getX(), caster.getY() + 1, caster.getZ(), 40, 2.5, 0.8, 2.5, 0);
+        level.sendParticles(blood, caster.getX(), caster.getY() + 1, caster.getZ(), 25, 2.5, 0.8, 2.5, 0);
+        level.sendParticles(com.piratecrew.registry.ModParticles.BLOOD.get(), caster.getX(), caster.getY() + 1.5, caster.getZ(), 25, 2.5, 0.8, 2.5, 0);
         level.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 2.0F, 0.8F);
         caster.heal(Math.min(12.0F, drained * 0.5F));
     }

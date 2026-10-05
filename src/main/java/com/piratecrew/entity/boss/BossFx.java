@@ -56,8 +56,8 @@ public class BossFx {
             if (s.timer > 0) {
                 if (s.timer % 4 == 0) {
                     switch (s.kind) {
-                        case CANNON -> level.sendParticles(ParticleTypes.FLAME, s.pos.x, s.pos.y + 0.1, s.pos.z, 6, 0.6, 0.0, 0.6, 0.01);
-                        case LIGHTNING -> level.sendParticles(ParticleTypes.ELECTRIC_SPARK, s.pos.x, s.pos.y + 0.2, s.pos.z, 8, 0.6, 0.2, 0.6, 0.05);
+                        case CANNON -> level.sendParticles(com.piratecrew.registry.ModParticles.EMBER.get(), s.pos.x, s.pos.y + 0.1, s.pos.z, 6, 0.6, 0.0, 0.6, 0.01);
+                        case LIGHTNING -> level.sendParticles(com.piratecrew.registry.ModParticles.SPARK.get(), s.pos.x, s.pos.y + 0.2, s.pos.z, 8, 0.6, 0.2, 0.6, 0.05);
                         case GEYSER -> level.sendParticles(ParticleTypes.BUBBLE_COLUMN_UP, s.pos.x, s.pos.y + 0.2, s.pos.z, 12, 0.5, 0.2, 0.5, 0.05);
                         case SLAM -> level.sendParticles(ParticleTypes.SQUID_INK, s.pos.x, s.pos.y + 0.2, s.pos.z, 10, 1.2, 0.1, 1.2, 0.01);
                     }

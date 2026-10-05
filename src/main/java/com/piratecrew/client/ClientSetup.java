@@ -51,6 +51,16 @@ public class ClientSetup {
         }
 
         @SubscribeEvent
+        public static void particles(net.minecraftforge.client.event.RegisterParticleProvidersEvent event) {
+            event.registerSpriteSet(com.piratecrew.registry.ModParticles.EMBER.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.EMBER));
+            event.registerSpriteSet(com.piratecrew.registry.ModParticles.FROST.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.FROST));
+            event.registerSpriteSet(com.piratecrew.registry.ModParticles.SPARK.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.SPARK));
+            event.registerSpriteSet(com.piratecrew.registry.ModParticles.WISP.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.WISP));
+            event.registerSpriteSet(com.piratecrew.registry.ModParticles.BLOOD.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.BLOOD));
+            event.registerSpriteSet(com.piratecrew.registry.ModParticles.GLYPH.get(), s -> new PactParticle.Provider(s, PactParticle.Kind.GLYPH));
+        }
+
+        @SubscribeEvent
         public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) {
             event.registerLayerDefinition(com.piratecrew.client.model.KrakenModel.LAYER, com.piratecrew.client.model.KrakenModel::createBodyLayer);
             event.registerLayerDefinition(com.piratecrew.client.model.LeviathanModel.LAYER, com.piratecrew.client.model.LeviathanModel::createBodyLayer);

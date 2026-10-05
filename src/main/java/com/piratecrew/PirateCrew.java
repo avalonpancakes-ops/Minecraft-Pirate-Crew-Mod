@@ -26,6 +26,7 @@ public class PirateCrew {
         ModPoi.POI.register(modBus);
         ModMenus.MENUS.register(modBus);
         ModTabs.TABS.register(modBus);
+        com.piratecrew.registry.ModParticles.PARTICLES.register(modBus);
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(ModEntities::registerAttributes);

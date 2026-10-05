@@ -120,11 +120,11 @@ public class TempestAdmiralEntity extends MarineBossEntity {
     private void blinkBehind(ServerLevel level, LivingEntity target) {
         Vec3 look = target.getLookAngle();
         Vec3 behind = target.position().subtract(look.x * 3, 0, look.z * 3);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1, getZ(), 40, 0.4, 1, 0.4, 0.2);
+        level.sendParticles(com.piratecrew.registry.ModParticles.SPARK.get(), getX(), getY() + 1, getZ(), 40, 0.5, 1, 0.5, 0.1);
         boolean moved = randomTeleport(behind.x, behind.y, behind.z, true)
                 || randomTeleport(target.getX() + random.nextInt(7) - 3, target.getY(), target.getZ() + random.nextInt(7) - 3, true);
         if (moved) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1, getZ(), 40, 0.4, 1, 0.4, 0.2);
+            level.sendParticles(com.piratecrew.registry.ModParticles.SPARK.get(), getX(), getY() + 1, getZ(), 40, 0.5, 1, 0.5, 0.1);
             level.playSound(null, blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 0.8F, 1.8F);
             getLookControl().setLookAt(target);
         }
