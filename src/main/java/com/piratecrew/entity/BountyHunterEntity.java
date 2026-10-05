@@ -468,9 +468,17 @@ public class BountyHunterEntity extends PirateEntity {
             return;
         }
         ServerPlayer debtor = sl.getServer().getPlayerList().getPlayer(debtorId);
-        if (debtor == null || debtor.level() != this.level()) {
-            // Debtor logged off or left the dimension: wait a little, then give up for today.
-            if (++debtorMissing > 30) vanish();
+        if (debtor == null) {
+            // Debtor logged off: wait a little, then leave. They come back when the debtor does.
+            if (++debtorMissing > 30) {
+                if (!test && !minion) LoanManager.huntersLeftForLogout(sl.getServer(), debtorId, waveSerial);
+                vanish();
+            }
+            return;
+        }
+        if (debtor.level() != this.level()) {
+            // Debtor went through a portal: follow them a few seconds later.
+            if (++debtorMissing >= 4) followToDimension(debtor);
             return;
         }
         debtorMissing = 0;
@@ -557,6 +565,45 @@ public class BountyHunterEntity extends PirateEntity {
             lootCorpse = null;
             LoanManager.seizeFromCorpse(corpse, this);
             vanish();
+        }
+    }
+
+    /** Jump to the debtor's dimension and turn up nearby, like they came through the portal after them. */
+    private void followToDimension(ServerPlayer debtor) {
+        ServerLevel dest = debtor.serverLevel();
+        Vec3 spot = LoanManager.findSpot(dest, debtor.blockPosition(), 6, 14, this.random);
+        if (spot == null) spot = LoanManager.findSpot(dest, debtor.blockPosition(), 2, 6, this.random);
+        if (spot == null) return; // nowhere to stand yet: try again next second
+        final Vec3 to = spot;
+        if (this.level() instanceof ServerLevel here) {
+            here.sendParticles(ParticleTypes.PORTAL, getX(), getY() + 1.0, getZ(), 40, 0.4, 0.8, 0.4, 0.3);
+        }
+        if (isUsingItem()) stopUsingItem();
+        this.laserCharge = -1;
+        Entity moved = this.changeDimension(dest, new net.minecraftforge.common.util.ITeleporter() {
+            @Override
+            public net.minecraft.world.level.portal.PortalInfo getPortalInfo(Entity entity, ServerLevel destWorld,
+                    java.util.function.Function<ServerLevel, net.minecraft.world.level.portal.PortalInfo> defaultPortalInfo) {
+                return new net.minecraft.world.level.portal.PortalInfo(to, Vec3.ZERO, entity.getYRot(), entity.getXRot());
+            }
+
+            @Override
+            public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw,
+                                      java.util.function.Function<Boolean, Entity> repositionEntity) {
+                return repositionEntity.apply(false);
+            }
+
+            @Override
+            public boolean playTeleportSound(ServerPlayer player, ServerLevel sourceWorld, ServerLevel destWorld) {
+                return false;
+            }
+        });
+        if (moved instanceof BountyHunterEntity h) {
+            dest.sendParticles(ParticleTypes.PORTAL, to.x, to.y + 1.0, to.z, 40, 0.4, 0.8, 0.4, 0.3);
+            h.playSound(SoundEvents.PORTAL_TRAVEL, 0.3F, 1.2F);
+            h.setTarget(debtor);
+            debtor.sendSystemMessage(Component.literal(h.pirateName + ": ").withStyle(ChatFormatting.DARK_RED)
+                    .append(Component.literal("Did you think a portal would stop me?").withStyle(ChatFormatting.RED)));
         }
     }
 

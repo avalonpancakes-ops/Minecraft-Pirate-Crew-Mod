@@ -111,7 +111,9 @@ To test without installing: `gradlew runClient` launches Minecraft with the mod.
   2. **Your bank account:** as much as is still owed.
   3. **Your items:** if you still owe more, the hunter walks over to your corpse, crouches over it and goes through your things for a few seconds. He takes items worth what you still owe, and they're **destroyed for good**. Rubies go first, then your most valuable things (diamonds, netherite, enchanted gear, elytra, totems...) until the debt is covered. Items are valued at the banker's shop prices; everyday blocks are worthless to him. While he searches, the corpse is locked (you can't grab your stuff), but if you or your crew **kill him before he finishes, your items are safe**. When he's done he vanishes, and whatever he didn't take is still on your corpse (and the 2-minute timer keeps running, so get back fast).
   - If that still doesn't cover it, more hunters come the next day, at the same strength.
-- **Paying off the debt calls the hunters off** at once. Hunters also leave if you log out or change dimension.
+- **Paying off the debt calls the hunters off** at once.
+- **No escaping through portals:** if you go to the Nether or the End (or any other dimension), the hunters follow you a few seconds later and turn up nearby.
+- **No escaping by logging off:** hunters leave 30 seconds after you log out, but if you come back the same Minecraft day, the same hunters come straight back after you.
 
 ### Corpses
 - When a player dies, their items don't scatter on the ground: they stay on the player's **corpse**, which lies where they died wearing their skin, with a name tag. Chat tells you its coordinates.

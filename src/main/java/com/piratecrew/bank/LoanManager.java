@@ -157,18 +157,15 @@ public class LoanManager {
             if (l.defaulted && p != null && now >= l.nextWaveAt && p.isAlive() && !p.isSpectator()) {
                 sendWave(p, l, now);
                 data.setDirty();
+            } else if (l.defaulted && l.resumeWave && p != null && p.tickCount > 200 && p.isAlive() && !p.isSpectator() && !l.waveDone) {
+                resumeWave(p, l);
+                data.setDirty();
             }
         }
     }
 
-    private static void sendWave(ServerPlayer p, LoanData.Loan l, long now) {
-        boolean first = l.serial == 0;
-        // The last wave failed to get the player: tomorrow's is stronger.
-        int wave = first || l.waveDone ? l.wave : l.wave + 1;
-        List<PirateTier> tiers = waveTiers(wave);
+    private static List<BountyHunterEntity> spawnHunters(ServerPlayer p, List<PirateTier> tiers, int serial) {
         ServerLevel level = p.serverLevel();
-        int serial = l.serial + 1;
-
         List<BountyHunterEntity> sent = new ArrayList<>();
         for (PirateTier tier : tiers) {
             Vec3 pos = findSpot(level, p.blockPosition(), 20, 32, p.getRandom());
@@ -183,6 +180,37 @@ public class LoanManager {
             level.addFreshEntity(h);
             sent.add(h);
         }
+        return sent;
+    }
+
+    /** Today's hunters gave up because the player logged off: note it so they return with the player. */
+    public static void huntersLeftForLogout(MinecraftServer server, UUID debtor, int serial) {
+        LoanData data = LoanData.get(server);
+        LoanData.Loan l = data.get(debtor);
+        if (l != null && l.defaulted && l.serial == serial && !l.waveDone && !l.resumeWave) {
+            l.resumeWave = true;
+            data.setDirty();
+        }
+    }
+
+    /** The player came back online during the same day: today's hunters pick up the trail again. */
+    private static void resumeWave(ServerPlayer p, LoanData.Loan l) {
+        List<BountyHunterEntity> sent = spawnHunters(p, waveTiers(l.wave), l.serial);
+        if (sent.isEmpty()) return;
+        l.resumeWave = false;
+        p.sendSystemMessage(Component.literal("\u2620 Logging off won't save you. The bank's hunters have picked up your trail again!").withStyle(ChatFormatting.DARK_RED));
+        p.playNotifySound(SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 1.0F, 0.7F);
+    }
+
+    private static void sendWave(ServerPlayer p, LoanData.Loan l, long now) {
+        boolean first = l.serial == 0;
+        // The last wave failed to get the player: tomorrow's is stronger.
+        int wave = first || l.waveDone ? l.wave : l.wave + 1;
+        List<PirateTier> tiers = waveTiers(wave);
+        ServerLevel level = p.serverLevel();
+        int serial = l.serial + 1;
+
+        List<BountyHunterEntity> sent = spawnHunters(p, tiers, serial);
         if (sent.isEmpty()) {
             l.nextWaveAt = now + 600; // nowhere to stand right now; try again in 30 seconds
             return;
@@ -190,6 +218,7 @@ public class LoanManager {
         l.wave = wave;
         l.serial = serial;
         l.waveDone = false;
+        l.resumeWave = false;
         l.nextWaveAt = now + DAY;
 
         if (first) {

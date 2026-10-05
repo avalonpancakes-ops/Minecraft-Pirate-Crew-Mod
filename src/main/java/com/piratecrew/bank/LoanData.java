@@ -36,6 +36,8 @@ public class LoanData extends SavedData {
         public boolean waveDone;
         /** Days-left count the player was last reminded at. */
         public int lastReminder = Integer.MAX_VALUE;
+        /** The player logged off on today's hunters: they come back when the player returns. */
+        public boolean resumeWave;
 
         Loan(UUID player) {
             this.player = player;
@@ -81,6 +83,7 @@ public class LoanData extends SavedData {
             t.putLong("NextWave", l.nextWaveAt);
             t.putBoolean("WaveDone", l.waveDone);
             t.putInt("Reminder", l.lastReminder);
+            t.putBoolean("ResumeWave", l.resumeWave);
             list.add(t);
         }
         tag.put("Loans", list);
@@ -101,6 +104,7 @@ public class LoanData extends SavedData {
             l.nextWaveAt = c.getLong("NextWave");
             l.waveDone = c.getBoolean("WaveDone");
             l.lastReminder = c.contains("Reminder") ? c.getInt("Reminder") : Integer.MAX_VALUE;
+            l.resumeWave = c.getBoolean("ResumeWave");
             d.loans.put(l.player, l);
         }
         return d;
