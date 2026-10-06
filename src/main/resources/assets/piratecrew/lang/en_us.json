@@ -168,5 +168,7 @@
   "block.minecraft.banner.piratecrew.jolly_roger.brown": "Brown Jolly Roger",
   "block.minecraft.banner.piratecrew.jolly_roger.green": "Green Jolly Roger",
   "block.minecraft.banner.piratecrew.jolly_roger.red": "Red Jolly Roger",
-  "block.minecraft.banner.piratecrew.jolly_roger.black": "Black Jolly Roger"
+  "block.minecraft.banner.piratecrew.jolly_roger.black": "Black Jolly Roger",
+  "key.piratecrew.pact_technique": "Use Soul Pact Technique",
+  "key.piratecrew.pact_ultimate": "Enter Soul Pact Ultimate Form"
 }

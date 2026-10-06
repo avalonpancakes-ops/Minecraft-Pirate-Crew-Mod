@@ -520,7 +520,11 @@ public class PirateEntity extends PathfinderMob {
 
     /** A pact mark after the name, in the pact's colour. */
     protected void appendPactTag(MutableComponent name) {
-        if (pact != null) name.append(Component.literal(" \u2726" + pact.label).withStyle(s -> s.withBold(false).withColor(pact.color)));
+        if (pact != null) {
+            int rank = com.piratecrew.pact.PactMastery.rank(this, pact);
+            name.append(Component.literal(" \u2726" + pact.label + (rank > 1 ? " " + com.piratecrew.pact.PactMastery.roman(rank) : ""))
+                    .withStyle(s -> s.withBold(false).withColor(pact.color)));
+        }
     }
 
     public void updateDisplayName() {

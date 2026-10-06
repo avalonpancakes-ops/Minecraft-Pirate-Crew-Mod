@@ -288,6 +288,45 @@ public class CommonEvents {
         com.piratecrew.item.GearSets.apply(event.player);
     }
 
+    /** Ultimate Forms run every tick (their aura) for players; pirates do it in their own tick. */
+    @SubscribeEvent
+    public static void pactUltimateTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide) return;
+        var pact = com.piratecrew.pact.SoulPacts.of(event.player);
+        if (pact != null) com.piratecrew.pact.PactMastery.tickUltimate(event.player, pact);
+    }
+
+    /** Kills made while bound to a pact grow its mastery (bosses teach a lot more). */
+    @SubscribeEvent
+    public static void pactMasteryKills(LivingDeathEvent event) {
+        var victim = event.getEntity();
+        if (victim.level().isClientSide) return;
+        if (!(event.getSource().getEntity() instanceof net.minecraft.world.entity.LivingEntity killer) || killer == victim) return;
+        var pact = com.piratecrew.pact.SoulPacts.of(killer);
+        if (pact == null) return;
+        boolean worthy = victim instanceof net.minecraft.world.entity.player.Player || victim instanceof net.minecraft.world.entity.monster.Enemy
+                || victim instanceof com.piratecrew.entity.PirateEntity;
+        if (!worthy) return;
+        int amount = victim instanceof com.piratecrew.entity.boss.BountyBoss ? 15 : 1;
+        com.piratecrew.pact.PactMastery.award(killer, pact, amount);
+        if (killer instanceof ServerPlayer sp) com.piratecrew.pact.SoulPacts.sync(sp);
+    }
+
+    /** Wind Spirit (the Gale Ultimate): a third of all blows simply miss. */
+    @SubscribeEvent
+    public static void pactDodge(LivingAttackEvent event) {
+        var victim = event.getEntity();
+        if (victim.level().isClientSide || event.getSource().getEntity() == null) return;
+        if (com.piratecrew.pact.SoulPacts.of(victim) != com.piratecrew.pact.SoulPact.GALE || !com.piratecrew.pact.PactMastery.ultActive(victim)) return;
+        if (victim.getRandom().nextFloat() < 0.33F) {
+            event.setCanceled(true);
+            if (victim.level() instanceof ServerLevel sl) {
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD, victim.getX(), victim.getY() + 1, victim.getZ(), 10, 0.4, 0.5, 0.4, 0.05);
+                sl.playSound(null, victim.blockPosition(), net.minecraft.sounds.SoundEvents.PHANTOM_FLAP, net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 1.6F);
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void pactClone(PlayerEvent.Clone event) {
         com.piratecrew.pact.SoulPacts.copy(event.getOriginal(), event.getEntity());

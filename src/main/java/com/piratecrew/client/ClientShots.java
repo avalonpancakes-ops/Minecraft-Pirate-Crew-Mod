@@ -106,7 +106,8 @@ public class ClientShots {
         STEPS.add(new Step("held_sword", 40, mc -> held(mc, ModItems.GEAR.get(GearTier.SOVEREIGN).sword())));
         STEPS.add(new Step("held_storm", 20, mc -> {
             held(mc, ModItems.GEAR.get(GearTier.STORMFORGED).sword());
-            PactHud.update(new com.piratecrew.network.PactSyncPacket("tempest", mc.level.getGameTime() + 120, 200));
+            long gt = mc.level.getGameTime();
+            PactHud.update(new com.piratecrew.network.PactSyncPacket("tempest", gt + 120, 200, 210, gt + 90, 300, gt + 260, gt + 6000));
         }));
         STEPS.add(new Step("treasure_map", 100, mc -> onServer(mc, sp -> {
             ServerLevel level = sp.serverLevel();

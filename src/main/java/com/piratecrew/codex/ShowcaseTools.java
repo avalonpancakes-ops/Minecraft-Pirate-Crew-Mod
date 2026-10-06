@@ -31,7 +31,7 @@ import java.util.List;
 /** The Captain's Log showcase page: one-click tools for operators (permission level 2). */
 public class ShowcaseTools {
     public enum Action {
-        SOVEREIGN_KIT, ALL_TIERS, BOSS_SUMMONS, ALL_PACTS, LEGENDS, PIRATE_KIT,
+        SOVEREIGN_KIT, ALL_TIERS, BOSS_SUMMONS, ALL_PACTS, LEGENDS, PIRATE_KIT, MASTERY,
         BOSS_COMMODORE, BOSS_KRAKEN, BOSS_TEMPEST, BOSS_LEVIATHAN, BOSS_VANE,
         BUILD_PORTAL, TO_SEA, OUTPOST, SHRINE, CAMP, MARINES, RAIDERS,
         HEAL, CLEAR, DAY, NIGHT, RUBIES;
@@ -63,6 +63,16 @@ public class ShowcaseTools {
                 }
                 give(p, new ItemStack(ModItems.SIREN_CONCH.get(), 4));
                 yield "Boss summons and Siren Conches.";
+            }
+            case MASTERY -> {
+                var pact = com.piratecrew.pact.SoulPacts.of(p);
+                if (pact == null) yield "Bind a Soul Pact first (All Pacts gives you one of each).";
+                int pts = com.piratecrew.pact.PactMastery.points(p, pact);
+                int next = pts >= 200 ? 0 : pts >= 120 ? 200 : pts >= 60 ? 120 : pts >= 25 ? 60 : 25;
+                com.piratecrew.pact.PactMastery.setPoints(p, pact, next);
+                com.piratecrew.pact.PactMastery.award(p, pact, 0);
+                com.piratecrew.pact.SoulPacts.sync(p);
+                yield pact.title() + " mastery set to " + next + " (rank " + com.piratecrew.pact.PactMastery.roman(com.piratecrew.pact.PactMastery.rank(next)) + "). Press again for the next rank.";
             }
             case LEGENDS -> {
                 for (var l : com.piratecrew.item.LegendaryWeaponItem.Legend.values()) give(p, ModItems.legend(l));

@@ -220,11 +220,24 @@ public class CodexContent {
         )));
 
         List<Entry> pacts = new ArrayList<>();
+        pacts.add(e("Pact Mastery", "The bond grows", icon(() -> ModItems.SOUL_PACTS.get(SoulPact.GRAVITY).get()),
+                "Every use of a pact's moves earns §6mastery§r, and so does every kill made while bound (a boss teaches 15).",
+                "",
+                "§6Rank II§r (25): cooldowns 15% shorter.",
+                "§6Rank III§r (60): unlocks the pact's §eTechnique§r, a second move on its own key (§eG§r). Cooldowns 25% shorter, powers 10% stronger.",
+                "§6Rank IV§r (120): cooldowns 35% shorter, powers 25% stronger.",
+                "§6Rank V§r (200): unlocks the §dUltimate Form§r (§eV§r): 20 seconds of the pact's full might, with every cooldown cut to a quarter and powers half again as strong. Then 5 minutes to recover.",
+                "",
+                "The pips over your pact badge show your rank; the thin bar, the way to the next. Mastery is kept per pact, and crew pirates master theirs too."));
         for (SoulPact p : SoulPact.values()) {
             pacts.add(e(p.title(), p.power + " · " + (p.cooldown / 20) + "s", icon(() -> ModItems.SOUL_PACTS.get(p).get()),
                     "§6Gift:§r " + p.passiveText,
                     "",
                     "§6Power (R):§r " + p.power + ". " + p.powerText,
+                    "",
+                    "§eTechnique (G, mastery III):§r " + com.piratecrew.pact.PactMastery.techniqueName(p) + ". " + com.piratecrew.pact.PactMastery.techniqueText(p),
+                    "",
+                    "§dUltimate (V, mastery V):§r " + com.piratecrew.pact.PactMastery.ultimateName(p) + ". " + com.piratecrew.pact.PactMastery.ultimateText(p),
                     "",
                     "Crew pirates bound to it fight " + (p.ranged ? "§bfrom range§r" : "§cup close§r") + " and use the power on their own.",
                     "",
@@ -269,6 +282,7 @@ public class CodexContent {
                 new Tool(Action.ALL_PACTS, "All Pacts", "Ten Soul Pacts", icon(() -> ModItems.SOUL_PACTS.get(SoulPact.EMBER).get()), "One of each Soul Pact"),
                 new Tool(Action.LEGENDS, "Legendaries", "Five boss blades", icon(() -> ModItems.LEGENDS.get(com.piratecrew.item.LegendaryWeaponItem.Legend.STORMCALLER).get()), "One of each legendary boss weapon"),
                 new Tool(Action.PIRATE_KIT, "Pirate Kit", "Hat, guns, maps", icon(ModItems.TRICORN), "Tricorn, cannons, cannonballs, treasure maps, discs and a jukebox"),
+                new Tool(Action.MASTERY, "Pact Mastery", "Next rank", icon(() -> ModItems.SOUL_PACTS.get(SoulPact.GRAVITY).get()), "Raise your pact's mastery to the next rank (cycles back to 0 after V)"),
                 new Tool(Action.BOSS_COMMODORE, "Commodore", "Summon here", icon(ModItems.SIGNAL_FLARE), "Commodore Graves appears in front of you"),
                 new Tool(Action.BOSS_KRAKEN, "Kraken", "Summon here", icon(ModItems.KRAKEN_LURE), "The Kraken rises in front of you (best over water)"),
                 new Tool(Action.BOSS_TEMPEST, "Sorel", "Summon here", icon(ModItems.STORM_SIGIL), "Tempest Admiral Sorel appears in front of you"),

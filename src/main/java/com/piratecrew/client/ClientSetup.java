@@ -27,6 +27,10 @@ public class ClientSetup {
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.categories.piratecrew");
     public static final KeyMapping PACT_POWER = new KeyMapping("key.piratecrew.pact_power", KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.piratecrew");
+    public static final KeyMapping PACT_TECHNIQUE = new KeyMapping("key.piratecrew.pact_technique", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, "key.categories.piratecrew");
+    public static final KeyMapping PACT_ULTIMATE = new KeyMapping("key.piratecrew.pact_ultimate", KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, "key.categories.piratecrew");
 
     @Mod.EventBusSubscriber(modid = PirateCrew.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ModBus {
@@ -78,6 +82,8 @@ public class ClientSetup {
         public static void keys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_CREW);
             event.register(PACT_POWER);
+            event.register(PACT_TECHNIQUE);
+            event.register(PACT_ULTIMATE);
             event.register(OPEN_LOG);
         }
 
@@ -104,6 +110,14 @@ public class ClientSetup {
             }
             while (PACT_POWER.consumeClick()) {
                 if (mc.player != null && mc.screen == null) ModNetwork.sendToServer(new com.piratecrew.network.PactAbilityPacket());
+            }
+            while (PACT_TECHNIQUE.consumeClick()) {
+                if (mc.player != null && mc.screen == null)
+                    ModNetwork.sendToServer(new com.piratecrew.network.PactAbilityPacket(com.piratecrew.network.PactAbilityPacket.TECHNIQUE));
+            }
+            while (PACT_ULTIMATE.consumeClick()) {
+                if (mc.player != null && mc.screen == null)
+                    ModNetwork.sendToServer(new com.piratecrew.network.PactAbilityPacket(com.piratecrew.network.PactAbilityPacket.ULTIMATE));
             }
         }
     }

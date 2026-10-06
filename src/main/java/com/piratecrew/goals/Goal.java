@@ -38,7 +38,8 @@ public enum Goal {
     CANNON("Fire in the Hole!", "Fire a ship's cannon", () -> new ItemStack(ModItems.CANNON.get())),
     TREASURE("X Marks the Spot", "Dig up a buried treasure chest", () -> new ItemStack(ModItems.TREASURE_MAP.get())),
     LEGENDARY("Legendary", "Hold a legendary boss weapon", () -> ModItems.legend(com.piratecrew.item.LegendaryWeaponItem.Legend.STORMCALLER)),
-    SHANTY("Sing Me a Shanty", "Play a Pirate Crew disc in a jukebox", () -> new ItemStack(ModItems.DISC_SAILOR.get()));
+    SHANTY("Sing Me a Shanty", "Play a Pirate Crew disc in a jukebox", () -> new ItemStack(ModItems.DISC_SAILOR.get())),
+    ASCENDED("Ascended", "Reach mastery rank V with a Soul Pact", () -> new ItemStack(ModItems.SOUL_PACTS.get(SoulPact.GRAVITY).get()));
 
     public final String title, description;
     public final Supplier<ItemStack> icon;

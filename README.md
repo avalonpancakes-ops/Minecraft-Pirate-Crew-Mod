@@ -296,9 +296,34 @@ Soul Pacts are found in Pact Shrines (always), sometimes in outpost chests, from
   - If a pact pirate dies, its pact scroll drops so it isn't lost.
 - `/piratecrew clearpact` (op) frees your soul for testing.
 
+#### Pact Mastery
+- The more you use a pact, the stronger the bond. Every use of a pact move earns **mastery**, and so does every kill made while bound. A boss is worth 15.
+- **Ranks**:
+  - **II** (25 mastery): cooldowns 15% shorter.
+  - **III** (60): unlocks the pact's **Technique**, a second move on its own key (**G**). Cooldowns are 25% shorter and powers 10% stronger.
+  - **IV** (120): cooldowns 35% shorter, powers 25% stronger.
+  - **V** (200): unlocks the **Ultimate Form** (**V**). For 20 seconds you get the pact's full might: every cooldown is cut to a quarter and powers are half again as strong. Then it takes 5 minutes to recover.
+- **HUD**: five pips over the pact badge show your rank, and a thin bar shows progress to the next. Once unlocked, small Technique and Ultimate slots appear beside the badge with their cooldowns. During the Ultimate the badge glows in the pact's colour, and the bar counts the form down.
+- **Mastery is kept per pact**, so changing pacts doesn't erase what your soul learned.
+- **Crew pirates** master their pacts the same way. They use their Technique on their own, and go into their Ultimate Form when a fight turns against them. Their name shows the rank, for example ✦Ember III.
+- The operator **Showcase** has a **Pact Mastery** button that raises your pact one rank per press, for testing.
+
+| Pact | Technique (G, rank III) | Ultimate Form (V, rank V) |
+|---|---|---|
+| Ember | **Meteor**: A meteor of fire falls where you aim and bursts. | **Inferno Form**: Strength and a burning aura. |
+| Tempest | **Static Field**: Lightning leaps to the nearest foe every second for 6 s. | **Storm Avatar**: Speed III; lightning strikes a nearby foe every 2 s. |
+| Frost | **Glacial Lance**: A line of ice spikes freezes everything ahead. | **Glacier Form**: Resistance; foes near you freeze; the sea freezes under you. |
+| Iron | **Anchor Slam**: Leap and slam down: a shockwave that drags foes in. | **Iron Colossus**: Resistance III and Strength II. |
+| Gale | **Cyclone**: A whirlwind pulls foes in, lifts them, then flings them. | **Wind Spirit**: Speed, high jumps, slow falling; a third of blows miss you. |
+| Shadow | **Nightfall**: Blinds and weakens foes nearby; you vanish, primed to strike double. | **Phantom Form**: Invisible, quick, every blow double. |
+| Quake | **Fissure**: The ground erupts in a line, hurling foes up. | **Titan Form**: Strength II; a shockwave every 2 s. |
+| Venom | **Serpent Spray**: A cone of deadly poison and withering. | **Hydra Form**: Regeneration; a poison mist sickens foes. |
+| Gravity | **Repulse**: Blasts every foe around you away and leaves them floating. | **Event Horizon**: Foes are dragged toward you and lifted; you fall slowly. |
+| Blood | **Hemorrhage**: Up to 6 foes bleed for 6 s; you drink half. | **Crimson Lord**: Regeneration II, Strength, 40% lifesteal, drains everyone close. |
+
 ### The Captain's Log, Voyage Goals and HUD
 - **Captain's Log** (press **J**, or use the book — every player gets one on their first visit; craft more from a book and a ruby): an animated night-chart guidebook to the whole mod. Sections for the pirate's life, the Sundered Sea, the Order of the Tide, every boss (summons, attacks, drops), all ten Soul Pacts and all six gear tiers, with item strips you can hover.
-- **Voyage Goals**: 28 milestones, from your first ruby to defeating Fleet Admiral Vane, sailing with an Emperor crew, firing a cannon and digging up buried treasure. The Log's Voyage page shows your progress; reaching one pops a **Goal Complete!** toast.
+- **Voyage Goals**: 29 milestones, from your first ruby to defeating Fleet Admiral Vane, sailing with an Emperor crew, firing a cannon and digging up buried treasure. The Log's Voyage page shows your progress; reaching one pops a **Goal Complete!** toast.
 - **Toasts**: a WANTED toast when your bounty rises, a rank-up toast when a crew pirate climbs a tier, and a Boss Defeated toast for everyone who fought.
 - **Bosses** arrive with a title (name and epithet) and have their own rope-and-brass boss bars.
 - **Soul Pact badge** beside the hotbar: your pact's scroll, a draining shadow and seconds while the power recharges, a glow when it's ready, dark blue in water.

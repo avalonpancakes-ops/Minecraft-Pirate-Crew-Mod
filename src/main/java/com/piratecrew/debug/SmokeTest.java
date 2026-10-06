@@ -136,6 +136,30 @@ public class SmokeTest {
                     fired.append(pact.id).append(ok ? "+ " : "- ");
                 }
                 PirateCrew.LOGGER.info("PIRATECREW SMOKETEST pact powers: {} (pirate now '{}')", fired.toString().trim(), caster.getDisplayName().getString());
+                // Mastery: every Technique and every Ultimate Form, including their delayed effects.
+                StringBuilder tech = new StringBuilder();
+                for (var pact : com.piratecrew.pact.SoulPact.values()) {
+                    caster.bindPact(pact);
+                    com.piratecrew.pact.PactMastery.setPoints(caster, pact, 200);
+                    if (dummy.isRemoved() || !dummy.isAlive()) {
+                        dummy = net.minecraft.world.entity.EntityType.ZOMBIE.create(sea);
+                        dummy.moveTo(bossAt.getX() + 4.5, bossAt.getY(), bossAt.getZ() + 0.5, 0, 0);
+                        sea.addFreshEntity(dummy);
+                    }
+                    dummy.setHealth(dummy.getMaxHealth());
+                    boolean ok = com.piratecrew.pact.PactPowers.technique(caster, pact, dummy, dummy.getEyePosition());
+                    com.piratecrew.pact.PactMastery.startUltimate(caster, pact);
+                    long t0 = sea.getGameTime();
+                    var data = (net.minecraft.world.level.storage.ServerLevelData) server.overworld().getLevelData();
+                    for (int k = 1; k <= 8; k++) {
+                        data.setGameTime(t0 + k * 20L);
+                        com.piratecrew.pact.PactMastery.tickUltimate(caster, pact);
+                        com.piratecrew.pact.PactPowers.tick();
+                    }
+                    tech.append(pact.id).append(ok ? "+ " : "- ");
+                }
+                PirateCrew.LOGGER.info("PIRATECREW SMOKETEST pact techniques and ultimates: {} (pirate now '{}', rank {})", tech.toString().trim(),
+                        caster.getDisplayName().getString(), com.piratecrew.pact.PactMastery.rank(caster, com.piratecrew.pact.SoulPact.BLOOD));
                 dummy.discard();
                 caster.discard();
             }
